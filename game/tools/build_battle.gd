@@ -1,0 +1,308 @@
+extends SceneTree
+## Builds scenes/battle.tscn from code and saves it as a real scene file, same
+## approach as build_diorama.gd. Run with:
+##   godot --headless --path game --script res://tools/build_battle.gd
+##
+## This is M3's second box: a battle scene with turn order and a readable
+## state, against a placeholder pair of creatures — one per side, both
+## starting in Front. Guard, moves and a real four-creature roster are the
+## next two boxes, in order; this scene only proves the queue and the
+## Front/Back board read correctly on screen. battle.gd owns the placeholder
+## combatant data (ids, names, speeds) and looks up these nodes by matching
+## name, so the two files have to stay in agreement on node names.
+
+const ARENA_SIZE := Vector2(11.0, 11.0)
+const ARENA_TILE_UNITS := 2.0
+const MARKER_RADIUS := 0.7
+const MARKER_HEIGHT := 0.05
+const CREATURE_HEIGHT := 1.5
+
+const PLAYER_FRONT_POS := Vector3(1.1, 0.0, 1.8)
+const PLAYER_BACK_POS := Vector3(2.7, 0.0, 3.6)
+const ENEMY_FRONT_POS := Vector3(-1.1, 0.0, -1.3)
+const ENEMY_BACK_POS := Vector3(-2.7, 0.0, -3.1)
+
+const PLAYER_COLOR := Color(0.30, 0.55, 0.95)
+const ENEMY_COLOR := Color(0.85, 0.30, 0.28)
+const FRONT_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.55)
+const BACK_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.28)
+
+
+func _initialize() -> void:
+	var root := Node3D.new()
+	root.name = "Battle"
+	root.set_script(load("res://scripts/battle.gd"))
+
+	_add_environment(root)
+	_add_lights(root)
+	_add_arena(root)
+	_add_slot_markers(root)
+	_add_creatures(root)
+	_add_camera(root)
+	_add_ui(root)
+
+	for child in root.get_children():
+		_own_recursive(child, root)
+
+	var packed := PackedScene.new()
+	var err := packed.pack(root)
+	if err != OK:
+		push_error("pack failed: %d" % err)
+		quit(1)
+		return
+
+	DirAccess.make_dir_recursive_absolute("res://scenes")
+	err = ResourceSaver.save(packed, "res://scenes/battle.tscn")
+	if err != OK:
+		push_error("save failed: %d" % err)
+		quit(1)
+		return
+
+	print("wrote res://scenes/battle.tscn")
+	quit(0)
+
+
+func _own_recursive(node: Node, owner_node: Node) -> void:
+	node.owner = owner_node
+	for child in node.get_children():
+		_own_recursive(child, owner_node)
+
+
+## Same HD-2D recipe as the diorama (bloom, ACES tonemap, tilt-shift) but
+## darker and cooler — this is a battle cut away from the town, not the town
+## itself, and pillar 6 still applies: it has to read as a lit diorama, not a
+## flat UI screen with 3D props glued on.
+func _add_environment(root: Node3D) -> void:
+	var env := Environment.new()
+
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.06, 0.07, 0.14)
+	sky_mat.sky_horizon_color = Color(0.22, 0.20, 0.28)
+	sky_mat.ground_bottom_color = Color(0.05, 0.05, 0.07)
+	sky_mat.ground_horizon_color = Color(0.18, 0.16, 0.20)
+	sky_mat.sun_angle_max = 12.0
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_sky_contribution = 0.85
+	env.ambient_light_energy = 0.95
+
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.tonemap_exposure = 1.05
+	env.tonemap_white = 6.0
+
+	env.glow_enabled = true
+	env.glow_intensity = 1.25
+	env.glow_strength = 1.3
+	env.glow_bloom = 0.4
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	env.glow_hdr_threshold = 0.65
+	env.glow_hdr_scale = 2.2
+
+	env.ssao_enabled = true
+	env.ssao_intensity = 0.9
+	env.ssao_radius = 1.0
+	env.ssao_power = 1.4
+
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.08
+	env.adjustment_saturation = 1.12
+
+	var we := WorldEnvironment.new()
+	we.name = "WorldEnvironment"
+	we.environment = env
+	root.add_child(we)
+
+
+func _add_lights(root: Node3D) -> void:
+	var key := DirectionalLight3D.new()
+	key.name = "Key"
+	key.rotation_degrees = Vector3(-50.0, -140.0, 0.0)
+	key.light_color = Color(0.86, 0.80, 1.0)
+	key.light_energy = 1.1
+	key.shadow_enabled = true
+	key.shadow_blur = 2.6
+	key.shadow_normal_bias = 1.4
+	root.add_child(key)
+
+	var fill := DirectionalLight3D.new()
+	fill.name = "Fill"
+	fill.rotation_degrees = Vector3(-24.0, 60.0, 0.0)
+	fill.light_color = Color(0.55, 0.62, 0.95)
+	fill.light_energy = 0.25
+	fill.shadow_enabled = false
+	root.add_child(fill)
+
+	# Two rim lights, one warm over the player line and one cold over the
+	# enemy line, so the two sides read apart even before a viewer clocks the
+	# creature colors — a cheap trick that pays for itself on a static shot.
+	var player_rim := OmniLight3D.new()
+	player_rim.name = "PlayerRim"
+	player_rim.position = PLAYER_FRONT_POS + Vector3(0.0, 2.6, 1.5)
+	player_rim.light_color = Color(0.55, 0.75, 1.0)
+	player_rim.light_energy = 3.2
+	player_rim.omni_range = 8.0
+	root.add_child(player_rim)
+
+	var enemy_rim := OmniLight3D.new()
+	enemy_rim.name = "EnemyRim"
+	enemy_rim.position = ENEMY_FRONT_POS + Vector3(0.0, 2.6, -1.5)
+	enemy_rim.light_color = Color(1.0, 0.55, 0.45)
+	enemy_rim.light_energy = 3.2
+	enemy_rim.omni_range = 8.0
+	root.add_child(enemy_rim)
+
+
+func _pixel_material(tex_path: String, uv: Vector2, tint: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load(tex_path)
+	mat.albedo_color = tint
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	mat.uv1_scale = Vector3(uv.x, uv.y, 1.0)
+	mat.roughness = 0.95
+	mat.metallic_specular = 0.05
+	return mat
+
+
+func _add_arena(root: Node3D) -> void:
+	var plane := PlaneMesh.new()
+	plane.size = ARENA_SIZE
+	var floor_mi := MeshInstance3D.new()
+	floor_mi.name = "ArenaFloor"
+	floor_mi.mesh = plane
+	floor_mi.material_override = _pixel_material(
+		"res://assets/textures/stone.png", ARENA_SIZE / ARENA_TILE_UNITS, Color(0.42, 0.42, 0.50))
+	root.add_child(floor_mi)
+
+
+## Four flat discs, always present regardless of who's standing on them —
+## design/combat.md's board is "two slots per side," and that's a claim about
+## the board shape, not about who currently occupies it, so the Back slots
+## have to be visible even while empty.
+func _add_slot_markers(root: Node3D) -> void:
+	var markers := Node3D.new()
+	markers.name = "SlotMarkers"
+	root.add_child(markers)
+
+	markers.add_child(_marker("PlayerFrontMarker", PLAYER_FRONT_POS, FRONT_MARKER_TINT))
+	markers.add_child(_marker("PlayerBackMarker", PLAYER_BACK_POS, BACK_MARKER_TINT))
+	markers.add_child(_marker("EnemyFrontMarker", ENEMY_FRONT_POS, FRONT_MARKER_TINT))
+	markers.add_child(_marker("EnemyBackMarker", ENEMY_BACK_POS, BACK_MARKER_TINT))
+
+
+func _marker(node_name: String, pos: Vector3, tint: Color) -> Node3D:
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = MARKER_RADIUS
+	cyl.bottom_radius = MARKER_RADIUS
+	cyl.height = MARKER_HEIGHT
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = tint
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	mi.mesh = cyl
+	mi.material_override = mat
+	mi.position = pos + Vector3(0.0, MARKER_HEIGHT * 0.5, 0.0)
+	return mi
+
+
+## Placeholder creatures — a capsule body plus a floating name tag. Real
+## sprites are M4's composable creature system; this scene only needs a
+## shape a viewer can tell apart by color and position, so battle.gd's
+## turn-order flash has something to flash.
+func _add_creatures(root: Node3D) -> void:
+	var creatures := Node3D.new()
+	creatures.name = "Creatures"
+	root.add_child(creatures)
+
+	creatures.add_child(_creature("PlayerFront", PLAYER_FRONT_POS, PLAYER_COLOR, "Emberfin"))
+	creatures.add_child(_creature("EnemyFront", ENEMY_FRONT_POS, ENEMY_COLOR, "Grimshell"))
+
+
+func _creature(node_name: String, pos: Vector3, color: Color, display_name: String) -> Node3D:
+	var holder := Node3D.new()
+	holder.name = node_name
+	holder.position = pos
+
+	var capsule := CapsuleMesh.new()
+	capsule.radius = 0.45
+	capsule.height = CREATURE_HEIGHT
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 0.6
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.0
+	var body := MeshInstance3D.new()
+	body.name = "Body"
+	body.mesh = capsule
+	body.material_override = mat
+	body.position = Vector3(0.0, CREATURE_HEIGHT * 0.5, 0.0)
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	holder.add_child(body)
+
+	var label := Label3D.new()
+	label.name = "NameLabel"
+	label.text = display_name
+	label.font_size = 48
+	label.outline_size = 10
+	label.position = Vector3(0.0, CREATURE_HEIGHT + 0.4, 0.0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = false
+	holder.add_child(label)
+
+	return holder
+
+
+## A static, wide diorama camera — nothing to follow yet, so it just has to
+## frame both lanes and both slot depths at once. Narrow-ish FOV keeps the
+## flattened HD-2D look; the tilt-shift band is centered between the two
+## Front slots, where the visible action (the flashing capsule) happens.
+func _add_camera(root: Node3D) -> void:
+	var cam := Camera3D.new()
+	cam.name = "BattleCamera"
+	cam.fov = 26.0
+	cam.position = Vector3(0.0, 12.0, 15.0)
+	cam.rotation_degrees = Vector3(-38.0, 0.0, 0.0)
+	cam.current = true
+	cam.far = 100.0
+
+	var attrs := CameraAttributesPractical.new()
+	attrs.dof_blur_amount = 0.2
+	attrs.dof_blur_far_enabled = true
+	attrs.dof_blur_far_distance = 21.5
+	attrs.dof_blur_far_transition = 7.0
+	attrs.dof_blur_near_enabled = true
+	attrs.dof_blur_near_distance = 13.5
+	attrs.dof_blur_near_transition = 6.0
+	cam.attributes = attrs
+
+	root.add_child(cam)
+
+
+## The turn queue strip: a full-width HBoxContainer anchored to the top of
+## the screen. Centered via BoxContainer's own alignment rather than a
+## wrapper, since it already spans the full width. battle.gd populates and
+## re-populates its children every turn; this just gives it a home.
+func _add_ui(root: Node3D) -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "UI"
+	root.add_child(layer)
+
+	var strip := HBoxContainer.new()
+	strip.name = "TurnQueueStrip"
+	strip.anchor_left = 0.0
+	strip.anchor_right = 1.0
+	strip.anchor_top = 0.0
+	strip.anchor_bottom = 0.0
+	strip.offset_left = 0.0
+	strip.offset_right = 0.0
+	strip.offset_top = 22.0
+	strip.offset_bottom = 110.0
+	strip.alignment = BoxContainer.ALIGNMENT_CENTER
+	strip.add_theme_constant_override("separation", 14)
+	layer.add_child(strip)

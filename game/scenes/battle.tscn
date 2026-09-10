@@ -1,0 +1,225 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/battle.gd" id="1_th188"]
+[ext_resource type="Texture2D" path="res://assets/textures/stone.png" id="2_p1qf1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a12nh"]
+sky_top_color = Color(0.06, 0.07, 0.14, 1)
+sky_horizon_color = Color(0.22, 0.2, 0.28, 1)
+ground_bottom_color = Color(0.05, 0.05, 0.07, 1)
+ground_horizon_color = Color(0.18, 0.16, 0.2, 1)
+sun_angle_max = 12.0
+
+[sub_resource type="Sky" id="Sky_lpir7"]
+sky_material = SubResource("ProceduralSkyMaterial_a12nh")
+
+[sub_resource type="Environment" id="Environment_6vh42"]
+background_mode = 2
+sky = SubResource("Sky_lpir7")
+ambient_light_source = 3
+ambient_light_sky_contribution = 0.85
+ambient_light_energy = 0.95
+tonemap_mode = 3
+tonemap_exposure = 1.05
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_intensity = 0.9
+ssao_power = 1.4
+glow_enabled = true
+glow_intensity = 1.25
+glow_strength = 1.3
+glow_bloom = 0.4
+glow_blend_mode = 2
+glow_hdr_threshold = 0.65
+glow_hdr_scale = 2.2
+adjustment_enabled = true
+adjustment_contrast = 1.08
+adjustment_saturation = 1.12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4k1nj"]
+albedo_color = Color(0.42, 0.42, 0.5, 1)
+albedo_texture = ExtResource("2_p1qf1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(5.5, 5.5, 1)
+texture_filter = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_f4pi3"]
+size = Vector2(11, 11)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yahae"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.55)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_v7i3o"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_66ngm"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.28)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_03edq"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_22uqi"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.55)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_6ni85"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vceff"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.28)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ekamt"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djc8l"]
+albedo_color = Color(0.3, 0.55, 0.95, 1)
+roughness = 0.6
+emission_enabled = true
+emission = Color(0.3, 0.55, 0.95, 1)
+emission_energy_multiplier = 0.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_h4dll"]
+radius = 0.45
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p0caf"]
+albedo_color = Color(0.85, 0.3, 0.28, 1)
+roughness = 0.6
+emission_enabled = true
+emission = Color(0.85, 0.3, 0.28, 1)
+emission_energy_multiplier = 0.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_61i1y"]
+radius = 0.45
+height = 1.5
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_saiin"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 21.5
+dof_blur_far_transition = 7.0
+dof_blur_near_enabled = true
+dof_blur_near_distance = 13.5
+dof_blur_near_transition = 6.0
+dof_blur_amount = 0.2
+
+[node name="Battle" type="Node3D" unique_id=655949118]
+script = ExtResource("1_th188")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=284117684]
+environment = SubResource("Environment_6vh42")
+
+[node name="Key" type="DirectionalLight3D" parent="." unique_id=2128223826]
+transform = Transform3D(-0.76604444, 0.4924039, -0.41317594, 0, 0.64278764, 0.76604444, 0.64278764, 0.58682406, -0.4924039, 0, 0, 0)
+light_color = Color(0.86, 0.8, 1, 1)
+light_energy = 1.1
+shadow_enabled = true
+shadow_normal_bias = 1.4
+shadow_blur = 2.6
+
+[node name="Fill" type="DirectionalLight3D" parent="." unique_id=1343584277]
+transform = Transform3D(0.49999997, -0.3522443, 0.7911536, 0, 0.9135454, 0.40673664, -0.86602545, -0.2033683, 0.45677269, 0, 0, 0)
+light_color = Color(0.55, 0.62, 0.95, 1)
+light_energy = 0.25
+
+[node name="PlayerRim" type="OmniLight3D" parent="." unique_id=1463902994]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 2.6, 3.3)
+light_color = Color(0.55, 0.75, 1, 1)
+light_energy = 3.2
+omni_range = 8.0
+
+[node name="EnemyRim" type="OmniLight3D" parent="." unique_id=1322735353]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 2.6, -2.8)
+light_color = Color(1, 0.55, 0.45, 1)
+light_energy = 3.2
+omni_range = 8.0
+
+[node name="ArenaFloor" type="MeshInstance3D" parent="." unique_id=1306821983]
+material_override = SubResource("StandardMaterial3D_4k1nj")
+mesh = SubResource("PlaneMesh_f4pi3")
+
+[node name="SlotMarkers" type="Node3D" parent="." unique_id=920720978]
+
+[node name="PlayerFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=2039490314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0.025, 1.8)
+material_override = SubResource("StandardMaterial3D_yahae")
+mesh = SubResource("CylinderMesh_v7i3o")
+
+[node name="PlayerBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=668969216]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 0.025, 3.6)
+material_override = SubResource("StandardMaterial3D_66ngm")
+mesh = SubResource("CylinderMesh_03edq")
+
+[node name="EnemyFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=1828035744]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0.025, -1.3)
+material_override = SubResource("StandardMaterial3D_22uqi")
+mesh = SubResource("CylinderMesh_6ni85")
+
+[node name="EnemyBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=1093467051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, 0.025, -3.1)
+material_override = SubResource("StandardMaterial3D_vceff")
+mesh = SubResource("CylinderMesh_ekamt")
+
+[node name="Creatures" type="Node3D" parent="." unique_id=589489423]
+
+[node name="PlayerFront" type="Node3D" parent="Creatures" unique_id=1801189391]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0, 1.8)
+
+[node name="Body" type="MeshInstance3D" parent="Creatures/PlayerFront" unique_id=621379420]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+material_override = SubResource("StandardMaterial3D_djc8l")
+mesh = SubResource("CapsuleMesh_h4dll")
+
+[node name="NameLabel" type="Label3D" parent="Creatures/PlayerFront" unique_id=1238140207]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+billboard = 1
+text = "Emberfin"
+font_size = 48
+outline_size = 10
+
+[node name="EnemyFront" type="Node3D" parent="Creatures" unique_id=961499669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, -1.3)
+
+[node name="Body" type="MeshInstance3D" parent="Creatures/EnemyFront" unique_id=680934571]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+material_override = SubResource("StandardMaterial3D_p0caf")
+mesh = SubResource("CapsuleMesh_61i1y")
+
+[node name="NameLabel" type="Label3D" parent="Creatures/EnemyFront" unique_id=2072555845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+billboard = 1
+text = "Grimshell"
+font_size = 48
+outline_size = 10
+
+[node name="BattleCamera" type="Camera3D" parent="." unique_id=1654864522]
+transform = Transform3D(1, 0, 0, 0, 0.7880108, 0.6156615, 0, -0.6156615, 0.7880108, 0, 12, 15)
+attributes = SubResource("CameraAttributesPractical_saiin")
+current = true
+fov = 26.0
+far = 100.0
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=14270035]
+
+[node name="TurnQueueStrip" type="HBoxContainer" parent="UI" unique_id=1492184861]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 22.0
+offset_bottom = 110.0
+theme_override_constants/separation = 14
+alignment = 1
