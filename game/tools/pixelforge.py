@@ -94,6 +94,32 @@ HERO = [
     "......KKKKK.KKKKKK......",
 ]
 
+# ---------------------------------------------------------------- walk cycle
+#
+# The cloak covers most of the legs, so a convincing stride doesn't need new
+# poses — shifting the boot row block sideways under the hem reads as a foot
+# stepping without redrawing anything above it.
+
+BOOT_ROW_START = 28
+BOOT_ROW_END = 31
+
+
+def _shift_row(row, delta):
+    if delta > 0:
+        return ("." * delta) + row[:-delta]
+    if delta < 0:
+        d = -delta
+        return row[d:] + ("." * d)
+    return row
+
+
+def walk_frame(base_rows, delta):
+    rows = list(base_rows)
+    for i in range(BOOT_ROW_START, BOOT_ROW_END + 1):
+        rows[i] = _shift_row(rows[i], delta)
+    return rows
+
+
 # ---------------------------------------------------------------- tiles
 #
 # Per-pixel random noise looks like television static, not ground, and its high
@@ -196,8 +222,14 @@ def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     made = []
 
-    w, h, px = render_map(HERO, TRAVELER, "hero")
-    made.append(write_png(os.path.join(root, "assets/sprites/traveler.png"), w, h, px))
+    w, h, px = render_map(HERO, TRAVELER, "hero-idle")
+    made.append(write_png(os.path.join(root, "assets/sprites/traveler_idle.png"), w, h, px))
+
+    w, h, px = render_map(walk_frame(HERO, -1), TRAVELER, "hero-walk-a")
+    made.append(write_png(os.path.join(root, "assets/sprites/traveler_walk_a.png"), w, h, px))
+
+    w, h, px = render_map(walk_frame(HERO, 1), TRAVELER, "hero-walk-b")
+    made.append(write_png(os.path.join(root, "assets/sprites/traveler_walk_b.png"), w, h, px))
 
     g = grass_tile(32, 7)
     made.append(write_png(os.path.join(root, "assets/textures/grass.png"), 32, 32, g))

@@ -8,6 +8,10 @@ config/description="An autonomous HD-2D monster-tactics RPG, built in public."
 run/main_scene="res://scenes/diorama.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
+[autoload]
+
+InputSetup="*res://scripts/input_setup.gd"
+
 [display]
 
 window/size/viewport_width=1280

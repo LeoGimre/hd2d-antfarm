@@ -17,7 +17,9 @@ const ORBIT_SWING_DEG := 7.0
 
 var _t: float = 0.0
 var _camera: Camera3D
-var _traveler: Sprite3D
+# Sprite3D in M1, CharacterBody3D once the traveler grew a controller (M2) —
+# either way it's the thing the camera orbits and the thing that idle-bobs.
+var _traveler: Node3D
 var _target: Vector3 = Vector3(0.0, 0.9, 0.0)
 var _traveler_home: Vector3
 
@@ -28,13 +30,13 @@ func _ready() -> void:
 	add_child(world)
 
 	_camera = world.get_node_or_null("DioramaCamera") as Camera3D
-	_traveler = world.get_node_or_null("Traveler") as Sprite3D
+	_traveler = world.get_node_or_null("Traveler") as Node3D
 	if _camera == null:
 		push_error("showcase: no DioramaCamera in %s" % scene_path)
 		return
 	if _traveler != null:
 		_traveler_home = _traveler.position
-		_target = _traveler_home + Vector3(0.0, 0.1, 0.0)
+		_target = _traveler_home + Vector3(0.0, 0.9, 0.0)
 
 	_place_camera(0.0)
 

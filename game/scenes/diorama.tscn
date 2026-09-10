@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://assets/textures/grass.png" id="1_2i8kc"]
 [ext_resource type="Texture2D" path="res://assets/textures/stone.png" id="2_8i2m1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/traveler.png" id="3_647yj"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="3_647yj"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_icw5t"]
 sky_top_color = Color(0.24, 0.36, 0.6, 1)
@@ -178,7 +178,39 @@ texture_filter = 2
 [sub_resource type="BoxMesh" id="BoxMesh_jakqs"]
 size = Vector3(1.6, 4.6, 1.6)
 
-[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_v7r0w"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_v7r0w"]
+radius = 0.35
+height = 1.6
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ey4f6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": null
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_2mcha"]
 dof_blur_far_enabled = true
 dof_blur_far_distance = 27.0
 dof_blur_far_transition = 9.0
@@ -187,12 +219,12 @@ dof_blur_near_distance = 21.0
 dof_blur_near_transition = 7.0
 dof_blur_amount = 0.2
 
-[node name="Diorama" type="Node3D" unique_id=621292324]
+[node name="Diorama" type="Node3D" unique_id=775427186]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1758491945]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=726572168]
 environment = SubResource("Environment_xlp2f")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1668774531]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=991917516]
 transform = Transform3D(-0.46947157, 0.61334693, -0.6351393, 0, 0.7193398, 0.6946584, 0.88294756, 0.32612237, -0.33770958, 0, 0, 0)
 light_color = Color(1, 0.88, 0.7, 1)
 light_energy = 1.25
@@ -201,12 +233,12 @@ shadow_normal_bias = 1.4
 shadow_blur = 2.6
 directional_shadow_max_distance = 70.0
 
-[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=1308034302]
+[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=1709714144]
 transform = Transform3D(0.4694716, -0.41451877, 0.7795964, 0, 0.88294756, 0.46947157, -0.88294756, -0.22040357, 0.4145188, 0, 0, 0)
 light_color = Color(0.68, 0.77, 0.94, 1)
 light_energy = 0.3
 
-[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1008241961]
+[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1211115950]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
 light_color = Color(1, 0.7, 0.34, 1)
 light_energy = 4.0
@@ -214,78 +246,85 @@ shadow_enabled = true
 omni_range = 9.0
 omni_attenuation = 1.5
 
-[node name="Ground" type="MeshInstance3D" parent="." unique_id=1807651641]
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1035308852]
 material_override = SubResource("StandardMaterial3D_dvoc2")
 mesh = SubResource("PlaneMesh_l8ih0")
 
-[node name="StonePath" type="MeshInstance3D" parent="." unique_id=1229085419]
+[node name="StonePath" type="MeshInstance3D" parent="." unique_id=2135165044]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
 material_override = SubResource("StandardMaterial3D_kh7na")
 mesh = SubResource("PlaneMesh_sr5io")
 
-[node name="SetDressing" type="Node3D" parent="." unique_id=1666425728]
+[node name="SetDressing" type="Node3D" parent="." unique_id=1497403030]
 
-[node name="WallBack" type="MeshInstance3D" parent="SetDressing" unique_id=1356654693]
+[node name="WallBack" type="MeshInstance3D" parent="SetDressing" unique_id=1818308845]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -13)
 material_override = SubResource("StandardMaterial3D_6rgto")
 mesh = SubResource("BoxMesh_v812j")
 
-[node name="PillarBackL" type="MeshInstance3D" parent="SetDressing" unique_id=2126397431]
+[node name="PillarBackL" type="MeshInstance3D" parent="SetDressing" unique_id=914287645]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -10.5)
 material_override = SubResource("StandardMaterial3D_p6lhn")
 mesh = SubResource("BoxMesh_yq5r4")
 
-[node name="PillarBackR" type="MeshInstance3D" parent="SetDressing" unique_id=574967170]
+[node name="PillarBackR" type="MeshInstance3D" parent="SetDressing" unique_id=1696991800]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.1, -10.5)
 material_override = SubResource("StandardMaterial3D_0v1je")
 mesh = SubResource("BoxMesh_1fyqf")
 
-[node name="StepsBack" type="MeshInstance3D" parent="SetDressing" unique_id=732259725]
+[node name="StepsBack" type="MeshInstance3D" parent="SetDressing" unique_id=324492702]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -8.6)
 material_override = SubResource("StandardMaterial3D_l8w3t")
 mesh = SubResource("BoxMesh_47q54")
 
-[node name="CrateA" type="MeshInstance3D" parent="SetDressing" unique_id=333682451]
+[node name="CrateA" type="MeshInstance3D" parent="SetDressing" unique_id=693637385]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 1.6)
 material_override = SubResource("StandardMaterial3D_nrs5m")
 mesh = SubResource("BoxMesh_l16hk")
 
-[node name="CrateB" type="MeshInstance3D" parent="SetDressing" unique_id=2098369689]
+[node name="CrateB" type="MeshInstance3D" parent="SetDressing" unique_id=1933651628]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.85, 1.35, 1.65)
 material_override = SubResource("StandardMaterial3D_gh8ov")
 mesh = SubResource("BoxMesh_75i1n")
 
-[node name="CrateC" type="MeshInstance3D" parent="SetDressing" unique_id=1735115479]
+[node name="CrateC" type="MeshInstance3D" parent="SetDressing" unique_id=781118048]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.55, -1.2)
 material_override = SubResource("StandardMaterial3D_s4y1d")
 mesh = SubResource("BoxMesh_q38q0")
 
-[node name="BenchR" type="MeshInstance3D" parent="SetDressing" unique_id=2031144759]
+[node name="BenchR" type="MeshInstance3D" parent="SetDressing" unique_id=1726915174]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.3, 3.2)
 material_override = SubResource("StandardMaterial3D_3j0n6")
 mesh = SubResource("BoxMesh_jv1w0")
 
-[node name="LanternPost" type="MeshInstance3D" parent="SetDressing" unique_id=269443339]
+[node name="LanternPost" type="MeshInstance3D" parent="SetDressing" unique_id=535081210]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.15, 1.6)
 material_override = SubResource("StandardMaterial3D_1wmg1")
 mesh = SubResource("BoxMesh_t3tng")
 
-[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=806743225]
+[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=1152148524]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
 material_override = SubResource("StandardMaterial3D_1o6vo")
 mesh = SubResource("BoxMesh_8acnu")
 
-[node name="FgPillarL" type="MeshInstance3D" parent="SetDressing" unique_id=1845935534]
+[node name="FgPillarL" type="MeshInstance3D" parent="SetDressing" unique_id=1530742823]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.3, 8.6)
 material_override = SubResource("StandardMaterial3D_u7c3e")
 mesh = SubResource("BoxMesh_gx1pa")
 
-[node name="FgPillarR" type="MeshInstance3D" parent="SetDressing" unique_id=59138088]
+[node name="FgPillarR" type="MeshInstance3D" parent="SetDressing" unique_id=1857943218]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.3, 8.6)
 material_override = SubResource("StandardMaterial3D_fmj8v")
 mesh = SubResource("BoxMesh_jakqs")
 
-[node name="Traveler" type="Sprite3D" parent="." unique_id=1246602034]
+[node name="Traveler" type="CharacterBody3D" parent="." unique_id=1860777636]
+script = ExtResource("3_647yj")
+
+[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Traveler" unique_id=1384477119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CapsuleShape3D_v7r0w")
+
+[node name="Sprite" type="AnimatedSprite3D" parent="Traveler" unique_id=1699795891]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 cast_shadow = 2
 pixel_size = 0.05
@@ -293,11 +332,12 @@ billboard = 2
 shaded = true
 alpha_cut = 1
 texture_filter = 0
-texture = ExtResource("3_647yj")
+sprite_frames = SubResource("SpriteFrames_ey4f6")
+animation = &"idle"
 
-[node name="DioramaCamera" type="Camera3D" parent="." unique_id=439910915]
+[node name="DioramaCamera" type="Camera3D" parent="." unique_id=1538782152]
 transform = Transform3D(1, 0, 0, 0, 0.8571673, 0.5150381, 0, -0.5150381, 0.8571673, 0, 13.5, 21)
-attributes = SubResource("CameraAttributesPractical_v7r0w")
+attributes = SubResource("CameraAttributesPractical_2mcha")
 current = true
 fov = 18.0
 far = 200.0

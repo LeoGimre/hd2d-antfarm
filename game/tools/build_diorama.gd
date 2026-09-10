@@ -244,10 +244,45 @@ func _add_set_dressing(root: Node3D) -> void:
 	root.add_child(dressing)
 
 
+func _build_traveler_frames() -> SpriteFrames:
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.add_frame("idle", load("res://assets/sprites/traveler_idle.png"))
+
+	# Walk cycle: the cloak hides most of the legs, so the boots stepping
+	# under the hem is enough motion to read as a stride at 12fps.
+	frames.add_animation("walk")
+	frames.set_animation_loop("walk", true)
+	frames.set_animation_speed("walk", 6.0)
+	frames.add_frame("walk", load("res://assets/sprites/traveler_walk_a.png"))
+	frames.add_frame("walk", load("res://assets/sprites/traveler_idle.png"))
+	frames.add_frame("walk", load("res://assets/sprites/traveler_walk_b.png"))
+	frames.add_frame("walk", load("res://assets/sprites/traveler_idle.png"))
+	return frames
+
+
 func _add_traveler(root: Node3D) -> void:
-	var sprite := Sprite3D.new()
-	sprite.name = "Traveler"
-	sprite.texture = load("res://assets/sprites/traveler.png")
+	# CharacterBody3D at ground level; the sprite is offset up to its own
+	# height, same as the old static Sprite3D's world position was.
+	var body := CharacterBody3D.new()
+	body.name = "Traveler"
+	body.set_script(load("res://scripts/player.gd"))
+
+	var collider := CollisionShape3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = 0.35
+	capsule.height = TRAVELER_HEIGHT
+	collider.shape = capsule
+	collider.position = Vector3(0.0, TRAVELER_HEIGHT * 0.5, 0.0)
+	body.add_child(collider)
+
+	var sprite := AnimatedSprite3D.new()
+	sprite.name = "Sprite"
+	sprite.sprite_frames = _build_traveler_frames()
+	sprite.animation = "idle"
 	sprite.pixel_size = SPRITE_PIXEL_SIZE
 	# Y-billboard keeps the sprite upright while it turns to face the camera —
 	# the trick that lets a 2D sprite live in a 3D scene without shearing.
@@ -260,7 +295,9 @@ func _add_traveler(root: Node3D) -> void:
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 	sprite.position = Vector3(0.0, TRAVELER_HEIGHT * 0.5, 0.0)
-	root.add_child(sprite)
+	body.add_child(sprite)
+
+	root.add_child(body)
 
 
 func _add_camera(root: Node3D) -> void:
