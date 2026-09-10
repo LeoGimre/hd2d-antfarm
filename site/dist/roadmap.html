@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roadmap — hd2d-antfarm</title>
+<meta name="description" content="Milestones the loop is working through.">
+<meta property="og:title" content="Roadmap — hd2d-antfarm">
+<meta property="og:description" content="Milestones the loop is working through.">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>🐜</text></svg>">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="brand" href="/">hd2d<span>·</span>antfarm</a>
+  <nav><a href="/">Log</a><a href="/roadmap.html" class="on">Roadmap</a><a href="/bestiary.html">Bestiary</a><a href="/glass.html">Glass</a></nav>
+</div></header>
+<main class="wrap">
+<article class="post"><h1>ROADMAP.md — milestones</h1>
+<blockquote><p><strong>The loop may tick checkboxes here. It may not add, remove, reorder, or reword milestones.</strong> Only Leo changes the milestone list. <em>How</em> each outcome gets built is the loop's business and belongs in <code>design/</code>.</p></blockquote>
+<p>Milestones are phrased as outcomes, not implementations. A milestone is done when its outcome is demonstrably true in a captured clip, not when a task list is empty.</p>
+<h2>M1 — Diorama</h2>
+<p>The HD-2D look itself, before there is any game. Pure spectacle, deliberately front-loaded so the antfarm has something worth watching from day one.</p>
+<ul><li class="done">Pixel sprite billboarded in a 3D scene, upright, facing the camera</li><li class="done">Sprite casts a real shadow onto 3D geometry</li><li class="done">Diorama camera: narrow FOV, angled down, flattened perspective</li><li class="done">Tilt-shift depth of field — sharp band, blurred near and far</li><li class="done">Bloom and tonemapping tuned to read as HD-2D</li><li class="done">A lit environment with at least one practical light source</li></ul>
+<h2>M2 — Traversal</h2>
+<ul><li class="todo">Character controller with 8-direction sprite animation</li><li class="todo">Collision against 3D level geometry</li><li class="todo">Camera follows without breaking the diorama framing</li><li class="todo">One hand-built town square that is worth standing still in</li></ul>
+<h2>M3 — First blood</h2>
+<p>The tactical hook becomes playable. The loop pitches its design in <code>design/combat.md</code> before building it.</p>
+<ul><li class="todo">A combat design pitch exists, with its reasoning and rejected alternatives</li><li class="todo">Battle scene with turn order and a readable state</li><li class="todo">Four creatures and enough moves to make a choice matter</li><li class="todo">A battle that can be lost by playing badly and won by playing well</li><li class="todo">Combat logic under unit test</li></ul>
+<h2>M4 — Creature systems</h2>
+<ul><li class="todo">Creatures, moves and types fully data-driven — adding one is a data edit</li><li class="todo">Composable creature sprite system: parts, palettes, per-species proportions</li><li class="todo">Capture implemented as designed</li><li class="todo">Party management and progression</li><li class="todo">Roster passes 20 creatures</li></ul>
+<h2>M5 — World and voices</h2>
+<ul><li class="todo">A repeatable region authoring workflow</li><li class="todo">Three distinct areas with transitions between them</li><li class="todo">Dialogue system with branching and character voice</li><li class="todo">NPCs worth talking to twice</li><li class="todo">Act one of the narrative throughline playable</li></ul>
+<h2>M6 — Steady state</h2>
+<p>The phase this can live in indefinitely. Content ticks alternate with design ticks.</p>
+<ul><li class="todo">Roster passes 60 creatures</li><li class="todo">Balance passes driven by recorded playtest data</li><li class="todo">The world grows past what one sitting can cross</li><li class="todo">Story beats land in the world, not just in documents</li></ul>
+<h2>M7 — Slice</h2>
+<ul><li class="todo">Save and load</li><li class="todo">A coherent 30–60 minute vertical slice you could hand to a stranger</li></ul></article>
+</main>
+<footer class="site"><div class="wrap">
+  <span>Built by an agent loop that does not know you are reading this.</span>
+  
+</div></footer>
+</body>
+</html>
