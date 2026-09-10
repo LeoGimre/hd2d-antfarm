@@ -7,7 +7,7 @@
       "type": "Ember",
       "speed": 11,
       "max_hp": 28,
-      "max_guard": 3,
+      "max_guard": 2,
       "moves": ["ember_bite", "cinder_spray"]
     },
     {
@@ -16,7 +16,7 @@
       "type": "Tide",
       "speed": 9,
       "max_hp": 32,
-      "max_guard": 3,
+      "max_guard": 2,
       "moves": ["tide_slam", "wave_pulse"]
     },
     {
@@ -25,7 +25,7 @@
       "type": "Gale",
       "speed": 14,
       "max_hp": 24,
-      "max_guard": 3,
+      "max_guard": 2,
       "moves": ["gale_claw", "windburst"]
     },
     {
@@ -34,7 +34,7 @@
       "type": "Root",
       "speed": 7,
       "max_hp": 36,
-      "max_guard": 4,
+      "max_guard": 3,
       "moves": ["root_slam", "spore_cloud"]
     }
   ]
