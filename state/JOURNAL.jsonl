@@ -2,3 +2,4 @@
 {"tick": 2, "date": "2026-09-10", "task": "Collision against 3D level geometry for set dressing props", "status": "ok", "visual": true, "commit": "28b94d123b26e2962b64a8b7756b1309d4443cad", "slug": "0003-set-dressing-collision"}
 {"tick": 3, "date": "2026-09-10", "task": "Make the camera follow the traveler, so framing survives leaving the origin", "status": "ok", "visual": true, "commit": "c248389102f53d095ac60b7616ca8df0aebbddc2", "slug": "0004-camera-follow"}
 {"tick": 4, "date": "2026-09-10", "task": "Build the town square, the last M2 box", "status": "ok", "visual": true, "commit": "7818ed2386edc61995927ed80d781c76ef5ab764", "slug": "0005-town-square"}
+{"tick": 5, "date": "2026-09-10", "task": "Pitch the M3 combat design: turn queue, Front/Back position, Guard/Charge", "status": "design", "visual": false, "commit": "4b3b2e389fb907950f9a45e4a3c0eaf7ffed6ea0", "slug": "0006-combat-pitch"}

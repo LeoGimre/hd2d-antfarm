@@ -4,20 +4,27 @@ Rewritten by the loop at the end of every tick. This is how a fresh session pick
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
 ## Current milestone
-M2 — Traversal is **done**. Character controller + walk animation, collision against 3D level
-geometry, camera-follow, and now a hand-built town square (plaza floor, two shop facades, a well,
-a market stall, two lanterns) — all four boxes ticked.
+M2 — Traversal is **done**. M3 — First blood is now open; its first box (the combat design pitch)
+is done as of tick 5.
 
 ## Current focus
-**Next milestone is M3 — First blood.** Its own first box requires a design tick before any code:
-write `design/combat.md` — the combat pitch, with reasoning and rejected alternatives — before
-building a battle scene, turn order, creatures/moves, or unit tests. Do not skip to code; the
-milestone's checklist puts the pitch first for a reason.
+**M3's second box: a battle scene with turn order and a readable state.** Build the turn-order
+queue strip and the two-slot Front/Back board specified in `design/combat.md`, against a
+placeholder pair of creatures — enough to prove the state is readable on screen before real
+creatures/moves/Guard values exist. Do not build creatures/moves data or unit tests yet; those are
+the next two boxes after this one, in order.
 
 ## Open blockers
 None.
 
 ## Recent decisions
+- **Combat design pitch** (tick 5): `design/combat.md` decides M3's core loop — a deterministic
+  speed-ordered turn queue rendered as a visible strip (not hidden ATB), a two-slot Front/Back
+  position (melee locked to Front, ranged discounted vs Back, Swap costs a full turn), and a
+  Guard/Charge economy (type-effective hits crack Guard faster, breaking a creature banks a Charge
+  spendable on a burst-empowered move). Capture and bonds-with-memory are explicitly deferred to
+  M4 — noted as read, not built. Full reasoning and rejected alternatives (plain HP race, real-time
+  ATB, a full tactics grid, a separate mana/AP pool) are in the document itself.
 - **Town square layout** (tick 4): a stone plaza floor wider than the road, two mirrored shop
   facades (solid block + wider roof-cap box + door inset — no wedge geometry, the project only
   emits primitives), a well centerpiece, a market stall built from the existing crates, and a
@@ -64,4 +71,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-4
+5
