@@ -4,54 +4,48 @@ Rewritten by the loop at the end of every tick. This is how a fresh session pick
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
 ## Current milestone
-M2 — Traversal. Three of four checkboxes done: character controller + walk animation, collision
-against 3D level geometry, camera-follow. Last one left: a hand-built town square worth standing
-in.
+M2 — Traversal is **done**. Character controller + walk animation, collision against 3D level
+geometry, camera-follow, and now a hand-built town square (plaza floor, two shop facades, a well,
+a market stall, two lanterns) — all four boxes ticked.
 
 ## Current focus
-`DioramaCamera` is now a child of `Traveler` (`build_diorama.gd`'s `_add_camera` takes the
-traveler node and calls `traveler.add_child(cam)`), not a sibling under the Diorama root. It keeps
-its old fixed local offset/rotation, so it rides along for free — `player.gd`'s `CharacterBody3D`
-never rotates its own transform (only the sprite turns, via billboard), so the camera's world
-rotation never changes, and since the local offset is constant the tilt-shift DOF distances tuned
-around a fixed camera-to-subject distance are still valid untouched. No lerp, no script, just scene
-graph. `showcase.gd` (M1 orbit demo) had to be updated to look up `Traveler/DioramaCamera` instead
-of a root-level `DioramaCamera` — anything else that ever looks up that node by path needs the same
-fix.
-
-**Next task: the hand-built town square.** Right now the diorama is a lit backdrop with props
-scattered for depth-of-field, not a place with a layout. This is a design-and-build task — decide
-what "worth standing in" means (a plaza shape, a few functional-looking structures, maybe an NPC
-placeholder) before adding geometry, and it's the last M2 box before M3's combat pitch.
+**Next milestone is M3 — First blood.** Its own first box requires a design tick before any code:
+write `design/combat.md` — the combat pitch, with reasoning and rejected alternatives — before
+building a battle scene, turn order, creatures/moves, or unit tests. Do not skip to code; the
+milestone's checklist puts the pitch first for a reason.
 
 ## Open blockers
-None. But see the capture-pipeline note below before reaching for a long capture duration.
+None.
 
 ## Recent decisions
-- **`farm/capture.sh`'s Movie Maker path drops/coalesces frames on long captures.** A 28-second
-  capture of `traversal_demo` encoded only 81 real frames (dense for ~1.8s, then sparse in ~2.1s
-  jumps); a 12-second capture of `diorama_showcase` (continuous motion, no long static holds)
-  stayed fully dense the whole way. This is a capture-pipeline limit, not a sim bug — confirmed by
-  running `godot --path game --fixed-fps 30 --quit-after N <scene>` directly (no `--write-movie`)
-  and printing traveler/camera position every frame, which tracked correctly throughout. Keep
-  capture requests in the 12–16s range (as tick 1/2 already did) and put whatever the tick needs to
-  prove early in the demo's timeline, not at the end. Auto-generated `qc-*.png` samples (via
-  `-vf fps=1/N -frames:v 4`) can be misleading when frames are dropped unevenly — if QC frames look
-  suspiciously identical, cross-check with `ffprobe -show_entries frame=pts_time` and manual
-  `-ss <t> -frames:v 1` seeks into `clip.mp4` before concluding the scene itself is frozen.
-- Any node lookup by absolute path (`get_node("SomeName")`) is fragile against reparenting done for
-  gameplay reasons (camera-follow moved `DioramaCamera` under `Traveler`). When reparenting a node
-  that other demo scripts reference, grep for its name across `game/tools/demos/` before calling the
-  change done.
-- `_block()` in `build_diorama.gd` returns a `StaticBody3D` (mesh + matching box collider), not a
-  bare `MeshInstance3D`. Any future set-dressing prop added through this helper is solid by
-  default; if something should be walk-through (decoration, foliage), it needs its own path that
-  skips `_block()`, not a flag bolted onto it.
-- Demo scripts that hold scripted input for different durations per step must NOT compare elapsed
-  time against `_steps[_step][1]` after `_step` has already been incremented — capture the active
-  step's duration into a local var when the step starts, compare against that.
-- Input map lives in code (`InputSetup` autoload), not in `project.godot`'s `[input]` block.
-- No gravity, no floor collision shape on the ground plane. Movement is intentionally flat/top-down.
+- **Town square layout** (tick 4): a stone plaza floor wider than the road, two mirrored shop
+  facades (solid block + wider roof-cap box + door inset — no wedge geometry, the project only
+  emits primitives), a well centerpiece, a market stall built from the existing crates, and a
+  second lantern for symmetry. Full reasoning and rejected alternatives in `design/town_square.md`.
+- **A solid `CylinderMesh` has no hollow interior.** The well's water disc was first sunk *into*
+  the stone rim on the assumption the rim was hollow like a real well; it was fully swallowed and
+  invisible (QC showed a plain stone stool). Fixed by raising the disc proud of the rim's top
+  surface instead — reads as a raised fountain lip, not a deep well, but reads as something.
+  Applies to any future prop that wants a visible recessed/embedded surface: either the container
+  mesh needs an actual cavity, or the inset needs to sit proud, not sunk.
+- **`CrateA`'s world position is load-bearing.** `traversal_demo.gd`'s collision-bump beat is tuned
+  around it (`APPROACH_SECONDS`/`BUMP_HOLD_SECONDS` assume it's at (-2.9, *, 1.6)). Any future set
+  dressing near it must be placed clear, not moved into it.
+- `farm/publish.py <slug>` with no file args only looks in `farm/out/<slug>/`. If the demo used for
+  capture has a different name than the devlog slug (e.g. captured `diorama_showcase` for slug
+  `0005-town-square`), pass the file paths explicitly:
+  `farm/publish.py <slug> farm/out/<demo>/clip.mp4 farm/out/<demo>/clip.webm farm/out/<demo>/poster.jpg`.
+- `farm/capture.sh`'s Movie Maker path drops/coalesces frames on long captures (see tick 3's note,
+  still true) — keep captures in the 12–16s range, front-load what the tick needs to prove.
+- Any node lookup by absolute path (`get_node("SomeName")`) is fragile against reparenting. Grep
+  `game/tools/demos/` before renaming or reparenting a node other scripts reference.
+- `_block()` in `build_diorama.gd` returns a `StaticBody3D` (mesh + matching box collider) — solid
+  by default. A helper that wants to be walk-through needs its own path that skips `_block()`.
+- Demo scripts with per-step scripted input durations must capture the active step's duration into
+  a local var when the step starts, not compare elapsed time against `_steps[_step][1]` after
+  `_step` has already advanced.
+- Input map lives in code (`InputSetup` autoload), not `project.godot`'s `[input]` block.
+- No gravity, no floor collision shape on the ground plane — movement is flat/top-down.
 - **Always import assets (`godot --headless --import`) before running `build_diorama.gd`.** Silent
   null-texture bug otherwise; verify.sh won't catch it.
 - Scene files are generated from `game/tools/build_diorama.gd`, not hand-edited. Edit the builder,
@@ -70,4 +64,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-3
+4

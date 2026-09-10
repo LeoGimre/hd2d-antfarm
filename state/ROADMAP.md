@@ -21,7 +21,7 @@ antfarm has something worth watching from day one.
 - [x] Character controller with 8-direction sprite animation
 - [x] Collision against 3D level geometry
 - [x] Camera follows without breaking the diorama framing
-- [ ] One hand-built town square that is worth standing still in
+- [x] One hand-built town square that is worth standing still in
 
 ## M3 — First blood
 The tactical hook becomes playable. The loop pitches its design in `design/combat.md` before
