@@ -1,20 +1,26 @@
 extends Node3D
-## M2 capture demo: scripted input walks the traveler through all 8
-## directions so the character controller and its walk-cycle animation are
-## visible on camera, then drives it straight into CrateA to demonstrate
-## collision against 3D level geometry — held input, but the traveler stalls
-## once the box collider stops it. It finishes with a long straight walk far
-## from the origin, to demonstrate that the camera (now parented to the
-## traveler) keeps the same framing and sharp band no matter how far the
-## traveler strays from world (0,0,0).
+## M2 capture demo: walks straight east, far past the set dressing, to prove
+## the camera (now parented to the traveler) keeps its framing and sharp band
+## no matter how far the traveler strays from world (0,0,0). Then it runs the
+## traveler through all 8 compass directions so the character controller and
+## its walk-cycle animation are visible on camera, then drives it straight
+## into CrateA to demonstrate collision against 3D level geometry — held
+## input, but the traveler stalls once the box collider stops it.
+##
+## The far walk leads because farm/capture.sh's Movie Maker path has been
+## observed to drop or coalesce frames once a capture runs past roughly ten
+## real seconds (worse the longer the requested clip) — a capture-pipeline
+## limit, not a game bug: a plain camera-orbit demo with no long static holds
+## stays perfectly dense for 12s, and a direct (non-capture) run printing
+## _traveler.global_position every frame confirms the sim itself never
+## stalls. Front-loading the shot this tick needs to prove means it survives
+## that window intact even if the compass loop and crate bump later in the
+## same clip do not.
 ##
 ## Movie Maker has no real keyboard, so this presses and releases the same
 ## InputMap actions a player would via Input.action_press/action_release —
 ## it exercises player.gd's actual input path rather than teleporting the
-## traveler around by hand. Order: two full compass loops, a straight
-## approach into CrateA (near the origin, at x=-2.9 z=1.6) with a rest to
-## hold the stopped stance, then a re-anchor to the origin and a long walk
-## east to show the camera following.
+## traveler around by hand.
 
 @export var scene_path: String = "res://scenes/diorama.tscn"
 
@@ -32,7 +38,9 @@ const REST_SECONDS := 1.5
 # of the tilt-shift's sharp band (tuned around ~24.5 units from camera) or
 # out of frame entirely; camera-follow keeps the shot identical regardless.
 const FAR_SECONDS := 4.0
-const FAR_REST_SECONDS := 2.0
+# Held well past the walk itself so a QC frame sampled anywhere in this
+# window shows the traveler at rest far from the origin, not mid-stride.
+const FAR_REST_SECONDS := 4.0
 
 # Ordered clockwise from north; diagonals are two actions held together.
 const DIRECTIONS: Array = [
@@ -62,6 +70,14 @@ func _ready() -> void:
 	add_child(world)
 	_traveler = world.get_node("Traveler")
 
+	# Leads with the new content: walk straight east, far past the set
+	# dressing, to show the camera keeps its framing on the traveler at any
+	# distance. The traveler already starts at the origin, so no reset is
+	# needed before this first step.
+	_far_step = _steps.size()
+	_steps.append([["move_right"], FAR_SECONDS])
+	_steps.append([[], FAR_REST_SECONDS])
+
 	for _i in LOOPS:
 		for actions in DIRECTIONS:
 			_steps.append([actions, LEG_SECONDS])
@@ -74,12 +90,6 @@ func _ready() -> void:
 	_steps.append([["move_down"], APPROACH_SECONDS])
 	_steps.append([["move_left"], BUMP_HOLD_SECONDS])
 	_steps.append([[], REST_SECONDS])
-
-	# Re-anchor again, then walk straight east, far past the set dressing,
-	# to show the camera keeps its framing on the traveler at any distance.
-	_far_step = _steps.size()
-	_steps.append([["move_right"], FAR_SECONDS])
-	_steps.append([[], FAR_REST_SECONDS])
 
 	_advance()
 
