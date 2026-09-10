@@ -5,12 +5,19 @@
 # disk (STATE.md, ROADMAP.md, design/, JOURNAL.jsonl, git log), never in a
 # context window. That makes runtime unbounded and context bounded, and it means
 # a wedged tick can be killed without poisoning the run.
+#
+# Exit codes are how run.sh tells the three outcomes apart:
+#   0   the tick ran
+#   42  a usage limit blocked it — it never got to work; resume time is in
+#       farm/logs/.resume_at
+#   1   anything else went wrong
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLAUDE="${CLAUDE_BIN:-claude}"
-TIMEOUT="${TICK_TIMEOUT:-1800}"
+TIMEOUT="${TICK_TIMEOUT:-2700}"
 LOGDIR="$ROOT/farm/logs"
+RESUME_AT="$LOGDIR/.resume_at"
 mkdir -p "$LOGDIR"
 
 N=$(printf '%04d' "$(( $(ls "$LOGDIR"/tick-*.json 2>/dev/null | wc -l | tr -d ' ') + 1 ))")
@@ -31,32 +38,38 @@ pid=$!
 ( sleep "$TIMEOUT"; kill -TERM "$pid" 2>/dev/null ) &
 watchdog=$!
 
-wait "$pid"; code=$?
+wait "$pid"
 kill "$watchdog" 2>/dev/null; wait "$watchdog" 2>/dev/null
 
-if [ $code -ne 0 ]; then
-  echo "[$(date '+%H:%M:%S')] tick $N exited $code"
-  tail -5 "$ERR" >&2 2>/dev/null
-  exit $code
-fi
+# The CLI's exit code does not distinguish "hit a usage limit" from "broke".
+# Both are non-zero, and a limit even reports subtype "success". Classify from
+# the payload instead.
+verdict=$(python3 "$ROOT/farm/limit.py" "$OUT")
+kind=${verdict%%|*}
+rest=${verdict#*|}
 
-# Surface cost and the closing summary so run.sh can budget and the operator can skim.
-python3 - "$OUT" <<'PY'
-import json, sys
-try:
-    d = json.load(open(sys.argv[1]))
-except Exception as e:
-    print(f"  (unparseable tick output: {e})")
-    sys.exit(0)
-cost = d.get("total_cost_usd")
-turns = d.get("num_turns")
-result = (d.get("result") or "").strip().replace("\n", " ")
-if cost is not None:
-    print(f"  cost ${cost:.4f}  turns {turns}")
-    with open(__import__("os").path.join(__import__("os").path.dirname(sys.argv[1]), "cost.log"), "a") as f:
-        f.write(f"{cost}\n")
-if result:
-    print(f"  {result[:220]}")
-PY
-
-echo "[$(date '+%H:%M:%S')] tick $N done"
+case "$kind" in
+  OK)
+    cost=${rest%%|*}; rest=${rest#*|}
+    turns=${rest%%|*}; summary=${rest#*|}
+    echo "$cost" >>"$LOGDIR/cost.log"
+    printf '  cost $%s  turns %s\n' "$cost" "$turns"
+    [ -n "$summary" ] && echo "  ${summary:0:200}"
+    echo "[$(date '+%H:%M:%S')] tick $N done"
+    exit 0
+    ;;
+  LIMIT)
+    epoch=${rest%%|*}; rest=${rest#*|}
+    human=${rest%%|*}; message=${rest#*|}
+    echo "$epoch" >"$RESUME_AT"
+    echo "  usage limit — $message"
+    echo "[$(date '+%H:%M:%S')] tick $N blocked (resets $human); not counted"
+    exit 42
+    ;;
+  *)
+    echo "  $rest"
+    [ -s "$ERR" ] && tail -5 "$ERR" >&2
+    echo "[$(date '+%H:%M:%S')] tick $N failed"
+    exit 1
+    ;;
+esac

@@ -37,7 +37,27 @@ where it's going.
 Drop a note in [state/REQUESTS.md](state/REQUESTS.md). The loop reads it next tick and never writes
 back. It's a one-way channel on purpose.
 
-To stop everything: `touch state/STOP`.
+To stop everything: `touch state/STOP`. It halts within a few seconds, even mid-wait.
+
+## Running the farm
+
+```bash
+MAX_TICKS=200 caffeinate -dims farm/run.sh
+```
+
+Usage limits are expected, not exceptional. A tick blocked by one never got to work, so it does
+not count against `MAX_TICKS` and does not trigger failure backoff — the runner reads the reset
+time out of the message, sleeps until then, and resumes on its own. If a stated reset time proves
+optimistic, the wait escalates (15m, 30m, 1h, ...) rather than hammering the limit.
+
+| Variable | Default | What |
+|---|---|---|
+| `MAX_TICKS` | unlimited | Ticks that actually ran. Limit waits are not counted. |
+| `BUDGET_USD` | unlimited | Halt once cumulative spend passes this |
+| `COOLDOWN` | 60 | Seconds between successful ticks |
+| `FAIL_BACKOFF` | 300 | Seconds after a real failure |
+| `MAX_FAILS` | 5 | Consecutive real failures before halting for a human |
+| `TICK_TIMEOUT` | 2700 | Watchdog, seconds |
 
 ## Running things by hand
 

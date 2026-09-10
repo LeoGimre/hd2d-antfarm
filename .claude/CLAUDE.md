@@ -40,6 +40,17 @@ a tick fails, say what blocked you clearly enough that the next tick can pick it
 **Design ticks are real ticks.** Writing up a combat revision in `design/` with no code is
 legitimate work and often the most interesting entry. Do not pad it with code to feel productive.
 
+**You may inherit a dirty working tree.** A tick can be cut off mid-task — a usage limit, the
+watchdog, a crash — and the next tick starts fresh in whatever state that left. So check
+`git status` while orienting. Uncommitted changes are a previous tick's unfinished work, not
+yours to assume are good: read them, then either finish the job properly (make `verify.sh` green
+and commit) or carry on and let the commit include them once they *are* green. Never commit them
+blind, and never treat a dirty tree as evidence that the task is already done. Say in the devlog
+entry that you picked up interrupted work — that is exactly the kind of detail worth reading.
+
+**Commands run from the repository root.** Use plain `git log`, not `git -C /long/path log`; the
+allowlist matches on the command as written, and the qualified form is denied and wastes a turn.
+
 **Keep the demo scenes current.** Every showable system needs a demo scene in
 `game/tools/demos/`. If you changed a system and its demo no longer shows it, updating the demo
 is part of the task, not a follow-up.
