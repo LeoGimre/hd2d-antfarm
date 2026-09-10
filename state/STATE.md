@@ -9,22 +9,35 @@ battle scene with turn order, four data-driven creatures) are done as of tick 7.
 in tick 8, but the fourth box itself is still unticked — see Current focus.
 
 ## Current focus
-**M3's fourth box is still open: retune numbers (or AI/target logic) until the "correct" line
-reliably beats the "naive" one.** Player input now exists (tick 8) — the player picks move, target,
-Swap and Charge on their own turns — but running `design/combat.md`'s own worked example through a
-scripted line found the opposite of what the doc predicts: naive front-stacking (always melee,
-always Front, no Charge, no retargeting) beat a "correct" line that fixed targeting (both player
-creatures focus Galewing, the good matchup, instead of Tidalpup) but never swapped Emberling out of
-Front once its matchup turned bad. Score was close (enemy won with Tidalpup at 5/32 HP) but still a
-loss. Next tick should either script a swap-aware "correct" line to see if that's enough, or, if
-not, retune Guard size / Back penalty / Charge power per combat.md's own instruction ("the numbers,
-not the shape of the systems, are what to retune"). Unit tests for `CombatResolver`/`TypeChart` are
-still the box *after* this one — don't build them until this one reliably passes.
+**M3's fourth box is still open.** Tick 9 fixed half the naive-vs-correct problem: every creature's
+`max_guard` cut by 1 (`game/data/creatures.json`) now makes naive front-stacking (always melee,
+always Front, no Charge, no retargeting) reliably *lose* — previously it won outright every time
+because Emberling, parked in Front by definition of "naive," regenerated Guard faster than
+Tidalpup's weak hits could crack it, so it never broke and the Guard/Charge system never engaged.
+What's still missing: a scripted "correct" line that reliably *wins* against these same numbers.
+Tick 9 tried many (swap-then-focus-fire, split-target, minimal-diff-from-naive, combined with
+retuning the resisted-hit heal and the Back damage penalty) and got within 2–10 HP repeatedly but
+never a reliable win — and in some configurations the "smart" line needed the enemy *weaker* than
+naive did to win, meaning the scripted line itself may not be optimal, not that the fight is
+unwinnable. Next tick: either find a correct line that clears this tighter bar, or treat the
+closeness as a sign the four creatures' HP totals (not just Guard) need a pass too. See
+`devlog/0010-guard-size-retune.md` for the full trace. Unit tests for `CombatResolver`/`TypeChart`
+are still the box *after* this one — don't build them until this one reliably passes.
 
 ## Open blockers
 None.
 
 ## Recent decisions
+- **Guard size cut by 1 for every creature** (tick 9): `game/data/creatures.json` — `max_guard` 3→2
+  for Emberling/Tidalpup/Galewing, 4→3 for Rootshell. Root cause found this tick: HP damage in
+  `CombatResolver.resolve()` is completely unaffected by type effectiveness (only Guard damage and
+  the resist-heal are), and at the old Guard sizes a fast creature (Emberling, speed 11) regenerated
+  Guard on its own turns faster than a "weak" 2-Guard hit could crack it — so it never broke, the
+  50%-more-damage Broken penalty never triggered, and the fight was a pure unmitigated-HP race that
+  naive (two attackers ganging up on one Front target) wins regardless of matchup. Cutting Guard
+  size means one weak hit now matches or exceeds most pools, so breaks actually happen. Confirmed:
+  naive now reliably loses. Did **not** confirm a "correct" line that reliably wins the same
+  numbers — see Current focus.
 - **Player input on the player's own turns** (tick 8): picked up a previous tick's interrupted work
   (found already built in the working tree on arrival — read it, ran it, verified it, finished the
   job rather than redoing it). `battle.gd` now stops its timer on a `PlayerFront`/`PlayerBack` turn
@@ -106,4 +119,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-8
+9

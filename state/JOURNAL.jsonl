@@ -6,3 +6,4 @@
 {"tick": 6, "date": "2026-09-10", "task": "Build a battle scene with a visible turn queue and Front/Back board", "status": "ok", "visual": true, "commit": "5b1070a1b262c09ecbde7efaa7371c6bdc925584", "slug": "0007-battle-turn-queue"}
 {"tick": 7, "date": "2026-09-10", "task": "Give the battle scene four real, data-driven creatures", "status": "ok", "visual": true, "commit": "b8dc32a506f58af3751f278a40abfead483e1527", "slug": "0008-four-creatures"}
 {"tick": 8, "date": "2026-09-10", "task": "Let the player choose their own moves, targets, Swaps and Charges", "status": "ok", "visual": true, "commit": "d25e4bd39c45ed5b2139badb891077e607a3fd23", "slug": "0009-player-input"}
+{"tick": 9, "date": "2026-09-10", "task": "Retune Guard size so naive front-stacking reliably loses the M3 proof battle", "status": "ok", "visual": true, "commit": "6c023860b7e4b09f60e361b33fb9ab03eb608d4e", "slug": "0010-guard-size-retune"}
