@@ -4,20 +4,34 @@ Rewritten by the loop at the end of every tick. This is how a fresh session pick
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
 ## Current milestone
-M2 — Traversal is **done**. M3 — First blood is now open; its first box (the combat design pitch)
-is done as of tick 5.
+M2 — Traversal is **done**. M3 — First blood is open; its first two boxes (combat design pitch,
+battle scene with turn order) are done as of tick 6.
 
 ## Current focus
-**M3's second box: a battle scene with turn order and a readable state.** Build the turn-order
-queue strip and the two-slot Front/Back board specified in `design/combat.md`, against a
-placeholder pair of creatures — enough to prove the state is readable on screen before real
-creatures/moves/Guard values exist. Do not build creatures/moves data or unit tests yet; those are
-the next two boxes after this one, in order.
+**M3's third box: four creatures and enough moves to make a choice matter.** Replace tick 6's
+hardcoded placeholder pair (`battle.gd`'s inline "Emberfin"/"Grimshell", Speed 12/8, no HP or
+Guard) with real, data-driven creatures under `game/data/` — four of them, with a type chart and
+enough move variety that Front/Back and Guard/Charge (both already specified in
+`design/combat.md`, neither built yet) start to matter. Unit tests for combat logic are the box
+after this one — don't build them yet.
 
 ## Open blockers
 None.
 
 ## Recent decisions
+- **Battle scene: turn queue + Front/Back board** (tick 6): `game/scripts/turn_queue.gd`
+  (`TurnQueue`, the project's first `class_name`) implements combat.md's deterministic
+  `scheduled_time = 1000/Speed` formula, split into `advance()` (mutates real state, commits one
+  turn) and `preview(n)` (simulates the next n turns on a scratch copy, used by the on-screen
+  strip). `game/tools/build_battle.gd` generates `scenes/battle.tscn`: two placeholder capsule
+  creatures (Speed 12 and 8 — a 3:2 ratio on purpose, so the queue visibly reorders instead of
+  ping-ponging) in their side's Front slot, with all four Front/Back slot markers always rendered
+  regardless of occupancy — the board's claim is "two slots exist," not "both are full." A capsule
+  flashes emission on its owner's turn so a clip shows "queue predicted X" against "X just moved."
+  Camera framing needed a second pass: the first cropped the Player Back marker at the bottom edge
+  (Back slots sit closer to camera than Front, so they're larger and push toward frame edges more
+  than the same lateral offset suggests on paper) — only caught by opening the QC stills, not by
+  the numbers. No HP, Guard, moves, or real roster yet — that's the next box, deliberately.
 - **Combat design pitch** (tick 5): `design/combat.md` decides M3's core loop — a deterministic
   speed-ordered turn queue rendered as a visible strip (not hidden ATB), a two-slot Front/Back
   position (melee locked to Front, ranged discounted vs Back, Swap costs a full turn), and a
@@ -25,10 +39,6 @@ None.
   spendable on a burst-empowered move). Capture and bonds-with-memory are explicitly deferred to
   M4 — noted as read, not built. Full reasoning and rejected alternatives (plain HP race, real-time
   ATB, a full tactics grid, a separate mana/AP pool) are in the document itself.
-- **Town square layout** (tick 4): a stone plaza floor wider than the road, two mirrored shop
-  facades (solid block + wider roof-cap box + door inset — no wedge geometry, the project only
-  emits primitives), a well centerpiece, a market stall built from the existing crates, and a
-  second lantern for symmetry. Full reasoning and rejected alternatives in `design/town_square.md`.
 - **A solid `CylinderMesh` has no hollow interior.** The well's water disc was first sunk *into*
   the stone rim on the assumption the rim was hollow like a real well; it was fully swallowed and
   invisible (QC showed a plain stone stool). Fixed by raising the disc proud of the rim's top
@@ -71,4 +81,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-5
+6
