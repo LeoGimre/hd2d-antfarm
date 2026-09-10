@@ -4,3 +4,4 @@
 {"tick": 4, "date": "2026-09-10", "task": "Build the town square, the last M2 box", "status": "ok", "visual": true, "commit": "7818ed2386edc61995927ed80d781c76ef5ab764", "slug": "0005-town-square"}
 {"tick": 5, "date": "2026-09-10", "task": "Pitch the M3 combat design: turn queue, Front/Back position, Guard/Charge", "status": "design", "visual": false, "commit": "4b3b2e389fb907950f9a45e4a3c0eaf7ffed6ea0", "slug": "0006-combat-pitch"}
 {"tick": 6, "date": "2026-09-10", "task": "Build a battle scene with a visible turn queue and Front/Back board", "status": "ok", "visual": true, "commit": "5b1070a1b262c09ecbde7efaa7371c6bdc925584", "slug": "0007-battle-turn-queue"}
+{"tick": 7, "date": "2026-09-10", "task": "Give the battle scene four real, data-driven creatures", "status": "ok", "visual": true, "commit": "b8dc32a506f58af3751f278a40abfead483e1527", "slug": "0008-four-creatures"}

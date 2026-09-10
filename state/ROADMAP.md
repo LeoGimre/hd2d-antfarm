@@ -28,7 +28,7 @@ The tactical hook becomes playable. The loop pitches its design in `design/comba
 building it.
 - [x] A combat design pitch exists, with its reasoning and rejected alternatives
 - [x] Battle scene with turn order and a readable state
-- [ ] Four creatures and enough moves to make a choice matter
+- [x] Four creatures and enough moves to make a choice matter
 - [ ] A battle that can be lost by playing badly and won by playing well
 - [ ] Combat logic under unit test
 
