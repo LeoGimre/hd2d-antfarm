@@ -1,0 +1,41 @@
+{
+  "_comment": "M3's first four creatures. Each lists its moves as [melee_id, ranged_id] — CombatantState.next_move_id() alternates between them so a short battle demonstrates both halves of the Front/Back rule instead of one move on repeat.",
+  "creatures": [
+    {
+      "id": "emberling",
+      "display_name": "Emberling",
+      "type": "Ember",
+      "speed": 11,
+      "max_hp": 28,
+      "max_guard": 3,
+      "moves": ["ember_bite", "cinder_spray"]
+    },
+    {
+      "id": "tidalpup",
+      "display_name": "Tidalpup",
+      "type": "Tide",
+      "speed": 9,
+      "max_hp": 32,
+      "max_guard": 3,
+      "moves": ["tide_slam", "wave_pulse"]
+    },
+    {
+      "id": "galewing",
+      "display_name": "Galewing",
+      "type": "Gale",
+      "speed": 14,
+      "max_hp": 24,
+      "max_guard": 3,
+      "moves": ["gale_claw", "windburst"]
+    },
+    {
+      "id": "rootshell",
+      "display_name": "Rootshell",
+      "type": "Root",
+      "speed": 7,
+      "max_hp": 36,
+      "max_guard": 4,
+      "moves": ["root_slam", "spore_cloud"]
+    }
+  ]
+}

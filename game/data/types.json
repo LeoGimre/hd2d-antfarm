@@ -1,0 +1,9 @@
+{
+  "_comment": "M3's type chart: a single four-type cycle (Ember -> Root -> Gale -> Tide -> Ember), each type's 'weak_to' beats it for 2 Guard damage, its 'resists' costs the attacker 0 Guard damage and heals the defender. See design/combat.md's Break/Charge section for the Guard-damage rule this feeds.",
+  "types": {
+    "Ember": { "weak_to": "Tide", "resists": "Root" },
+    "Tide": { "weak_to": "Gale", "resists": "Ember" },
+    "Gale": { "weak_to": "Root", "resists": "Tide" },
+    "Root": { "weak_to": "Ember", "resists": "Gale" }
+  }
+}

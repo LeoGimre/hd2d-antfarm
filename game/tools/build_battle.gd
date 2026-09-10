@@ -3,13 +3,12 @@ extends SceneTree
 ## approach as build_diorama.gd. Run with:
 ##   godot --headless --path game --script res://tools/build_battle.gd
 ##
-## This is M3's second box: a battle scene with turn order and a readable
-## state, against a placeholder pair of creatures — one per side, both
-## starting in Front. Guard, moves and a real four-creature roster are the
-## next two boxes, in order; this scene only proves the queue and the
-## Front/Back board read correctly on screen. battle.gd owns the placeholder
-## combatant data (ids, names, speeds) and looks up these nodes by matching
-## name, so the two files have to stay in agreement on node names.
+## M3's third box: four real creatures from game/data/, two per side in
+## Front and Back. battle.gd owns the TEAM table (which creature stands in
+## which slot) and looks these nodes up by matching name, so the two files
+## have to stay in agreement on both node names and TEAM's contents — this
+## file keeps its own copy for initial placement and labels since it runs
+## standalone, before battle.gd's _ready() ever executes.
 
 const ARENA_SIZE := Vector2(11.0, 11.0)
 const ARENA_TILE_UNITS := 2.0
@@ -17,15 +16,32 @@ const MARKER_RADIUS := 0.7
 const MARKER_HEIGHT := 0.05
 const CREATURE_HEIGHT := 1.5
 
+## Back sits well to the *side* of Front, not mostly behind it. The original
+## near-diagonal offset (Back = Front + (1.6, 1.8)) put Front and Back close
+## enough together on screen, from this camera's angle, that Back's own
+## InfoLabel fell inside Front's silhouette — the nearer, larger capsule won
+## the depth test and hid it completely (only found by opening the QC
+## frames: a floating blob with no readable text, immovable by any of the
+## light/material/DOF tuning that would fix an actual overexposure). Widening
+## the lateral offset and flattening the depth offset keeps Back farther from
+## the board's center line without stacking it almost directly over Front.
 const PLAYER_FRONT_POS := Vector3(1.1, 0.0, 1.8)
-const PLAYER_BACK_POS := Vector3(2.7, 0.0, 3.6)
+const PLAYER_BACK_POS := Vector3(3.6, 0.0, 2.6)
 const ENEMY_FRONT_POS := Vector3(-1.1, 0.0, -1.3)
-const ENEMY_BACK_POS := Vector3(-2.7, 0.0, -3.1)
+const ENEMY_BACK_POS := Vector3(-3.6, 0.0, -1.7)
 
 const PLAYER_COLOR := Color(0.30, 0.55, 0.95)
 const ENEMY_COLOR := Color(0.85, 0.30, 0.28)
 const FRONT_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.55)
 const BACK_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.28)
+
+## Must match battle.gd's TEAM exactly — see the header comment above.
+const TEAM := {
+	"PlayerFront": {"creature_id": "emberling", "pos_key": "player_front"},
+	"PlayerBack": {"creature_id": "rootshell", "pos_key": "player_back"},
+	"EnemyFront": {"creature_id": "tidalpup", "pos_key": "enemy_front"},
+	"EnemyBack": {"creature_id": "galewing", "pos_key": "enemy_back"},
+}
 
 
 func _initialize() -> void:
@@ -143,16 +159,20 @@ func _add_lights(root: Node3D) -> void:
 	player_rim.name = "PlayerRim"
 	player_rim.position = PLAYER_FRONT_POS + Vector3(0.0, 2.6, 1.5)
 	player_rim.light_color = Color(0.55, 0.75, 1.0)
-	player_rim.light_energy = 3.2
-	player_rim.omni_range = 8.0
+	player_rim.light_energy = 1.6
+	player_rim.omni_range = 5.5
 	root.add_child(player_rim)
 
 	var enemy_rim := OmniLight3D.new()
 	enemy_rim.name = "EnemyRim"
 	enemy_rim.position = ENEMY_FRONT_POS + Vector3(0.0, 2.6, -1.5)
 	enemy_rim.light_color = Color(1.0, 0.55, 0.45)
-	enemy_rim.light_energy = 3.2
-	enemy_rim.omni_range = 8.0
+	# Both rims tuned down from tick 6's 3.2/8.0 — the Back slots are now
+	# occupied by real, labeled creatures a few units from the Front rim
+	# light, and that intensity/range blew Back out into an unreadable white
+	# bloom (caught in QC, not on paper) instead of just kissing Front's edge.
+	enemy_rim.light_energy = 1.6
+	enemy_rim.omni_range = 5.5
 	root.add_child(enemy_rim)
 
 
@@ -210,20 +230,52 @@ func _marker(node_name: String, pos: Vector3, tint: Color) -> Node3D:
 	return mi
 
 
-## Placeholder creatures — a capsule body plus a floating name tag. Real
-## sprites are M4's composable creature system; this scene only needs a
-## shape a viewer can tell apart by color and position, so battle.gd's
-## turn-order flash has something to flash.
+## Real creatures — no sprites yet (M4's composable creature system), so
+## each is still a capsule body plus floating text, but now loaded from
+## game/data/ rather than hardcoded: a name, a type, and a live HP/Guard
+## readout that battle.gd rewrites every turn.
 func _add_creatures(root: Node3D) -> void:
 	var creatures := Node3D.new()
 	creatures.name = "Creatures"
 	root.add_child(creatures)
 
-	creatures.add_child(_creature("PlayerFront", PLAYER_FRONT_POS, PLAYER_COLOR, "Emberfin"))
-	creatures.add_child(_creature("EnemyFront", ENEMY_FRONT_POS, ENEMY_COLOR, "Grimshell"))
+	var positions := {
+		"player_front": PLAYER_FRONT_POS,
+		"player_back": PLAYER_BACK_POS,
+		"enemy_front": ENEMY_FRONT_POS,
+		"enemy_back": ENEMY_BACK_POS,
+	}
+	var db := CreatureDB.new()
+	for node_name in TEAM:
+		var info: Dictionary = TEAM[node_name]
+		var data := db.get_creature(info["creature_id"])
+		var pos: Vector3 = positions[info["pos_key"]]
+		var color := PLAYER_COLOR if info["pos_key"].begins_with("player") else ENEMY_COLOR
+		var is_back: bool = info["pos_key"].ends_with("back")
+		# Lifted clear of Front's own label so the two don't share screen
+		# space at this camera angle. Enemy Back needed much less of this
+		# once it got its own wide lateral offset from Enemy Front (below) —
+		# the two no longer compete for the same screen space, and Enemy
+		# Back sits close enough to the frame's top edge already that
+		# lifting it as far as Player Back would crop it.
+		var label_lift := 0.35
+		if info["pos_key"] == "player_back":
+			label_lift = 1.15
+		elif info["pos_key"] == "enemy_back":
+			label_lift = 0.5
+		# Enemy Back moves *away* from camera as it moves off Front (Player
+		# Back moves *toward* camera instead), so only it ends up small
+		# enough on screen for a Front-sized label's glyphs to anti-alias
+		# into a solid blob instead of legible letterforms — invisible on
+		# paper, only caught by opening the QC frames, and immune to every
+		# lighting/DOF knob tried first because it was never a lighting
+		# problem. Scaling just that one label up compensates directly.
+		var label_font_scale := 1.3 if info["pos_key"] == "enemy_back" else 1.0
+		creatures.add_child(_creature(node_name, pos, color, data, label_lift, label_font_scale))
 
 
-func _creature(node_name: String, pos: Vector3, color: Color, display_name: String) -> Node3D:
+func _creature(node_name: String, pos: Vector3, color: Color, data: Dictionary,
+		label_lift: float, label_font_scale: float) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = node_name
 	holder.position = pos
@@ -233,7 +285,8 @@ func _creature(node_name: String, pos: Vector3, color: Color, display_name: Stri
 	capsule.height = CREATURE_HEIGHT
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
-	mat.roughness = 0.6
+	mat.roughness = 0.95
+	mat.metallic_specular = 0.05
 	mat.emission_enabled = true
 	mat.emission = color
 	mat.emission_energy_multiplier = 0.0
@@ -245,15 +298,22 @@ func _creature(node_name: String, pos: Vector3, color: Color, display_name: Stri
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	holder.add_child(body)
 
-	var label := Label3D.new()
-	label.name = "NameLabel"
-	label.text = display_name
-	label.font_size = 48
-	label.outline_size = 10
-	label.position = Vector3(0.0, CREATURE_HEIGHT + 0.4, 0.0)
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = false
-	holder.add_child(label)
+	# One label, two lines, rather than two stacked Label3Ds — the Back slots
+	# are far enough from camera that every extra world-unit of label height
+	# risks poking above the frame (see the crop this replaced). A single
+	# label's own line spacing is tighter than any manual gap between two.
+	var info := Label3D.new()
+	info.name = "InfoLabel"
+	info.text = "%s (%s)\nHP %d/%d   Guard %d/%d" % [
+		data["display_name"], data["type"], data["max_hp"], data["max_hp"],
+		data["max_guard"], data["max_guard"],
+	]
+	info.font_size = int(40 * label_font_scale)
+	info.outline_size = int(9 * label_font_scale)
+	info.position = Vector3(0.0, CREATURE_HEIGHT + label_lift, 0.0)
+	info.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	info.no_depth_test = false
+	holder.add_child(info)
 
 	return holder
 
@@ -265,19 +325,23 @@ func _creature(node_name: String, pos: Vector3, color: Color, display_name: Stri
 func _add_camera(root: Node3D) -> void:
 	var cam := Camera3D.new()
 	cam.name = "BattleCamera"
-	cam.fov = 26.0
-	cam.position = Vector3(0.0, 12.0, 15.0)
+	cam.fov = 28.0
+	cam.position = Vector3(0.0, 15.0, 19.0)
 	cam.rotation_degrees = Vector3(-38.0, 0.0, 0.0)
 	cam.current = true
 	cam.far = 100.0
 
 	var attrs := CameraAttributesPractical.new()
+	# Far distance sits past the Enemy Back slot on purpose — Back now carries
+	# its own readable HP/Guard label (this tick's data-driven roster), and
+	# "legible in ten seconds of video" (GAME.md's standard) outranks a purist
+	# near/far blur that would wash that label out.
 	attrs.dof_blur_amount = 0.2
 	attrs.dof_blur_far_enabled = true
-	attrs.dof_blur_far_distance = 21.5
-	attrs.dof_blur_far_transition = 7.0
+	attrs.dof_blur_far_distance = 50.0
+	attrs.dof_blur_far_transition = 10.0
 	attrs.dof_blur_near_enabled = true
-	attrs.dof_blur_near_distance = 13.5
+	attrs.dof_blur_near_distance = 17.0
 	attrs.dof_blur_near_transition = 6.0
 	cam.attributes = attrs
 
@@ -306,3 +370,40 @@ func _add_ui(root: Node3D) -> void:
 	strip.alignment = BoxContainer.ALIGNMENT_CENTER
 	strip.add_theme_constant_override("separation", 14)
 	layer.add_child(strip)
+
+	var log_label := Label.new()
+	log_label.name = "CombatLog"
+	log_label.anchor_left = 0.0
+	log_label.anchor_right = 1.0
+	log_label.anchor_top = 1.0
+	log_label.anchor_bottom = 1.0
+	log_label.offset_left = 20.0
+	log_label.offset_right = -20.0
+	log_label.offset_top = -56.0
+	log_label.offset_bottom = -16.0
+	log_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	log_label.add_theme_font_size_override("font_size", 22)
+	log_label.add_theme_color_override("font_color", Color.WHITE)
+	layer.add_child(log_label)
+
+	var player_charge := Label.new()
+	player_charge.name = "PlayerCharge"
+	player_charge.text = "Player Charge: 0"
+	player_charge.anchor_left = 0.0
+	player_charge.anchor_top = 0.0
+	player_charge.offset_left = 20.0
+	player_charge.offset_top = 130.0
+	player_charge.add_theme_font_size_override("font_size", 18)
+	player_charge.add_theme_color_override("font_color", PLAYER_COLOR)
+	layer.add_child(player_charge)
+
+	var enemy_charge := Label.new()
+	enemy_charge.name = "EnemyCharge"
+	enemy_charge.text = "Enemy Charge: 0"
+	enemy_charge.anchor_left = 1.0
+	enemy_charge.anchor_top = 0.0
+	enemy_charge.offset_left = -220.0
+	enemy_charge.offset_top = 130.0
+	enemy_charge.add_theme_font_size_override("font_size", 18)
+	enemy_charge.add_theme_color_override("font_color", ENEMY_COLOR)
+	layer.add_child(enemy_charge)

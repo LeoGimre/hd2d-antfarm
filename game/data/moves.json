@@ -1,0 +1,13 @@
+{
+  "_comment": "category 'melee' can only target the opposing Front slot (or Back if Front is empty); 'ranged' can target either slot but deals 25% less to a Back target. Both rules are design/combat.md's, applied in combat_resolver.gd.",
+  "moves": [
+    { "id": "ember_bite", "display_name": "Ember Bite", "type": "Ember", "power": 8, "category": "melee" },
+    { "id": "cinder_spray", "display_name": "Cinder Spray", "type": "Ember", "power": 6, "category": "ranged" },
+    { "id": "tide_slam", "display_name": "Tide Slam", "type": "Tide", "power": 8, "category": "melee" },
+    { "id": "wave_pulse", "display_name": "Wave Pulse", "type": "Tide", "power": 6, "category": "ranged" },
+    { "id": "gale_claw", "display_name": "Gale Claw", "type": "Gale", "power": 8, "category": "melee" },
+    { "id": "windburst", "display_name": "Windburst", "type": "Gale", "power": 6, "category": "ranged" },
+    { "id": "root_slam", "display_name": "Root Slam", "type": "Root", "power": 8, "category": "melee" },
+    { "id": "spore_cloud", "display_name": "Spore Cloud", "type": "Root", "power": 6, "category": "ranged" }
+  ]
+}
