@@ -27,8 +27,8 @@ func _initialize() -> void:
 	_add_lights(root)
 	_add_ground(root)
 	_add_set_dressing(root)
-	_add_traveler(root)
-	_add_camera(root)
+	var traveler := _add_traveler(root)
+	_add_camera(traveler)
 
 	# Ownership is what makes children serialize into the packed scene.
 	for child in root.get_children():
@@ -277,7 +277,7 @@ func _build_traveler_frames() -> SpriteFrames:
 	return frames
 
 
-func _add_traveler(root: Node3D) -> void:
+func _add_traveler(root: Node3D) -> CharacterBody3D:
 	# CharacterBody3D at ground level; the sprite is offset up to its own
 	# height, same as the old static Sprite3D's world position was.
 	var body := CharacterBody3D.new()
@@ -311,9 +311,18 @@ func _add_traveler(root: Node3D) -> void:
 	body.add_child(sprite)
 
 	root.add_child(body)
+	return body
 
 
-func _add_camera(root: Node3D) -> void:
+## Camera-follow, done by parenting rather than a script: the camera is a
+## child of Traveler with a fixed local offset, so it inherits the
+## traveler's position every frame for free. Traveler never rotates its own
+## transform (only the sprite turns, via billboard), so the camera's world
+## rotation stays exactly this fixed downward tilt no matter where the
+## traveler walks — and because the local offset to the traveler is
+## constant, the camera-to-subject distance the DOF band below is tuned
+## around never changes either.
+func _add_camera(traveler: CharacterBody3D) -> void:
 	var cam := Camera3D.new()
 	cam.name = "DioramaCamera"
 	# Narrow FOV from far away is the Octopath flattening trick: perspective is
@@ -335,4 +344,4 @@ func _add_camera(root: Node3D) -> void:
 	attrs.dof_blur_near_transition = 7.0
 	cam.attributes = attrs
 
-	root.add_child(cam)
+	traveler.add_child(cam)

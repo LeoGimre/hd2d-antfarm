@@ -254,12 +254,12 @@ dof_blur_near_distance = 21.0
 dof_blur_near_transition = 7.0
 dof_blur_amount = 0.2
 
-[node name="Diorama" type="Node3D" unique_id=462087561]
+[node name="Diorama" type="Node3D" unique_id=1893206157]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=231671447]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1026114915]
 environment = SubResource("Environment_v812j")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1217342070]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=530771374]
 transform = Transform3D(-0.46947157, 0.61334693, -0.6351393, 0, 0.7193398, 0.6946584, 0.88294756, 0.32612237, -0.33770958, 0, 0, 0)
 light_color = Color(1, 0.88, 0.7, 1)
 light_energy = 1.25
@@ -268,12 +268,12 @@ shadow_normal_bias = 1.4
 shadow_blur = 2.6
 directional_shadow_max_distance = 70.0
 
-[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=1316734721]
+[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=130924344]
 transform = Transform3D(0.4694716, -0.41451877, 0.7795964, 0, 0.88294756, 0.46947157, -0.88294756, -0.22040357, 0.4145188, 0, 0, 0)
 light_color = Color(0.68, 0.77, 0.94, 1)
 light_energy = 0.3
 
-[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1485644065]
+[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1222174430]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
 light_color = Color(1, 0.7, 0.34, 1)
 light_energy = 4.0
@@ -281,140 +281,140 @@ shadow_enabled = true
 omni_range = 9.0
 omni_attenuation = 1.5
 
-[node name="Ground" type="MeshInstance3D" parent="." unique_id=1257492733]
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1191452586]
 material_override = SubResource("StandardMaterial3D_p6lhn")
 mesh = SubResource("PlaneMesh_yq5r4")
 
-[node name="StonePath" type="MeshInstance3D" parent="." unique_id=35323088]
+[node name="StonePath" type="MeshInstance3D" parent="." unique_id=1146923257]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
 material_override = SubResource("StandardMaterial3D_0v1je")
 mesh = SubResource("PlaneMesh_1fyqf")
 
-[node name="SetDressing" type="Node3D" parent="." unique_id=206387689]
+[node name="SetDressing" type="Node3D" parent="." unique_id=222611011]
 
-[node name="WallBack" type="StaticBody3D" parent="SetDressing" unique_id=874738763]
+[node name="WallBack" type="StaticBody3D" parent="SetDressing" unique_id=1086932931]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -13)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/WallBack" unique_id=803500866]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/WallBack" unique_id=834066490]
 material_override = SubResource("StandardMaterial3D_l8w3t")
 mesh = SubResource("BoxMesh_47q54")
 
-[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="SetDressing/WallBack" unique_id=1466629802]
+[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="SetDressing/WallBack" unique_id=644750561]
 shape = SubResource("BoxShape3D_nrs5m")
 
-[node name="PillarBackL" type="StaticBody3D" parent="SetDressing" unique_id=1176016896]
+[node name="PillarBackL" type="StaticBody3D" parent="SetDressing" unique_id=260469140]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -10.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/PillarBackL" unique_id=1310695108]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/PillarBackL" unique_id=974091847]
 material_override = SubResource("StandardMaterial3D_l16hk")
 mesh = SubResource("BoxMesh_gh8ov")
 
-[node name="@CollisionShape3D@3" type="CollisionShape3D" parent="SetDressing/PillarBackL" unique_id=835495886]
+[node name="@CollisionShape3D@3" type="CollisionShape3D" parent="SetDressing/PillarBackL" unique_id=1688983796]
 shape = SubResource("BoxShape3D_75i1n")
 
-[node name="PillarBackR" type="StaticBody3D" parent="SetDressing" unique_id=97126265]
+[node name="PillarBackR" type="StaticBody3D" parent="SetDressing" unique_id=1367399428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.1, -10.5)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/PillarBackR" unique_id=1752630506]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/PillarBackR" unique_id=1033867717]
 material_override = SubResource("StandardMaterial3D_s4y1d")
 mesh = SubResource("BoxMesh_q38q0")
 
-[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="SetDressing/PillarBackR" unique_id=511319422]
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="SetDressing/PillarBackR" unique_id=1668475505]
 shape = SubResource("BoxShape3D_3j0n6")
 
-[node name="StepsBack" type="StaticBody3D" parent="SetDressing" unique_id=717405199]
+[node name="StepsBack" type="StaticBody3D" parent="SetDressing" unique_id=1120767906]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -8.6)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/StepsBack" unique_id=856453997]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/StepsBack" unique_id=1077503808]
 material_override = SubResource("StandardMaterial3D_jv1w0")
 mesh = SubResource("BoxMesh_1wmg1")
 
-[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="SetDressing/StepsBack" unique_id=2038707399]
+[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="SetDressing/StepsBack" unique_id=107968967]
 shape = SubResource("BoxShape3D_t3tng")
 
-[node name="CrateA" type="StaticBody3D" parent="SetDressing" unique_id=1250915819]
+[node name="CrateA" type="StaticBody3D" parent="SetDressing" unique_id=1859645840]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 1.6)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateA" unique_id=566563630]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateA" unique_id=1393718480]
 material_override = SubResource("StandardMaterial3D_1o6vo")
 mesh = SubResource("BoxMesh_8acnu")
 
-[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="SetDressing/CrateA" unique_id=239075691]
+[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="SetDressing/CrateA" unique_id=390633397]
 shape = SubResource("BoxShape3D_u7c3e")
 
-[node name="CrateB" type="StaticBody3D" parent="SetDressing" unique_id=16247535]
+[node name="CrateB" type="StaticBody3D" parent="SetDressing" unique_id=216007035]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.85, 1.35, 1.65)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateB" unique_id=1700120009]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateB" unique_id=1440673347]
 material_override = SubResource("StandardMaterial3D_gx1pa")
 mesh = SubResource("BoxMesh_fmj8v")
 
-[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="SetDressing/CrateB" unique_id=319921263]
+[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="SetDressing/CrateB" unique_id=251818698]
 shape = SubResource("BoxShape3D_jakqs")
 
-[node name="CrateC" type="StaticBody3D" parent="SetDressing" unique_id=732242164]
+[node name="CrateC" type="StaticBody3D" parent="SetDressing" unique_id=1214562890]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.55, -1.2)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateC" unique_id=1464281832]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/CrateC" unique_id=865810123]
 material_override = SubResource("StandardMaterial3D_v7r0w")
 mesh = SubResource("BoxMesh_ey4f6")
 
-[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="SetDressing/CrateC" unique_id=241886042]
+[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="SetDressing/CrateC" unique_id=1110599218]
 shape = SubResource("BoxShape3D_2mcha")
 
-[node name="BenchR" type="StaticBody3D" parent="SetDressing" unique_id=1890357832]
+[node name="BenchR" type="StaticBody3D" parent="SetDressing" unique_id=1703830187]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.3, 3.2)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/BenchR" unique_id=1556645635]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/BenchR" unique_id=1185592083]
 material_override = SubResource("StandardMaterial3D_vbcw4")
 mesh = SubResource("BoxMesh_v64kc")
 
-[node name="@CollisionShape3D@9" type="CollisionShape3D" parent="SetDressing/BenchR" unique_id=2022282363]
+[node name="@CollisionShape3D@9" type="CollisionShape3D" parent="SetDressing/BenchR" unique_id=1424138445]
 shape = SubResource("BoxShape3D_wswd4")
 
-[node name="LanternPost" type="StaticBody3D" parent="SetDressing" unique_id=776613518]
+[node name="LanternPost" type="StaticBody3D" parent="SetDressing" unique_id=973745054]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.15, 1.6)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/LanternPost" unique_id=1845039915]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/LanternPost" unique_id=2039533784]
 material_override = SubResource("StandardMaterial3D_w5tug")
 mesh = SubResource("BoxMesh_sw4yy")
 
-[node name="@CollisionShape3D@10" type="CollisionShape3D" parent="SetDressing/LanternPost" unique_id=16937342]
+[node name="@CollisionShape3D@10" type="CollisionShape3D" parent="SetDressing/LanternPost" unique_id=1908184550]
 shape = SubResource("BoxShape3D_l40u0")
 
-[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=673831762]
+[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=1349795909]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
 material_override = SubResource("StandardMaterial3D_b2wfv")
 mesh = SubResource("BoxMesh_jucem")
 
-[node name="FgPillarL" type="StaticBody3D" parent="SetDressing" unique_id=2071402536]
+[node name="FgPillarL" type="StaticBody3D" parent="SetDressing" unique_id=774031173]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.3, 8.6)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/FgPillarL" unique_id=1970702974]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/FgPillarL" unique_id=803976175]
 material_override = SubResource("StandardMaterial3D_4uwp8")
 mesh = SubResource("BoxMesh_8nf1q")
 
-[node name="@CollisionShape3D@11" type="CollisionShape3D" parent="SetDressing/FgPillarL" unique_id=439354941]
+[node name="@CollisionShape3D@11" type="CollisionShape3D" parent="SetDressing/FgPillarL" unique_id=1294968283]
 shape = SubResource("BoxShape3D_rk1jn")
 
-[node name="FgPillarR" type="StaticBody3D" parent="SetDressing" unique_id=1761486617]
+[node name="FgPillarR" type="StaticBody3D" parent="SetDressing" unique_id=1372630891]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.3, 8.6)
 
-[node name="Mesh" type="MeshInstance3D" parent="SetDressing/FgPillarR" unique_id=1252744851]
+[node name="Mesh" type="MeshInstance3D" parent="SetDressing/FgPillarR" unique_id=1804121180]
 material_override = SubResource("StandardMaterial3D_aubo7")
 mesh = SubResource("BoxMesh_to3mk")
 
-[node name="@CollisionShape3D@12" type="CollisionShape3D" parent="SetDressing/FgPillarR" unique_id=1559921320]
+[node name="@CollisionShape3D@12" type="CollisionShape3D" parent="SetDressing/FgPillarR" unique_id=169091075]
 shape = SubResource("BoxShape3D_mc0ub")
 
-[node name="Traveler" type="CharacterBody3D" parent="." unique_id=1512629078]
+[node name="Traveler" type="CharacterBody3D" parent="." unique_id=1588993864]
 script = ExtResource("3_xlp2f")
 
-[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="Traveler" unique_id=1739661434]
+[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="Traveler" unique_id=150220936]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 shape = SubResource("CapsuleShape3D_7mwbc")
 
-[node name="Sprite" type="AnimatedSprite3D" parent="Traveler" unique_id=650035528]
+[node name="Sprite" type="AnimatedSprite3D" parent="Traveler" unique_id=2089957035]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 cast_shadow = 2
 pixel_size = 0.05
@@ -425,7 +425,7 @@ texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_jen4n")
 animation = &"idle"
 
-[node name="DioramaCamera" type="Camera3D" parent="." unique_id=182562456]
+[node name="DioramaCamera" type="Camera3D" parent="Traveler" unique_id=1491255624]
 transform = Transform3D(1, 0, 0, 0, 0.8571673, 0.5150381, 0, -0.5150381, 0.8571673, 0, 13.5, 21)
 attributes = SubResource("CameraAttributesPractical_ldfwe")
 current = true

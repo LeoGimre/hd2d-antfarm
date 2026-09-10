@@ -29,7 +29,9 @@ func _ready() -> void:
 	var world: Node = packed.instantiate()
 	add_child(world)
 
-	_camera = world.get_node_or_null("DioramaCamera") as Camera3D
+	# DioramaCamera is a child of Traveler now (camera-follow, M2), not of the
+	# scene root — it moves with the traveler by inheriting its transform.
+	_camera = world.get_node_or_null("Traveler/DioramaCamera") as Camera3D
 	_traveler = world.get_node_or_null("Traveler") as Node3D
 	if _camera == null:
 		push_error("showcase: no DioramaCamera in %s" % scene_path)

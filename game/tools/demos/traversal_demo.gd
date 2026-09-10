@@ -3,16 +3,18 @@ extends Node3D
 ## directions so the character controller and its walk-cycle animation are
 ## visible on camera, then drives it straight into CrateA to demonstrate
 ## collision against 3D level geometry — held input, but the traveler stalls
-## once the box collider stops it.
+## once the box collider stops it. It finishes with a long straight walk far
+## from the origin, to demonstrate that the camera (now parented to the
+## traveler) keeps the same framing and sharp band no matter how far the
+## traveler strays from world (0,0,0).
 ##
 ## Movie Maker has no real keyboard, so this presses and releases the same
 ## InputMap actions a player would via Input.action_press/action_release —
 ## it exercises player.gd's actual input path rather than teleporting the
-## traveler around by hand. The diorama camera is static (camera-follow is
-## the next M2 checkbox, not this one), so the loop is sized small enough to
-## stay inside its framing: two full compass loops, then a straight approach
-## into CrateA (near the origin, at x=-2.9 z=1.6), then a rest to hold the
-## stopped stance for QC frames.
+## traveler around by hand. Order: two full compass loops, a straight
+## approach into CrateA (near the origin, at x=-2.9 z=1.6) with a rest to
+## hold the stopped stance, then a re-anchor to the origin and a long walk
+## east to show the camera following.
 
 @export var scene_path: String = "res://scenes/diorama.tscn"
 
@@ -26,6 +28,11 @@ const APPROACH_SECONDS := 0.6
 # stalled against it rather than mid-approach.
 const BUMP_HOLD_SECONDS := 5.0
 const REST_SECONDS := 1.5
+# Far enough that a fixed, non-following camera would leave the traveler out
+# of the tilt-shift's sharp band (tuned around ~24.5 units from camera) or
+# out of frame entirely; camera-follow keeps the shot identical regardless.
+const FAR_SECONDS := 4.0
+const FAR_REST_SECONDS := 2.0
 
 # Ordered clockwise from north; diagonals are two actions held together.
 const DIRECTIONS: Array = [
@@ -46,6 +53,7 @@ var _step := 0
 var _held: Array[String] = []
 var _traveler: CharacterBody3D
 var _approach_step := -1
+var _far_step := -1
 
 
 func _ready() -> void:
@@ -67,6 +75,12 @@ func _ready() -> void:
 	_steps.append([["move_left"], BUMP_HOLD_SECONDS])
 	_steps.append([[], REST_SECONDS])
 
+	# Re-anchor again, then walk straight east, far past the set dressing,
+	# to show the camera keeps its framing on the traveler at any distance.
+	_far_step = _steps.size()
+	_steps.append([["move_right"], FAR_SECONDS])
+	_steps.append([[], FAR_REST_SECONDS])
+
 	_advance()
 
 
@@ -85,7 +99,7 @@ func _advance() -> void:
 		# Nothing left to hold against; stay idle at wherever the last step left off.
 		_current_duration = INF
 		return
-	if _step == _approach_step:
+	if _step == _approach_step or _step == _far_step:
 		_traveler.velocity = Vector3.ZERO
 		_traveler.global_position = Vector3.ZERO
 	_current_duration = _steps[_step][1]
