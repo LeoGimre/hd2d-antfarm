@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# pre-commit — enforce the tier boundaries at the one place that matters.
+#
+# The permission allowlist can be walked around: the loop is allowed to run sed,
+# cp, mv and shell redirection, any of which can write to a file that Edit() rules
+# protect. This hook is the backstop, because every path to changing the repo ends
+# in a commit.
+#
+# This is drift-resistance, not adversarial containment. It stops the realistic
+# failure — a loop casually deciding to "update" a pillar to match what it built —
+# not a determined agent with --no-verify.
+set -uo pipefail
+
+FROZEN=(
+  "state/GAME.md"
+  "state/REQUESTS.md"
+  "farm/verify.sh"
+  ".claude/settings.json"
+  ".claude/commands/antfarm-tick.md"
+  ".githooks/pre-commit"
+)
+
+staged=$(git diff --cached --name-only)
+bad=0
+
+for f in "${FROZEN[@]}"; do
+  if grep -qx "$f" <<<"$staged"; then
+    echo "pre-commit: REFUSED — $f is frozen." >&2
+    bad=1
+  fi
+done
+
+if [ $bad -eq 1 ]; then
+  cat >&2 <<'MSG'
+
+These files define what the loop is and what it may do. They are Leo's, not the
+loop's. If the work seems to require changing one, the work is wrong — pick a
+different task, and say so in the devlog entry.
+
+(Operator: git commit --no-verify to override deliberately.)
+MSG
+  exit 1
+fi
+
+# ROADMAP.md: ticking a box is allowed, editing a milestone is not.
+if grep -qx "state/ROADMAP.md" <<<"$staged"; then
+  if ! git diff --cached -U0 -- state/ROADMAP.md | python3 -c '
+import re, sys
+
+# Pair up removed/added lines; every change must be a checkbox flip and nothing else.
+removed, added = [], []
+for line in sys.stdin:
+    if line.startswith("---") or line.startswith("+++") or line.startswith("@@"):
+        continue
+    if line.startswith("-"):
+        removed.append(line[1:].rstrip("\n"))
+    elif line.startswith("+"):
+        added.append(line[1:].rstrip("\n"))
+
+norm = lambda s: re.sub(r"^(\s*- )\[[ xX]\]", r"\1[ ]", s)
+
+if len(removed) != len(added):
+    print("line count changed — milestones were added or removed", file=sys.stderr)
+    sys.exit(1)
+
+for r, a in zip(removed, added):
+    if norm(r) != norm(a):
+        print(f"milestone text changed:\n  - {r}\n  + {a}", file=sys.stderr)
+        sys.exit(1)
+    if not re.match(r"^\s*- \[[ xX]\]", r):
+        print(f"non-checkbox line changed:\n  {r}", file=sys.stderr)
+        sys.exit(1)
+sys.exit(0)
+'; then
+    echo "pre-commit: REFUSED — state/ROADMAP.md may only have checkboxes ticked." >&2
+    echo "Milestones are Leo's to write. Tick boxes; do not reword, add or remove them." >&2
+    exit 1
+  fi
+fi
+
+exit 0

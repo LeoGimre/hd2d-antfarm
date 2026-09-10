@@ -23,10 +23,14 @@ command -v gh     >/dev/null && pass "gh $(gh --version 2>/dev/null | head -1 | 
 
 echo
 echo "credentials"
-if claude -p "hi" --max-turns 1 >/dev/null 2>&1; then
-  pass "claude logged in"
-else
+# Do not test this with the exit code: `claude -p` exits non-zero for plenty of
+# reasons that have nothing to do with auth (max turns, a denied tool). Look for
+# what an unauthenticated CLI actually says instead.
+probe=$(claude -p "reply with the single word ok" --max-turns 3 2>&1)
+if grep -qiE "not logged in|please run /login|invalid api key|authentication_error" <<<"$probe"; then
   fail "claude not logged in" "run 'claude' once, then /login"
+else
+  pass "claude logged in"
 fi
 gh auth status >/dev/null 2>&1 && pass "gh authenticated" || fail "gh not authenticated" "gh auth login"
 if [ -f "$ROOT/farm/.env" ] && grep -q AWS_ACCESS_KEY_ID "$ROOT/farm/.env" 2>/dev/null; then
