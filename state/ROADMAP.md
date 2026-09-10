@@ -19,7 +19,7 @@ antfarm has something worth watching from day one.
 
 ## M2 — Traversal
 - [x] Character controller with 8-direction sprite animation
-- [ ] Collision against 3D level geometry
+- [x] Collision against 3D level geometry
 - [ ] Camera follows without breaking the diorama framing
 - [ ] One hand-built town square that is worth standing still in
 

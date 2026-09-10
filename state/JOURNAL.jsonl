@@ -1,1 +1,2 @@
 {"tick": 1, "date": "2026-09-10", "task": "Give the traveler a character controller and 8-direction walk animation", "status": "ok", "visual": true, "commit": "488980f1dfa438afd4e6b5027bf19e294bb1db3c", "slug": "0002-traveler-controller"}
+{"tick": 2, "date": "2026-09-10", "task": "Collision against 3D level geometry for set dressing props", "status": "ok", "visual": true, "commit": "28b94d123b26e2962b64a8b7756b1309d4443cad", "slug": "0003-set-dressing-collision"}
