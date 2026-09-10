@@ -1,22 +1,25 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/textures/grass.png" id="1_2i8kc"]
-[ext_resource type="Texture2D" path="res://assets/textures/stone.png" id="2_8i2m1"]
-[ext_resource type="Script" path="res://scripts/player.gd" id="3_647yj"]
+[ext_resource type="Texture2D" path="res://assets/textures/grass.png" id="1_icw5t"]
+[ext_resource type="Texture2D" path="res://assets/textures/stone.png" id="2_xlwty"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="3_xlp2f"]
+[ext_resource type="Texture2D" path="res://assets/sprites/traveler_idle.png" id="4_dvoc2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/traveler_walk_a.png" id="5_l8ih0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/traveler_walk_b.png" id="6_kh7na"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_icw5t"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sr5io"]
 sky_top_color = Color(0.24, 0.36, 0.6, 1)
 sky_horizon_color = Color(0.7, 0.72, 0.78, 1)
 ground_bottom_color = Color(0.3, 0.31, 0.36, 1)
 ground_horizon_color = Color(0.62, 0.6, 0.6, 1)
 sun_angle_max = 24.0
 
-[sub_resource type="Sky" id="Sky_xlwty"]
-sky_material = SubResource("ProceduralSkyMaterial_icw5t")
+[sub_resource type="Sky" id="Sky_6rgto"]
+sky_material = SubResource("ProceduralSkyMaterial_sr5io")
 
-[sub_resource type="Environment" id="Environment_xlp2f"]
+[sub_resource type="Environment" id="Environment_v812j"]
 background_mode = 2
-sky = SubResource("Sky_xlwty")
+sky = SubResource("Sky_6rgto")
 ambient_light_source = 3
 ambient_light_energy = 1.3
 tonemap_mode = 3
@@ -40,153 +43,153 @@ adjustment_enabled = true
 adjustment_contrast = 1.06
 adjustment_saturation = 1.18
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dvoc2"]
-albedo_texture = ExtResource("1_2i8kc")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6lhn"]
+albedo_texture = ExtResource("1_icw5t")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(35, 35, 1)
 texture_filter = 2
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_l8ih0"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_yq5r4"]
 size = Vector2(70, 70)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kh7na"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0v1je"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(1.923077, 26.923079, 1)
 texture_filter = 2
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_sr5io"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_1fyqf"]
 size = Vector2(5, 70)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6rgto"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l8w3t"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(18.75, 1.5, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_v812j"]
+[sub_resource type="BoxMesh" id="BoxMesh_47q54"]
 size = Vector3(30, 2.4, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6lhn"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nrs5m"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.875, 2.6249998, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_yq5r4"]
+[sub_resource type="BoxMesh" id="BoxMesh_l16hk"]
 size = Vector3(1.4, 4.2, 1.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0v1je"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gh8ov"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.875, 2.6249998, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_1fyqf"]
+[sub_resource type="BoxMesh" id="BoxMesh_75i1n"]
 size = Vector3(1.4, 4.2, 1.4)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l8w3t"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s4y1d"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(6.25, 0.275, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_47q54"]
+[sub_resource type="BoxMesh" id="BoxMesh_q38q0"]
 size = Vector3(10, 0.44, 1.8)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nrs5m"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3j0n6"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.625, 0.625, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_l16hk"]
+[sub_resource type="BoxMesh" id="BoxMesh_jv1w0"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gh8ov"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1wmg1"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.4375, 0.4375, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_75i1n"]
+[sub_resource type="BoxMesh" id="BoxMesh_t3tng"]
 size = Vector3(0.7, 0.7, 0.7)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s4y1d"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1o6vo"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.6875, 0.6875, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_q38q0"]
+[sub_resource type="BoxMesh" id="BoxMesh_8acnu"]
 size = Vector3(1.1, 1.1, 1.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3j0n6"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u7c3e"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(1.5, 0.375, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_jv1w0"]
+[sub_resource type="BoxMesh" id="BoxMesh_gx1pa"]
 size = Vector3(2.4, 0.6, 0.9)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1wmg1"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fmj8v"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(0.125, 1.4375, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_t3tng"]
+[sub_resource type="BoxMesh" id="BoxMesh_jakqs"]
 size = Vector3(0.2, 2.3, 0.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1o6vo"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v7r0w"]
 albedo_color = Color(1, 0.74, 0.38, 1)
 emission_enabled = true
 emission = Color(1, 0.6, 0.22, 1)
 emission_energy_multiplier = 1.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_8acnu"]
+[sub_resource type="BoxMesh" id="BoxMesh_ey4f6"]
 size = Vector3(0.42, 0.5, 0.42)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u7c3e"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mcha"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(1, 2.875, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_gx1pa"]
+[sub_resource type="BoxMesh" id="BoxMesh_vbcw4"]
 size = Vector3(1.6, 4.6, 1.6)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fmj8v"]
-albedo_texture = ExtResource("2_8i2m1")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v64kc"]
+albedo_texture = ExtResource("2_xlwty")
 metallic_specular = 0.05
 roughness = 0.95
 uv1_scale = Vector3(1, 2.875, 1)
 texture_filter = 2
 
-[sub_resource type="BoxMesh" id="BoxMesh_jakqs"]
+[sub_resource type="BoxMesh" id="BoxMesh_wswd4"]
 size = Vector3(1.6, 4.6, 1.6)
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_v7r0w"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_w5tug"]
 radius = 0.35
 height = 1.6
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_ey4f6"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_sw4yy"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": null
+"texture": ExtResource("4_dvoc2")
 }],
 "loop": 1,
 "name": &"idle",
@@ -194,23 +197,23 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": null
+"texture": ExtResource("5_l8ih0")
 }, {
 "duration": 1.0,
-"texture": null
+"texture": ExtResource("4_dvoc2")
 }, {
 "duration": 1.0,
-"texture": null
+"texture": ExtResource("6_kh7na")
 }, {
 "duration": 1.0,
-"texture": null
+"texture": ExtResource("4_dvoc2")
 }],
 "loop": 1,
 "name": &"walk",
 "speed": 6.0
 }]
 
-[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_2mcha"]
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_l40u0"]
 dof_blur_far_enabled = true
 dof_blur_far_distance = 27.0
 dof_blur_far_transition = 9.0
@@ -219,12 +222,12 @@ dof_blur_near_distance = 21.0
 dof_blur_near_transition = 7.0
 dof_blur_amount = 0.2
 
-[node name="Diorama" type="Node3D" unique_id=775427186]
+[node name="Diorama" type="Node3D" unique_id=683605622]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=726572168]
-environment = SubResource("Environment_xlp2f")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=412307471]
+environment = SubResource("Environment_v812j")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=991917516]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=454563267]
 transform = Transform3D(-0.46947157, 0.61334693, -0.6351393, 0, 0.7193398, 0.6946584, 0.88294756, 0.32612237, -0.33770958, 0, 0, 0)
 light_color = Color(1, 0.88, 0.7, 1)
 light_energy = 1.25
@@ -233,12 +236,12 @@ shadow_normal_bias = 1.4
 shadow_blur = 2.6
 directional_shadow_max_distance = 70.0
 
-[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=1709714144]
+[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=18448208]
 transform = Transform3D(0.4694716, -0.41451877, 0.7795964, 0, 0.88294756, 0.46947157, -0.88294756, -0.22040357, 0.4145188, 0, 0, 0)
 light_color = Color(0.68, 0.77, 0.94, 1)
 light_energy = 0.3
 
-[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1211115950]
+[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1845331112]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
 light_color = Color(1, 0.7, 0.34, 1)
 light_energy = 4.0
@@ -246,85 +249,85 @@ shadow_enabled = true
 omni_range = 9.0
 omni_attenuation = 1.5
 
-[node name="Ground" type="MeshInstance3D" parent="." unique_id=1035308852]
-material_override = SubResource("StandardMaterial3D_dvoc2")
-mesh = SubResource("PlaneMesh_l8ih0")
-
-[node name="StonePath" type="MeshInstance3D" parent="." unique_id=2135165044]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
-material_override = SubResource("StandardMaterial3D_kh7na")
-mesh = SubResource("PlaneMesh_sr5io")
-
-[node name="SetDressing" type="Node3D" parent="." unique_id=1497403030]
-
-[node name="WallBack" type="MeshInstance3D" parent="SetDressing" unique_id=1818308845]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -13)
-material_override = SubResource("StandardMaterial3D_6rgto")
-mesh = SubResource("BoxMesh_v812j")
-
-[node name="PillarBackL" type="MeshInstance3D" parent="SetDressing" unique_id=914287645]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -10.5)
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=633664928]
 material_override = SubResource("StandardMaterial3D_p6lhn")
-mesh = SubResource("BoxMesh_yq5r4")
+mesh = SubResource("PlaneMesh_yq5r4")
 
-[node name="PillarBackR" type="MeshInstance3D" parent="SetDressing" unique_id=1696991800]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.1, -10.5)
+[node name="StonePath" type="MeshInstance3D" parent="." unique_id=2025840753]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
 material_override = SubResource("StandardMaterial3D_0v1je")
-mesh = SubResource("BoxMesh_1fyqf")
+mesh = SubResource("PlaneMesh_1fyqf")
 
-[node name="StepsBack" type="MeshInstance3D" parent="SetDressing" unique_id=324492702]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -8.6)
+[node name="SetDressing" type="Node3D" parent="." unique_id=1545913095]
+
+[node name="WallBack" type="MeshInstance3D" parent="SetDressing" unique_id=423656651]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -13)
 material_override = SubResource("StandardMaterial3D_l8w3t")
 mesh = SubResource("BoxMesh_47q54")
 
-[node name="CrateA" type="MeshInstance3D" parent="SetDressing" unique_id=693637385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 1.6)
+[node name="PillarBackL" type="MeshInstance3D" parent="SetDressing" unique_id=80075924]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -10.5)
 material_override = SubResource("StandardMaterial3D_nrs5m")
 mesh = SubResource("BoxMesh_l16hk")
 
-[node name="CrateB" type="MeshInstance3D" parent="SetDressing" unique_id=1933651628]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.85, 1.35, 1.65)
+[node name="PillarBackR" type="MeshInstance3D" parent="SetDressing" unique_id=1992042909]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.1, -10.5)
 material_override = SubResource("StandardMaterial3D_gh8ov")
 mesh = SubResource("BoxMesh_75i1n")
 
-[node name="CrateC" type="MeshInstance3D" parent="SetDressing" unique_id=781118048]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.55, -1.2)
+[node name="StepsBack" type="MeshInstance3D" parent="SetDressing" unique_id=1702958593]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -8.6)
 material_override = SubResource("StandardMaterial3D_s4y1d")
 mesh = SubResource("BoxMesh_q38q0")
 
-[node name="BenchR" type="MeshInstance3D" parent="SetDressing" unique_id=1726915174]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.3, 3.2)
+[node name="CrateA" type="MeshInstance3D" parent="SetDressing" unique_id=1156453471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 1.6)
 material_override = SubResource("StandardMaterial3D_3j0n6")
 mesh = SubResource("BoxMesh_jv1w0")
 
-[node name="LanternPost" type="MeshInstance3D" parent="SetDressing" unique_id=535081210]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.15, 1.6)
+[node name="CrateB" type="MeshInstance3D" parent="SetDressing" unique_id=1841888250]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.85, 1.35, 1.65)
 material_override = SubResource("StandardMaterial3D_1wmg1")
 mesh = SubResource("BoxMesh_t3tng")
 
-[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=1152148524]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
+[node name="CrateC" type="MeshInstance3D" parent="SetDressing" unique_id=171150976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.55, -1.2)
 material_override = SubResource("StandardMaterial3D_1o6vo")
 mesh = SubResource("BoxMesh_8acnu")
 
-[node name="FgPillarL" type="MeshInstance3D" parent="SetDressing" unique_id=1530742823]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.3, 8.6)
+[node name="BenchR" type="MeshInstance3D" parent="SetDressing" unique_id=649129414]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.3, 3.2)
 material_override = SubResource("StandardMaterial3D_u7c3e")
 mesh = SubResource("BoxMesh_gx1pa")
 
-[node name="FgPillarR" type="MeshInstance3D" parent="SetDressing" unique_id=1857943218]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.3, 8.6)
+[node name="LanternPost" type="MeshInstance3D" parent="SetDressing" unique_id=355718394]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.15, 1.6)
 material_override = SubResource("StandardMaterial3D_fmj8v")
 mesh = SubResource("BoxMesh_jakqs")
 
-[node name="Traveler" type="CharacterBody3D" parent="." unique_id=1860777636]
-script = ExtResource("3_647yj")
+[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=1457753183]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
+material_override = SubResource("StandardMaterial3D_v7r0w")
+mesh = SubResource("BoxMesh_ey4f6")
 
-[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Traveler" unique_id=1384477119]
+[node name="FgPillarL" type="MeshInstance3D" parent="SetDressing" unique_id=1154114065]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.3, 8.6)
+material_override = SubResource("StandardMaterial3D_2mcha")
+mesh = SubResource("BoxMesh_vbcw4")
+
+[node name="FgPillarR" type="MeshInstance3D" parent="SetDressing" unique_id=568975059]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.3, 8.6)
+material_override = SubResource("StandardMaterial3D_v64kc")
+mesh = SubResource("BoxMesh_wswd4")
+
+[node name="Traveler" type="CharacterBody3D" parent="." unique_id=971822737]
+script = ExtResource("3_xlp2f")
+
+[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Traveler" unique_id=967318806]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
-shape = SubResource("CapsuleShape3D_v7r0w")
+shape = SubResource("CapsuleShape3D_w5tug")
 
-[node name="Sprite" type="AnimatedSprite3D" parent="Traveler" unique_id=1699795891]
+[node name="Sprite" type="AnimatedSprite3D" parent="Traveler" unique_id=756214051]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 cast_shadow = 2
 pixel_size = 0.05
@@ -332,12 +335,12 @@ billboard = 2
 shaded = true
 alpha_cut = 1
 texture_filter = 0
-sprite_frames = SubResource("SpriteFrames_ey4f6")
+sprite_frames = SubResource("SpriteFrames_sw4yy")
 animation = &"idle"
 
-[node name="DioramaCamera" type="Camera3D" parent="." unique_id=1538782152]
+[node name="DioramaCamera" type="Camera3D" parent="." unique_id=1781046262]
 transform = Transform3D(1, 0, 0, 0, 0.8571673, 0.5150381, 0, -0.5150381, 0.8571673, 0, 13.5, 21)
-attributes = SubResource("CameraAttributesPractical_2mcha")
+attributes = SubResource("CameraAttributesPractical_l40u0")
 current = true
 fov = 18.0
 far = 200.0
