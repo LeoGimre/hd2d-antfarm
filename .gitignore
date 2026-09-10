@@ -1,0 +1,23 @@
+# Godot
+.godot/
+/game/android/
+*.translation
+
+# Capture intermediates — clips are uploaded to object storage, not committed
+/farm/out/
+/farm/logs/
+*.ogv
+
+# Node / Next
+node_modules/
+.next/
+.vercel/
+out/
+
+# Secrets
+.env
+.env.local
+farm/.env
+
+# macOS
+.DS_Store

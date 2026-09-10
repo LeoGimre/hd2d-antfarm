@@ -1,0 +1,303 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/grass.png" id="1_2i8kc"]
+[ext_resource type="Texture2D" path="res://assets/textures/stone.png" id="2_8i2m1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/traveler.png" id="3_647yj"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_icw5t"]
+sky_top_color = Color(0.24, 0.36, 0.6, 1)
+sky_horizon_color = Color(0.7, 0.72, 0.78, 1)
+ground_bottom_color = Color(0.3, 0.31, 0.36, 1)
+ground_horizon_color = Color(0.62, 0.6, 0.6, 1)
+sun_angle_max = 24.0
+
+[sub_resource type="Sky" id="Sky_xlwty"]
+sky_material = SubResource("ProceduralSkyMaterial_icw5t")
+
+[sub_resource type="Environment" id="Environment_xlp2f"]
+background_mode = 2
+sky = SubResource("Sky_xlwty")
+ambient_light_source = 3
+ambient_light_energy = 1.3
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_intensity = 0.9
+ssao_power = 1.4
+glow_enabled = true
+glow_intensity = 1.15
+glow_strength = 1.2
+glow_bloom = 0.35
+glow_blend_mode = 2
+glow_hdr_threshold = 0.72
+glow_hdr_scale = 2.2
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.62, 0.68, 0.8, 1)
+fog_density = 0.008
+fog_sky_affect = 0.25
+adjustment_enabled = true
+adjustment_contrast = 1.06
+adjustment_saturation = 1.18
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dvoc2"]
+albedo_texture = ExtResource("1_2i8kc")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(35, 35, 1)
+texture_filter = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_l8ih0"]
+size = Vector2(70, 70)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kh7na"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(1.923077, 26.923079, 1)
+texture_filter = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sr5io"]
+size = Vector2(5, 70)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6rgto"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(18.75, 1.5, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_v812j"]
+size = Vector3(30, 2.4, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6lhn"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.875, 2.6249998, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_yq5r4"]
+size = Vector3(1.4, 4.2, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0v1je"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.875, 2.6249998, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_1fyqf"]
+size = Vector3(1.4, 4.2, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l8w3t"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(6.25, 0.275, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_47q54"]
+size = Vector3(10, 0.44, 1.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nrs5m"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.625, 0.625, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_l16hk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gh8ov"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.4375, 0.4375, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_75i1n"]
+size = Vector3(0.7, 0.7, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s4y1d"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.6875, 0.6875, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_q38q0"]
+size = Vector3(1.1, 1.1, 1.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3j0n6"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(1.5, 0.375, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_jv1w0"]
+size = Vector3(2.4, 0.6, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1wmg1"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(0.125, 1.4375, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_t3tng"]
+size = Vector3(0.2, 2.3, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1o6vo"]
+albedo_color = Color(1, 0.74, 0.38, 1)
+emission_enabled = true
+emission = Color(1, 0.6, 0.22, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_8acnu"]
+size = Vector3(0.42, 0.5, 0.42)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u7c3e"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(1, 2.875, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_gx1pa"]
+size = Vector3(1.6, 4.6, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fmj8v"]
+albedo_texture = ExtResource("2_8i2m1")
+metallic_specular = 0.05
+roughness = 0.95
+uv1_scale = Vector3(1, 2.875, 1)
+texture_filter = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_jakqs"]
+size = Vector3(1.6, 4.6, 1.6)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_v7r0w"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 27.0
+dof_blur_far_transition = 9.0
+dof_blur_near_enabled = true
+dof_blur_near_distance = 21.0
+dof_blur_near_transition = 7.0
+dof_blur_amount = 0.2
+
+[node name="Diorama" type="Node3D" unique_id=621292324]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1758491945]
+environment = SubResource("Environment_xlp2f")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1668774531]
+transform = Transform3D(-0.46947157, 0.61334693, -0.6351393, 0, 0.7193398, 0.6946584, 0.88294756, 0.32612237, -0.33770958, 0, 0, 0)
+light_color = Color(1, 0.88, 0.7, 1)
+light_energy = 1.25
+shadow_enabled = true
+shadow_normal_bias = 1.4
+shadow_blur = 2.6
+directional_shadow_max_distance = 70.0
+
+[node name="SkyFill" type="DirectionalLight3D" parent="." unique_id=1308034302]
+transform = Transform3D(0.4694716, -0.41451877, 0.7795964, 0, 0.88294756, 0.46947157, -0.88294756, -0.22040357, 0.4145188, 0, 0, 0)
+light_color = Color(0.68, 0.77, 0.94, 1)
+light_energy = 0.3
+
+[node name="LanternLight" type="OmniLight3D" parent="." unique_id=1008241961]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
+light_color = Color(1, 0.7, 0.34, 1)
+light_energy = 4.0
+shadow_enabled = true
+omni_range = 9.0
+omni_attenuation = 1.5
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1807651641]
+material_override = SubResource("StandardMaterial3D_dvoc2")
+mesh = SubResource("PlaneMesh_l8ih0")
+
+[node name="StonePath" type="MeshInstance3D" parent="." unique_id=1229085419]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
+material_override = SubResource("StandardMaterial3D_kh7na")
+mesh = SubResource("PlaneMesh_sr5io")
+
+[node name="SetDressing" type="Node3D" parent="." unique_id=1666425728]
+
+[node name="WallBack" type="MeshInstance3D" parent="SetDressing" unique_id=1356654693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -13)
+material_override = SubResource("StandardMaterial3D_6rgto")
+mesh = SubResource("BoxMesh_v812j")
+
+[node name="PillarBackL" type="MeshInstance3D" parent="SetDressing" unique_id=2126397431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -10.5)
+material_override = SubResource("StandardMaterial3D_p6lhn")
+mesh = SubResource("BoxMesh_yq5r4")
+
+[node name="PillarBackR" type="MeshInstance3D" parent="SetDressing" unique_id=574967170]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.1, -10.5)
+material_override = SubResource("StandardMaterial3D_0v1je")
+mesh = SubResource("BoxMesh_1fyqf")
+
+[node name="StepsBack" type="MeshInstance3D" parent="SetDressing" unique_id=732259725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -8.6)
+material_override = SubResource("StandardMaterial3D_l8w3t")
+mesh = SubResource("BoxMesh_47q54")
+
+[node name="CrateA" type="MeshInstance3D" parent="SetDressing" unique_id=333682451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 1.6)
+material_override = SubResource("StandardMaterial3D_nrs5m")
+mesh = SubResource("BoxMesh_l16hk")
+
+[node name="CrateB" type="MeshInstance3D" parent="SetDressing" unique_id=2098369689]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.85, 1.35, 1.65)
+material_override = SubResource("StandardMaterial3D_gh8ov")
+mesh = SubResource("BoxMesh_75i1n")
+
+[node name="CrateC" type="MeshInstance3D" parent="SetDressing" unique_id=1735115479]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 0.55, -1.2)
+material_override = SubResource("StandardMaterial3D_s4y1d")
+mesh = SubResource("BoxMesh_q38q0")
+
+[node name="BenchR" type="MeshInstance3D" parent="SetDressing" unique_id=2031144759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.3, 3.2)
+material_override = SubResource("StandardMaterial3D_3j0n6")
+mesh = SubResource("BoxMesh_jv1w0")
+
+[node name="LanternPost" type="MeshInstance3D" parent="SetDressing" unique_id=269443339]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.15, 1.6)
+material_override = SubResource("StandardMaterial3D_1wmg1")
+mesh = SubResource("BoxMesh_t3tng")
+
+[node name="LanternHead" type="MeshInstance3D" parent="SetDressing" unique_id=806743225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 2.45, 1.6)
+material_override = SubResource("StandardMaterial3D_1o6vo")
+mesh = SubResource("BoxMesh_8acnu")
+
+[node name="FgPillarL" type="MeshInstance3D" parent="SetDressing" unique_id=1845935534]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.3, 8.6)
+material_override = SubResource("StandardMaterial3D_u7c3e")
+mesh = SubResource("BoxMesh_gx1pa")
+
+[node name="FgPillarR" type="MeshInstance3D" parent="SetDressing" unique_id=59138088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.3, 8.6)
+material_override = SubResource("StandardMaterial3D_fmj8v")
+mesh = SubResource("BoxMesh_jakqs")
+
+[node name="Traveler" type="Sprite3D" parent="." unique_id=1246602034]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+cast_shadow = 2
+pixel_size = 0.05
+billboard = 2
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+texture = ExtResource("3_647yj")
+
+[node name="DioramaCamera" type="Camera3D" parent="." unique_id=439910915]
+transform = Transform3D(1, 0, 0, 0, 0.8571673, 0.5150381, 0, -0.5150381, 0.8571673, 0, 13.5, 21)
+attributes = SubResource("CameraAttributesPractical_v7r0w")
+current = true
+fov = 18.0
+far = 200.0
