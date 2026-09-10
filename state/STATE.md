@@ -5,23 +5,44 @@ one left off. Keep it short: it is read every tick, so bloat here costs tokens f
 
 ## Current milestone
 M2 — Traversal is **done**. M3 — First blood is open; its first three boxes (combat design pitch,
-battle scene with turn order, four data-driven creatures) are done as of tick 7.
+battle scene with turn order, four data-driven creatures) are done as of tick 7. Player input landed
+in tick 8, but the fourth box itself is still unticked — see Current focus.
 
 ## Current focus
-**M3's fourth box: a battle that can be lost by playing badly and won by playing well.** The battle
-scene (`game/scripts/battle.gd`) currently has every combatant pick its own move and target
-automatically (`CombatantState.next_move_id()` just alternates melee/ranged) — there is no player
-input yet. This box needs the player to actually choose: which move, which target, when to Swap or
-spend a Charge, for at least the player's side. `design/combat.md`'s own worked example ("naive
-front-stacking loses, correct type-matching and Charge-spending wins, same four creatures, same
-levels") is the acceptance test — if the correct line doesn't reliably beat the naive one once a
-player can pick, the numbers (not the systems) are what to retune. Unit tests for
-`CombatResolver`/`TypeChart` are the box *after* this one — don't build them yet.
+**M3's fourth box is still open: retune numbers (or AI/target logic) until the "correct" line
+reliably beats the "naive" one.** Player input now exists (tick 8) — the player picks move, target,
+Swap and Charge on their own turns — but running `design/combat.md`'s own worked example through a
+scripted line found the opposite of what the doc predicts: naive front-stacking (always melee,
+always Front, no Charge, no retargeting) beat a "correct" line that fixed targeting (both player
+creatures focus Galewing, the good matchup, instead of Tidalpup) but never swapped Emberling out of
+Front once its matchup turned bad. Score was close (enemy won with Tidalpup at 5/32 HP) but still a
+loss. Next tick should either script a swap-aware "correct" line to see if that's enough, or, if
+not, retune Guard size / Back penalty / Charge power per combat.md's own instruction ("the numbers,
+not the shape of the systems, are what to retune"). Unit tests for `CombatResolver`/`TypeChart` are
+still the box *after* this one — don't build them until this one reliably passes.
 
 ## Open blockers
 None.
 
 ## Recent decisions
+- **Player input on the player's own turns** (tick 8): picked up a previous tick's interrupted work
+  (found already built in the working tree on arrival — read it, ran it, verified it, finished the
+  job rather than redoing it). `battle.gd` now stops its timer on a `PlayerFront`/`PlayerBack` turn
+  and polls `Input.is_action_just_pressed()` for move choice (`battle_move_1`/`_2`), Swap
+  (`battle_swap`), Charge toggle (`battle_charge`), and ranged target (`battle_target_front`/
+  `_back`) — polled rather than `_unhandled_input`-routed because demo/test scripts drive input via
+  `Input.action_press()`/`action_release()`, which only updates polled state. `CombatantState` now
+  carries its own `speed` (not looked up by slot) so Swap can hand the turn queue the swapped-in
+  creature's cadence via `TurnQueue.rename()`. `_check_battle_over()` finally gives a battle a real
+  end — nothing did before this tick. `battle_demo.gd` had to be updated in the same tick: its
+  premise ("nothing for a demo script to drive") broke the moment player turns started waiting on
+  input, so it now synthesizes the same move/target presses a real player would. See
+  `devlog/0009-player-input.md` for the naive-vs-correct test results (see Current focus above).
+  A headless scratch harness (`game/tools/_scratch_battle_test.gd`) is the fast way to check a line
+  without opening a window — drives `battle.tscn` via a `SceneTree` script, synthesizes input the
+  same way the demo does, prints the combat log. **Never commit it** (delete it at tick end if `rm`
+  is available; if not — this environment sometimes denies `rm` outright — just don't `git add` it,
+  `git add -A` will vacuum it in so add specific paths instead).
 - **Four data-driven creatures** (tick 7): `game/data/{creatures,moves,types}.json` hold M3's real
   roster — Emberling/Tidalpup/Galewing/Rootshell in a four-type cycle (Ember → Root → Gale → Tide →
   Ember), two moves each (one melee, one ranged). `CreatureDB`/`TypeChart` (`game/scripts/`) just
@@ -85,4 +106,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-7
+8
