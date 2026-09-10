@@ -29,6 +29,19 @@ func add_combatant(id: String, display_name: String, side: String, speed: float)
 	combatants.append(Combatant.new(id, display_name, side, speed))
 
 
+## Swap trades which creature stands in a slot without touching that slot's
+## place in the schedule — the creature now occupying `id` inherits its
+## cadence from here on, but the turn it takes to swap is not itself
+## rescheduled again (that already happened in advance(), before the choice
+## to swap was even made).
+func rename(id: String, display_name: String, speed: float) -> void:
+	for c in combatants:
+		if c.id == id:
+			c.display_name = display_name
+			c.speed = speed
+			return
+
+
 ## Commits one turn: the soonest-scheduled combatant acts now and is
 ## rescheduled `1000 / Speed` past the moment it just acted at (not past
 ## whatever the caller's wall-clock "now" is), matching combat.md's formula.

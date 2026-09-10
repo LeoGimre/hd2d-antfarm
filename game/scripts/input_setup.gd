@@ -13,6 +13,12 @@ const BINDINGS := {
 	"move_right": [KEY_D, KEY_RIGHT],
 	"move_up": [KEY_W, KEY_UP],
 	"move_down": [KEY_S, KEY_DOWN],
+	"battle_move_1": [KEY_1],
+	"battle_move_2": [KEY_2],
+	"battle_swap": [KEY_3],
+	"battle_target_front": [KEY_F],
+	"battle_target_back": [KEY_B],
+	"battle_charge": [KEY_C],
 }
 
 

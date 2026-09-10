@@ -11,6 +11,7 @@ var display_name: String
 var side: String
 var slot: String # "front" | "back"
 var ctype: String
+var speed: float
 var max_hp: int
 var hp: int
 var max_guard: int
@@ -22,13 +23,18 @@ var defeated := false
 var _next_is_melee := true
 
 
+## speed travels with the creature (not the slot) so that Swap — trading
+## which creature stands in Front vs Back — can hand the turn queue the
+## right cadence for whoever now occupies a slot; see battle.gd's
+## _execute_player_swap().
 func _init(p_id: String, p_display_name: String, p_side: String, p_slot: String, p_ctype: String,
-		p_max_hp: int, p_max_guard: int, p_move_ids: Array) -> void:
+		p_speed: float, p_max_hp: int, p_max_guard: int, p_move_ids: Array) -> void:
 	id = p_id
 	display_name = p_display_name
 	side = p_side
 	slot = p_slot
 	ctype = p_ctype
+	speed = p_speed
 	max_hp = p_max_hp
 	hp = p_max_hp
 	max_guard = p_max_guard

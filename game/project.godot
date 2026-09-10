@@ -1,4 +1,11 @@
 ; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
@@ -16,17 +23,14 @@ InputSetup="*res://scripts/input_setup.gd"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/stretch/mode="disabled"
 
 [editor]
 
-movie_writer/fps=30
 movie_writer/disable_vsync=true
+movie_writer/fps=30
 movie_writer/mjpeg_quality=0.9
 
 [rendering]
 
-renderer/rendering_method="forward_plus"
-anti_aliasing/quality/msaa_3d=2
-anti_aliasing/quality/screen_space_aa=0
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+anti_aliasing/quality/msaa_3d=2

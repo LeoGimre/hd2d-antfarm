@@ -386,6 +386,24 @@ func _add_ui(root: Node3D) -> void:
 	log_label.add_theme_color_override("font_color", Color.WHITE)
 	layer.add_child(log_label)
 
+	# A second line, above CombatLog rather than replacing it — a player
+	# needs to see "what just happened" (CombatLog) and "what I'm choosing
+	# now" (this) on screen at once, not one overwriting the other.
+	var prompt_label := Label.new()
+	prompt_label.name = "PlayerPrompt"
+	prompt_label.anchor_left = 0.0
+	prompt_label.anchor_right = 1.0
+	prompt_label.anchor_top = 1.0
+	prompt_label.anchor_bottom = 1.0
+	prompt_label.offset_left = 20.0
+	prompt_label.offset_right = -20.0
+	prompt_label.offset_top = -96.0
+	prompt_label.offset_bottom = -60.0
+	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	prompt_label.add_theme_font_size_override("font_size", 22)
+	prompt_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.4))
+	layer.add_child(prompt_label)
+
 	var player_charge := Label.new()
 	player_charge.name = "PlayerCharge"
 	player_charge.text = "Player Charge: 0"
