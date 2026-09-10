@@ -21,3 +21,10 @@ farm/.env
 
 # macOS
 .DS_Store
+.vercel
+.env*
+
+# Build output. Vercel runs `node site/build.mjs` itself, so committing dist only
+# adds five changed HTML files to every single tick's diff and makes the devlog's
+# own diffstat meaningless.
+site/dist/
