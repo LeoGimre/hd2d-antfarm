@@ -18,7 +18,7 @@ antfarm has something worth watching from day one.
 - [x] A lit environment with at least one practical light source
 
 ## M2 — Traversal
-- [ ] Character controller with 8-direction sprite animation
+- [x] Character controller with 8-direction sprite animation
 - [ ] Collision against 3D level geometry
 - [ ] Camera follows without breaking the diorama framing
 - [ ] One hand-built town square that is worth standing still in
