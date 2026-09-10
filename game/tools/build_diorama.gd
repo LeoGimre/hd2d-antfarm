@@ -186,17 +186,30 @@ func _add_ground(root: Node3D) -> void:
 	root.add_child(path)
 
 
-func _block(node_name: String, pos: Vector3, size: Vector3) -> MeshInstance3D:
+## A set-dressing block that actually blocks: a StaticBody3D carries the visual
+## mesh and a matching box collider, so the traveler's move_and_slide sees it
+## instead of walking straight through.
+func _block(node_name: String, pos: Vector3, size: Vector3) -> StaticBody3D:
 	var box := BoxMesh.new()
 	box.size = size
 	var mi := MeshInstance3D.new()
-	mi.name = node_name
+	mi.name = "Mesh"
 	mi.mesh = box
-	mi.position = pos
 	mi.material_override = _pixel_material(
 		"res://assets/textures/stone.png",
 		Vector2(size.x, size.y) / STONE_TILE_UNITS)
-	return mi
+
+	var shape := BoxShape3D.new()
+	shape.size = size
+	var collider := CollisionShape3D.new()
+	collider.shape = shape
+
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = pos
+	body.add_child(mi)
+	body.add_child(collider)
+	return body
 
 
 ## Depth layering. Tilt-shift only reads as tilt-shift if there is something
