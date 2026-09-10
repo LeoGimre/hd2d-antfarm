@@ -101,9 +101,9 @@ function roadmapProgress() {
 function layout({ title, page, body, description }) {
   const nav = [
     ["/", "log", "Log"],
-    ["/roadmap.html", "roadmap", "Roadmap"],
-    ["/bestiary.html", "bestiary", "Bestiary"],
-    ["/glass.html", "glass", "Glass"],
+    ["/roadmap", "roadmap", "Roadmap"],
+    ["/bestiary", "bestiary", "Bestiary"],
+    ["/glass", "glass", "Glass"],
   ];
   return `<!doctype html>
 <html lang="en">
@@ -156,14 +156,14 @@ function pageIndex(entries, state, progress) {
     ? `<div class="stage">${videoBlock(latest)}<div class="stage-cap">
          <strong>${esc(latest.title)}</strong>
          <span>tick ${latest.tick}</span>
-         <a href="/log/${esc(latest.slug)}.html">read the entry →</a>
+         <a href="/log/${esc(latest.slug)}">read the entry →</a>
        </div></div>`
     : `<div class="stage"><div class="empty">no clip yet — the loop has not shipped anything visible</div></div>`;
 
   const feed = entries.length
     ? entries.map((e) => `<div class="entry">
         ${e.poster ? `<img class="thumb" src="${esc(e.poster)}" alt="">` : ""}
-        <h3><a href="/log/${esc(e.slug)}.html">${esc(e.title)}</a></h3>
+        <h3><a href="/log/${esc(e.slug)}">${esc(e.title)}</a></h3>
         <div class="meta">
           <span>tick ${e.tick}</span>${e.date ? `<span>${esc(e.date)}</span>` : ""}
           ${e.milestone ? `<span>${esc(e.milestone)}</span>` : ""}${statusPill(e)}
