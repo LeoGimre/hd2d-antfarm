@@ -21,9 +21,10 @@ so reaching it goes through the Front/Back reach rule. Naive loses; correct targ
 HP left; correct targeting that never spends a banked Charge *loses by 10 HP* — the first time
 Break/Charge has been load-bearing here. Skill gradient 100/80/59/36/8% as decisions are randomised.
 
-Next tick with an engine, in order: (1) move the encounter out of the duplicated `const TEAM` in
-`battle.gd` and `build_battle.gd` into `game/data/encounters.json` — who fights whom is content, and
-right now changing it is a two-file code edit against pillar 1; (2) apply the new pairing;
+Next tick with an engine, in order: (1) move the encounter into `game/data/encounters.json` —
+the format is already decided in `design/encounters.md`, including the finding that
+`build_battle.gd`'s copy of `TEAM` can just be deleted rather than replaced; (2) apply the new
+pairing;
 (3) re-run both lines and confirm the model (the doc lists the exact `battle_*` input sequences —
 6 decisions to win, 3 to lose); (4) drop `TURN_INTERVAL` to ~0.85 so the 16-event fight fits a
 12–16s capture; (5) then tick box 4. Box 5's unit tests come after.
@@ -37,6 +38,12 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Encounters become `game/data/encounters.json`** (tick 13): format decided in
+  `design/encounters.md`. The key finding: `build_battle.gd`'s `TEAM` copy exists only to bake
+  `InfoLabel` text that `battle.gd._ready()` overwrites before frame one, so the generated scene
+  never needed the roster — delete the second table rather than replace it. Also noted there:
+  **nothing in `verify.sh` loads `battle.tscn`** (the gate smoke-runs the diorama), so a malformed
+  encounters.json passes green and fails only in the battle demo.
 - **The site scrapes this file, so its prose is load-bearing** (tick 12): `loadState()` in
   `site/build.mjs` lifts `Current milestone`, `Current focus` and `Open blockers` onto the front
   page. Its section regex used to carry an `m` flag, under which `$` matches every line end, so
@@ -111,4 +118,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-12
+13

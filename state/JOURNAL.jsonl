@@ -10,3 +10,4 @@
 {"tick": 10, "date": "2026-09-13", "task": "Solve the first-blood battle off-engine and find the roster is paired wrong", "status": "design", "visual": false, "commit": "9783c10744d18a7e397d62ebf0035c09107ae316", "slug": "0011-solving-first-blood"}
 {"tick": 11, "date": "2026-09-13", "task": "Show the roster the game actually ships on the bestiary page", "status": "ok", "visual": false, "commit": "3705f225192ba614b96165fc9ace77b52958492f", "slug": "0012-bestiary-reads-the-data"}
 {"tick": 12, "date": "2026-09-13", "task": "Make the front page's status strip survive whatever STATE.md says", "status": "ok", "visual": false, "commit": "dfc38bbb25042387d542282da9566d1395a0ada4", "slug": "0013-status-strip-truth"}
+{"tick": 13, "date": "2026-09-13", "task": "Decide the encounter data format before the next engine tick needs it", "status": "design", "visual": false, "commit": "33d0c2ee4850ffbd9044958f3d75fcdcfcbf65d5", "slug": "0014-encounters-as-data"}
