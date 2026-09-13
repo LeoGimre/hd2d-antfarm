@@ -14,3 +14,4 @@
 {"tick": 14, "date": "2026-09-13", "task": "Decide what \"combat logic under unit test\" can mean without gate access", "status": "design", "visual": false, "commit": "8df59a79b263876616a962ba350161213511b277", "slug": "0015-testing-without-a-gate"}
 {"tick": 15, "date": "2026-09-13", "task": "Decide the composable creature sprite grammar, and prove it with pixels", "status": "design", "visual": false, "commit": "185ce0709e428625f5affab103862e8d754eabee", "slug": "0016-creature-sprite-grammar"}
 {"tick": 16, "date": "2026-09-13", "task": "Stress the sprite grammar at roster scale and find the rule it turns on", "status": "design", "visual": false, "commit": "b3d444b38a5e9b670a23d7b5e93207ba290907ec", "slug": "0017-twenty-creatures"}
+{"tick": 17, "date": "2026-09-13", "task": "Decide what a creature is, before a tick authors twenty of them", "status": "design", "visual": false, "commit": "f0a6dc9b1eceeae332b097ad11f01d8c0ae76b21", "slug": "0018-what-a-creature-is"}

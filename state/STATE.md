@@ -41,7 +41,9 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
 3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
    generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
-   now carries six body plans and twenty placeholder entries, validated at roster scale.
+   now carries six body plans and twenty placeholder entries, validated at roster scale — but
+   author real creatures from `design/creatures.md`'s place/habit/tell template rather than
+   shipping those placeholder names.
 
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
@@ -52,6 +54,12 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Guard is composure, not armour** (tick 17): `design/creatures.md`. A creature's Guard is what
+  it is *pretending*; Breaking it is the pretence failing and the creature being seen. No rule in
+  `combat.md` changes — this is the fiction those rules already described. Authoring template for
+  every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
+  the element (the sprite hue already says the element). **Do not rename the existing four ids
+  until M3's fourth box is ticked** — four design docs reference them.
 - **Only the silhouette reads** (tick 16): the one rule the sprite technique turns on. Anything
   drawn *inside* another part's outline is invisible — it must be drawn a pixel fatter in the
   outline colour first (`taper_edged`). Rootshell's vanishing shell and the brawler plan rendering
@@ -151,4 +159,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-16
+17
