@@ -45,6 +45,12 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    author real creatures from `design/creatures.md`'s place/habit/tell template rather than
    shipping those placeholder names.
 
+5. `design/hd2d_look.md` — remediation list at the bottom: battle scene has no fog, its
+   tilt-shift brackets nothing (board is 22–25 units out; near blur ends at 17, far starts at 50),
+   and its camera is wider *and* closer than the diorama's. **Look at a frame before and after
+   each.** House key-light angle is now `(-44, -118, 0)` everywhere, because baked sprite shading
+   forces every scene to agree.
+
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
 `/Applications/Godot.app/...` does not exist here and `curl`/`wget` are denied, so it cannot be
@@ -54,6 +60,13 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **One key-light angle for the whole game: `(-44, -118, 0)`** (tick 18): generated sprites bake
+  their shading from a fixed direction and billboards carry it everywhere, so scenes that key from
+  different angles light the creatures wrong. `design/hd2d_look.md` has the full recipe and the
+  side-by-side audit of the two builders. Rule for any new scene: copy the diorama's environment
+  block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
+  never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
+  identical, in the file, to one that works.
 - **Guard is composure, not armour** (tick 17): `design/creatures.md`. A creature's Guard is what
   it is *pretending*; Breaking it is the pretence failing and the creature being seen. No rule in
   `combat.md` changes — this is the fiction those rules already described. Authoring template for
@@ -159,4 +172,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-17
+18
