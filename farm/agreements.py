@@ -381,6 +381,30 @@ def _():
     return out
 
 
+@check("every creature you can meet is a creature you could have")
+def _():
+    """design/capture.md's authoring constraint, as a check rather than a hope:
+    an enemy that cannot be captured by the party the encounter fields is a
+    creature the player is shown and can never have. Counter-examples are
+    exempt — being unwinnable is what they are for."""
+    path = os.path.join(ROOT, "design", "proto", "encounters.json")
+    solver = os.path.join(ROOT, "design", "proto", "combat_solver.py")
+    if not (os.path.exists(path) and os.path.exists(solver)):
+        return []
+    out = []
+    for e in json.load(open(path))["encounters"]:
+        if e.get("counter_example"):
+            continue
+        r = subprocess.run([sys.executable, solver, "window", "--encounter", e["id"]],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            out.append("%s: solver failed: %s" % (e["id"], r.stderr.strip().splitlines()[-1:]))
+        for line in r.stdout.splitlines():
+            if "NOT CAPTURABLE" in line:
+                out.append("%s: %s" % (e["id"], " ".join(line.split())))
+    return out
+
+
 @check("tutorial encounters hold the tutorial contract")
 def _():
     """A tutorial is exempt from the Charge-economy rule above, so it needs a

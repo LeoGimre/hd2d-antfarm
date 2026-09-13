@@ -806,11 +806,19 @@ def capture_window(target_index):
     line, _n = _deepen(lambda d: search_capture(target_index, True, d), 12)
     if line is None:
         return None
+    # Walk the line to the FIRST state where the Offer is legal, not to the state
+    # before the last decision. Those coincide in a duel, where the Offer is the
+    # line's final move, and they do not in a two-a-side fight, where the shortest
+    # capture-and-win line takes the creature in the middle and then finishes the
+    # other one. Tick 51 shipped the second version and measured the wrong states.
     s = initial()
-    for _who, c in line[:-1]:
+    for _who, c in line:
         s, i = run_to_player_choice(s)
+        if i is None or offer_ok(s, target_index):
+            break
         s = apply_choice(s, i, c)
-    s, _i = run_to_player_choice(s)
+    else:
+        s, _i = run_to_player_choice(s)
     hp = unpack(s)[0][target_index][2]
     spare, t = 0, s
     while spare <= 8:
@@ -823,6 +831,53 @@ def capture_window(target_index):
         t = nt
         spare += 1
     return len(line), hp, spare
+
+
+def capture_pressure(target_index):
+    """Everything about *when* a creature can be taken, as against whether.
+
+    Returns (win, capture, capture_and_win, hp_at_offer, open_for, reason):
+    the shortest line to win at all, to capture the target, to do both, the
+    target's HP when the Offer first becomes legal, how many further decisions
+    of correct play the Offer survives, and what shuts it.
+
+    The last two are the interesting pair. Capture is free in decisions — it
+    has never cost one on any encounter measured — but the window it lives in
+    is a couple of decisions wide at most, and in a duel it is zero.
+    """
+    w, _ = _deepen(search_win, 14)
+    c, _ = _deepen(lambda d: search_capture(target_index, False, d), 14)
+    cw = capture_window(target_index)
+    if cw is None:
+        return (len(w) if w else None, len(c) if c else None, None, None, None, "not capturable")
+    line, hp, _spare = cw
+    # Re-walk to the opening of the window, then play on correctly.
+    best, _ = _deepen(lambda d: search_capture(target_index, True, d), 14)
+    s = initial()
+    for _who, ch in best:
+        s, i = run_to_player_choice(s)
+        if i is None or offer_ok(s, target_index):
+            break
+        s = apply_choice(s, i, ch)
+    n, t, why = 0, s, "unknown"
+    while n <= 10:
+        t, j = run_to_player_choice(t)
+        if j is None or winner(t) is not None:
+            why = "the battle ends"
+            break
+        nt = apply_choice(t, j, typed(t, j, 99)) or apply_choice(t, j, ("melee", False))
+        if nt is None:
+            why = "no legal move"
+            break
+        t = nt
+        if unpack(t)[0][target_index][5]:
+            why = "the creature dies"
+            break
+        if not offer_ok(t, target_index):
+            why = "the Charges go elsewhere"
+            break
+        n += 1
+    return (len(w) if w else None, len(c) if c else None, line, hp, n, why)
 
 
 def tutorial_contract():
@@ -891,7 +946,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("command", nargs="?", default="lines",
                     choices=["lines", "trace", "search", "tolerance", "capture",
-                             "constants", "parties", "tutorial"])
+                             "constants", "parties", "tutorial", "window"])
     ap.add_argument("policy", nargs="?", default="typed")
     ap.add_argument("--encounter", default=DEFAULT_ENCOUNTER, choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
@@ -1022,6 +1077,22 @@ def main():
         print()
         print("  An encounter only one party can enter is a key check, not a tactical fight.")
         print("  Aim for several, and for more than one workable Front.")
+
+    elif args.command == "window":
+        print("  %-11s %-4s %-8s %-8s %-6s %-6s %s" % (
+            "target", "win", "capture", "cap+win", "HP", "open", "then"))
+        for ti, _tag in enemy_slots():
+            name = CREATURES[TEAM[ti][0]]["display_name"]
+            w, c, cw, hp, openfor, why = capture_pressure(ti)
+            if cw is None:
+                print("  %-11s %-4s %-8s NOT CAPTURABLE"
+                      % (name, w if w else "-", c if c else "-"))
+                continue
+            print("  %-11s %-4d %-8d %-8d %-6d %-6d %s" % (name, w, c, cw, hp, openfor, why))
+        print()
+        print("  'open' is how many further decisions of correct play the Offer survives.")
+        print("  See design/capture.md: capture costs no tempo and very little else —")
+        print("  what it costs is noticing, which is a UI problem, not a balance one.")
 
     elif args.command == "tutorial":
         problems = tutorial_contract()

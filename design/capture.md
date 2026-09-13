@@ -109,6 +109,59 @@ The lesson generalises past capture: **a decision count from a depth-first
 search is not a minimum**, and quoting one as though it were is how a design
 argument ends up resting on the order of a `for` loop.
 
+## What capture actually costs: the window
+
+`tutorial.md` found that in a duel the turn you can finally take a creature is
+the turn your next attack kills it. The obvious next question is whether that is
+a fact about duels or a fact about this game. It is a fact about this game.
+
+```
+python3 design/proto/combat_solver.py window --encounter first_blood
+```
+
+| encounter | target | win | capture | cap+win | HP at the Offer | window | shut by |
+|---|---|---|---|---|---|---|---|
+| kiln_duel | Emberling | 3 | 3 | 3 | 8 | **0** | the creature dies |
+| first_blood | Emberling | 5 | 3 | 5 | 20 | **2** | the battle ends |
+| first_blood | Galewing | 5 | 3 | 5 | 18 | **0** | the battle ends |
+| the_ridge | Ashmoth | 5 | 3 | 5 | 20 | **2** | the battle ends |
+| the_ridge | Ridgewalk | 5 | 3 | 5 | 20 | **2** | the battle ends |
+
+"Window" is how many further decisions of *correct* play the Offer survives
+after it first becomes legal. Zero means the next correct decision takes the
+creature off the table.
+
+Two things fall out.
+
+**The tempo correction above is stronger than it was stated.** `cap+win` equals
+`win` in every encounter measured, not just the proof battle. Capture has never
+cost a decision anywhere. The aspiration at the end of that section — that a
+cost might appear in longer fights — is still unmeasured, but it is now
+unmeasured across three encounters instead of one.
+
+**What capture costs is the noticing.** The Charge economy pays out its second
+Charge at almost exactly the moment the fight resolves, because the same hits
+that bank Charges are the hits that end the battle. So the Offer is never a
+comfortable "now decide" beat; it is a thing that opens and shuts inside a
+couple of decisions, and in the fights with the least slack, inside one.
+
+That is a good design and a dangerous one, and which it is depends entirely on
+presentation:
+
+> **The battle UI must announce the Offer the moment it becomes legal, and make
+> it impossible to miss.** Not a greyed-out button that ungreys — a state change
+> the player cannot fail to see. A window this narrow is a lesson if the game
+> tells you it is open and a bug if it does not.
+
+This is the same requirement `tutorial.md` derived from the duel. It is not a
+tutorial requirement. It is the requirement, in every fight.
+
+**Why "the battle ends" and not "the creature dies".** In a two-a-side fight the
+window usually shuts because the player wins, not because they killed the
+creature they wanted. That is worse, not better: dying is legible feedback and
+winning is not. A player who wins cleanly and walks away has no way to know
+anything was on offer.
+
 ## What this means for encounters
 
 Whether a given creature is capturable is a property of **the encounter and the

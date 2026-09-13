@@ -84,8 +84,14 @@ that.
 one-decision window is fine as a lesson and indefensible as a trap. This is now
 a requirement on the engine work, not a balance number: if the second Break
 does not visibly change what the player can do, the encounter teaches nothing
-and just quietly deletes a creature. Nothing else in the queue depends on the
-UI this hard.
+and just quietly deletes a creature.
+
+*Measured a tick later, and worse than written here:* this is not a tutorial
+requirement. `capture.md` now carries the window for every encounter and it is
+0–2 decisions wide everywhere. In the two-a-side fights it shuts because the
+player **wins**, which is less legible than killing the creature, not more — a
+player who wins cleanly has no way to know anything was on offer. The duel is
+only where the narrowness was easiest to see.
 
 **The Kiln Yards keep producing the duel.** `regions.json` now lists
 `kiln_duel` as the region's default encounter, and the recovery from mashing is
