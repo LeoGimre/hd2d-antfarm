@@ -81,7 +81,7 @@ def type_cases():
 
 
 def queue_cases():
-    speeds = [float(cs.CREATURES[c]["speed"]) for c, _s, _l in cs.ENCOUNTERS["repaired"]]
+    speeds = [float(cs.CREATURES[c]["speed"]) for c, _s, _l in cs.ENCOUNTERS[cs.DEFAULT_ENCOUNTER]]
     q = [(s, 1000.0 / s) for s in speeds]
     order = []
     for _ in range(8):
@@ -105,14 +105,14 @@ def outcome_cases():
     return out
 
 
-def golden_trace(encounter="repaired", policy="typed"):
+def golden_trace(encounter=None, policy="typed"):
     """Tier 3: the full event log, event for event. Expected to be regenerated
     on any deliberate tuning change — read the diff, confirm every changed line
     was meant, commit. A golden trace nobody reads the diff of is worthless."""
-    cs.set_encounter(encounter)
+    cs.set_encounter(encounter or cs.DEFAULT_ENCOUNTER)
     log = []
     w, s, n = cs.play(cs.POLICIES[policy][0], log)
-    return {"encounter": encounter, "policy": policy, "winner": w,
+    return {"encounter": encounter or cs.DEFAULT_ENCOUNTER, "policy": policy, "winner": w,
             "player_decisions": n, "events": [l.strip() for l in log]}
 
 

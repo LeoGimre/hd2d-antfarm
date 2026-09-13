@@ -512,98 +512,98 @@
   },
   "outcomes": [
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "naive",
       "description": "always melee, never Charge",
       "expect_winner": "enemy",
       "expect_player_decisions": 3
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "melee_charge",
       "description": "always melee, always spend Charge",
       "expect_winner": "player",
       "expect_player_decisions": 5
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "snipe_back",
       "description": "always attack the Back slot",
       "expect_winner": "enemy",
       "expect_player_decisions": 3
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "anti_typed",
       "description": "attack whoever resists you",
       "expect_winner": "enemy",
       "expect_player_decisions": 2
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "typed",
       "description": "attack whoever you are strong against, spend Charge",
       "expect_winner": "player",
       "expect_player_decisions": 6
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "typed_hoard",
       "description": "correct targeting, never spends a Charge",
       "expect_winner": "enemy",
       "expect_player_decisions": 6
     },
     {
-      "encounter": "repaired",
+      "encounter": "first_blood",
       "line": "typed_swap",
       "description": "open with a Swap, then correct targeting",
       "expect_winner": "enemy",
       "expect_player_decisions": 4
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "naive",
       "description": "always melee, never Charge",
       "expect_winner": "enemy",
       "expect_player_decisions": 3
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "melee_charge",
       "description": "always melee, always spend Charge",
       "expect_winner": "player",
       "expect_player_decisions": 5
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "snipe_back",
       "description": "always attack the Back slot",
       "expect_winner": "enemy",
       "expect_player_decisions": 3
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "anti_typed",
       "description": "attack whoever resists you",
       "expect_winner": "enemy",
       "expect_player_decisions": 2
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "typed",
       "description": "attack whoever you are strong against, spend Charge",
       "expect_winner": "player",
       "expect_player_decisions": 6
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "typed_hoard",
       "description": "correct targeting, never spends a Charge",
       "expect_winner": "enemy",
       "expect_player_decisions": 8
     },
     {
-      "encounter": "ridge",
+      "encounter": "the_ridge",
       "line": "typed_swap",
       "description": "open with a Swap, then correct targeting",
       "expect_winner": "enemy",
@@ -611,7 +611,7 @@
     }
   ],
   "golden_trace": {
-    "encounter": "repaired",
+    "encounter": "first_blood",
     "policy": "typed",
     "winner": "player",
     "player_decisions": 6,

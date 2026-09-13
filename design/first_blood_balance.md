@@ -187,8 +187,8 @@ The solver this document was built on is committed as
 `design/proto/combat_solver.py`. The two policy tables are:
 
 ```
-python3 design/proto/combat_solver.py lines --encounter current  --no-capture
-python3 design/proto/combat_solver.py lines --encounter repaired --no-capture
+python3 design/proto/combat_solver.py lines --encounter first_blood_unpaired --no-capture
+python3 design/proto/combat_solver.py lines --encounter first_blood          --no-capture
 ```
 
 `--no-capture` matters. `design/capture.md` added an Offer action *after* these
@@ -213,7 +213,7 @@ is the finding, and the number that describes the encounter is below.
 ### The tolerance band, which is the real balance number
 
 ```
-python3 design/proto/combat_solver.py tolerance --encounter repaired
+python3 design/proto/combat_solver.py tolerance --encounter first_blood
 ```
 
 | advantage | naive | correct |

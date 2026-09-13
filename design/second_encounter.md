@@ -10,7 +10,7 @@ This is the second one. It exists to remove that caveat, and it did — twice in
 the direction of confirming and once by finding a constraint nobody had stated.
 
 ```
-python3 design/proto/combat_solver.py lines --encounter ridge
+python3 design/proto/combat_solver.py lines --encounter the_ridge
 ```
 
 ## The encounter

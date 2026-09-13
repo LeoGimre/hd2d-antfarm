@@ -26,8 +26,9 @@ result; when that fails, this file is wrong until shown otherwise.
     python3 design/proto/combat_solver.py tolerance
     python3 design/proto/combat_solver.py capture
 
-Add --encounter current to run against the roster as committed in game/data
-rather than the re-paired one design/first_blood_balance.md prescribes.
+Encounters come from design/proto/encounters.json; --encounter names one.
+--encounter first_blood_unpaired runs the pre-repair roster, the counter-example
+every balance document cites.
 """
 import argparse, copy, json, math, os, random, sys
 
@@ -76,21 +77,23 @@ TALLY = {}
 
 KEYS = ["PlayerFront", "PlayerBack", "EnemyFront", "EnemyBack"]
 
-ENCOUNTERS = {
-    # What game/data + battle.gd's TEAM currently ship. Unwinnable by any
-    # explainable plan -- see design/first_blood_balance.md.
-    "current": [("emberling", "player", "front"), ("rootshell", "player", "back"),
-                ("tidalpup", "enemy", "front"), ("galewing", "enemy", "back")],
-    # The re-pairing that document prescribes. Every correct target is diagonal.
-    "repaired": [("rootshell", "player", "front"), ("tidalpup", "player", "back"),
-                 ("emberling", "enemy", "front"), ("galewing", "enemy", "back")],
-    # The Ridge, proposed in design/second_encounter.md. Diagonal like the one
-    # above, and deliberately built from different creatures at different stats
-    # to test whether that requirement is structural or a quirk of the first four.
-    "ridge": [("rootshell", "player", "front"), ("tidalpup", "player", "back"),
-              ("ashmoth", "enemy", "front"), ("ridgewalk", "enemy", "back")],
-}
-TEAM = ENCOUNTERS["repaired"]
+def _load_encounters():
+    """design/encounters.md says who fights whom is content, and that this file
+    should stop carrying a hand-maintained copy of it once the data exists. It
+    does now, in design/proto/encounters.json — so the balance tool and the game
+    read the same bytes rather than two tables that agree until they do not."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "encounters.json")
+    out = {}
+    with open(path) as f:
+        for e in json.load(f)["encounters"]:
+            out[e["id"]] = [(m["creature"], side, m["slot"])
+                            for side in ("player", "enemy") for m in e[side]]
+    return out
+
+
+ENCOUNTERS = _load_encounters()
+DEFAULT_ENCOUNTER = "first_blood"
+TEAM = ENCOUNTERS[DEFAULT_ENCOUNTER]
 
 
 def gd_round(x):
@@ -723,7 +726,7 @@ def balanced_encounters():
 # still reproduces it move for move, the port is very probably faithful; if it
 # stops, this file is wrong until proven otherwise.
 SELF_CHECK = {
-    "encounter": "current",
+    "encounter": "first_blood_unpaired",
     "policy": "naive",
     "winner": "enemy",
     "events": 16,
@@ -761,7 +764,7 @@ def main():
                     choices=["lines", "trace", "search", "tolerance", "capture",
                              "constants"])
     ap.add_argument("policy", nargs="?", default="typed")
-    ap.add_argument("--encounter", default="repaired", choices=sorted(ENCOUNTERS))
+    ap.add_argument("--encounter", default=DEFAULT_ENCOUNTER, choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
     ap.add_argument("--no-capture", action="store_true",
                     help="disable the Offer action (the rule set before capture existed)")

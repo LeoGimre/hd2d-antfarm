@@ -205,12 +205,25 @@ percent more player HP reverses it.
 python3 design/proto/combat_solver.py tolerance --encounter <id>
 ```
 
-### The solver should read this file
+### The solver reads this file — done
 
-`design/proto/combat_solver.py` currently carries its own hardcoded `ENCOUNTERS`
-dict, duplicating exactly the table this document exists to delete — acceptable
-only because the file it should read does not exist yet. When it does, the
-solver reads it, and the balance tool and the game are checking the same bytes.
+`design/proto/combat_solver.py` used to carry its own hardcoded `ENCOUNTERS`
+dict, duplicating exactly the table this document exists to delete. It now reads
+**`design/proto/encounters.json`**, which holds the three encounters that exist
+in this format, ready for an engine tick to move to `game/data/`.
+
+`farm/agreements.py` validates it: ids are unique, every named creature exists,
+each side has exactly one Front and one Back, and — the interesting one —
+**every creature must be able to do Guard damage to something on the other
+side.** That is `design/second_encounter.md`'s finding turned into a check. A
+creature whose attacks are resisted by everything opposite it never breaks
+anything, never banks a Charge, and is absent from the economy the fight is
+about; it took a search of 192 stat settings to discover and it now costs a
+regex to catch.
+
+One encounter is marked `"counter_example": true` — the pre-repair roster, kept
+because every balance document cites it — and the check skips those, because a
+deliberate counter-example failing validation is not information.
 
 ### The checklist, then
 

@@ -211,6 +211,57 @@ def _():
     return out
 
 
+@check("proposed encounters are well formed and can produce a tactical fight")
+def _():
+    path = os.path.join(ROOT, "design", "proto", "encounters.json")
+    if not os.path.exists(path):
+        return []
+    encounters = json.load(open(path))["encounters"]
+    creatures = {c["id"]: c for c in json.loads(read("game", "data", "creatures.json"))["creatures"]}
+    proposed = os.path.join(ROOT, "design", "proto", "proposed_creatures.json")
+    if os.path.exists(proposed):
+        for c in json.load(open(proposed))["creatures"]:
+            creatures.setdefault(c["id"], c)
+    types = json.loads(read("game", "data", "types.json"))["types"]
+
+    def guard_damage(att, dfn):
+        e = types.get(creatures[dfn]["type"], {})
+        at = creatures[att]["type"]
+        return 2 if e.get("weak_to") == at else (0 if e.get("resists") == at else 1)
+
+    out, seen_ids = [], set()
+    for e in encounters:
+        eid = e.get("id", "<no id>")
+        if eid in seen_ids:
+            out.append("duplicate encounter id %r" % eid)
+        seen_ids.add(eid)
+        for side in ("player", "enemy"):
+            members = e.get(side, [])
+            slots = sorted(m.get("slot") for m in members)
+            if slots != ["back", "front"]:
+                out.append("%s: %s side has slots %s, expected exactly one front and one back"
+                           % (eid, side, slots))
+            for m in members:
+                if m.get("creature") not in creatures:
+                    out.append("%s: %s names unknown creature %r" % (eid, side, m.get("creature")))
+        if e.get("counter_example"):
+            continue                                   # deliberately not a valid fight
+        if any(m.get("creature") not in creatures
+               for side in ("player", "enemy") for m in e.get(side, [])):
+            continue                                   # already reported above
+        # design/second_encounter.md: a creature whose attacks are resisted by
+        # everything opposite it does zero Guard damage, so it can never break,
+        # never bank a Charge, and is absent from the economy the fight is about.
+        for side, other in (("player", "enemy"), ("enemy", "player")):
+            for m in e[side]:
+                if not any(guard_damage(m["creature"], o["creature"]) > 0 for o in e[other]):
+                    out.append("%s: %s cannot do Guard damage to anything on the other side — "
+                               "it is absent from the Charge economy and the fight cannot "
+                               "discriminate skill (see design/second_encounter.md)"
+                               % (eid, m["creature"]))
+    return out
+
+
 @check("the generated combat test fixtures are current")
 def _():
     gen = os.path.join(ROOT, "design", "proto", "gen_test_cases.py")
