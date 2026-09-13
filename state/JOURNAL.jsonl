@@ -19,3 +19,4 @@
 {"tick": 19, "date": "2026-09-13", "task": "Publish the design documents on the site, and fix the renderer they broke", "status": "ok", "visual": false, "commit": "acaaef5528e3e4dd2f858413ac8d2a00a97b96f2", "slug": "0020-design-on-the-site"}
 {"tick": 20, "date": "2026-09-13", "task": "Design capture, and let the solver throw out two versions of it first", "status": "design", "visual": false, "commit": "629dbd7e94bafb2b0c45434c6910c5fb8fec0a02", "slug": "0021-capture"}
 {"tick": 21, "date": "2026-09-13", "task": "Measure how much progression pillar 2 can survive, then design to fit", "status": "design", "visual": false, "commit": "3d9629866a0451aafa93d648ffc5ad483b527156", "slug": "0022-progression-budget"}
+{"tick": 22, "date": "2026-09-13", "task": "Decide what the story is about, from what the mechanics already say", "status": "design", "visual": false, "commit": "961fddd9b00067f7b1b7a29572ae759fc4f4566f", "slug": "0023-the-throughline"}

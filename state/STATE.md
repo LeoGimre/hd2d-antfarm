@@ -75,6 +75,15 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **The story is about attention** (tick 22): `design/narrative.md`. Derived from the mechanics,
+  not pasted on — combat cracks a performance, Charge is banked understanding, capture is seeing
+  and sparing. Antagonist is an institution with a method for taking creatures *without* breaking
+  their composure; escalation is that practice spreading, visible as regions going quiet, and it
+  does not reverse. Told through places first (revisiting is the mechanic), people second, combat
+  third. Two consequences for other systems: **encounter tables must be able to differ between
+  visits** (a requirement on `design/encounters.md`'s format), and dialogue must remember what the
+  player has done. Flagged, not designed: how an unbroken creature fights differently — that goes
+  to the solver, not a paragraph.
 - **Progression adds options, never magnitude** (tick 21): `design/progression.md`, measured.
   Scaling *both* sides changes nothing up to x3 — magnitude is free — but relative advantage has a
   tolerance of only about **-15% to +5%**: +5% player HP, +3 move power, or **+1 Guard** each flip
@@ -197,4 +206,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-21
+22
