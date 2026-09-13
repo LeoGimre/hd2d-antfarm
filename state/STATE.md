@@ -129,6 +129,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Screen-space light: house angle = 130 deg, battle scene currently 114** (tick 28): computed,
+  not assumed. `creature_forge.py` now *derives* its baked light from `HOUSE_KEY_EULER` + camera
+  tilt, so changing the house angle changes the sprites. Both cameras project the house angle to
+  130 within a degree, so one bake serves both — luck, not law: they tilt about X only and neither
+  is yawed. **Standing suspicion: several documents assert that two systems must agree about
+  something, and this is the first time one was checked. It was wrong. Check the others.**
 - **Twenty real creatures exist, in `design/roster.md`** (tick 27): authored from place/habit/tell,
   five per type across all six body plans, shapes in `design/proto/creature_forge.py`. Finding: the
   *tell* decides the silhouette — write the sentence first and the proportions follow. Type falls
@@ -241,4 +247,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-27
+28

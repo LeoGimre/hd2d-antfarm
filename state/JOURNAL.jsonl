@@ -25,3 +25,4 @@
 {"tick": 25, "date": "2026-09-13", "task": "Bring the balance document up to date with what has been learned since", "status": "ok", "visual": false, "commit": "52044bfec8f29caccb94d36b1108b3c267b2bb17", "slug": "0026-updating-the-record"}
 {"tick": 26, "date": "2026-09-13", "task": "Fix the thin-limb shading by giving pixels a real surface normal", "status": "ok", "visual": false, "commit": "cc6723e2c097912e1815983ba293c37aafefd414", "slug": "0027-thin-limbs"}
 {"tick": 27, "date": "2026-09-13", "task": "Author twenty creatures, and find that the tells produce the silhouettes", "status": "design", "visual": false, "commit": "e70400fcab877bdb1ffe6024551f1fdba0693a4c", "slug": "0028-twenty-real-creatures"}
+{"tick": 28, "date": "2026-09-13", "task": "Compute the screen-space light angle instead of asserting the scenes agree", "status": "ok", "visual": false, "commit": "10e8a7dc5cd9d37c786ba868e32a3388a8cccc63", "slug": "0029-computing-the-light"}
