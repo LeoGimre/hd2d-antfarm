@@ -75,6 +75,14 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **The combat solver is committed** (tick 23): `design/proto/combat_solver.py`, runs here (no
+  engine needed). `--self-check` replays tick 9's committed naive result; **if it fails, the file
+  is wrong and none of its numbers count.** Subcommands: `lines` (policy battery), `trace`,
+  `search` (shortest forcing win), `tolerance` (an encounter's stat-tolerance band), `capture`.
+  `--encounter current|repaired`, plus `SEEN_MODE`/`OFFER_COST` env vars for capture variants.
+  **Use iterative deepening, never plain depth-first, for any decision count** — a depth-first
+  search returns *a* line, not the shortest, and its length depends on the order `legal_choices()`
+  lists moves in. That error put two wrong numbers into `design/capture.md`.
 - **The story is about attention** (tick 22): `design/narrative.md`. Derived from the mechanics,
   not pasted on — combat cracks a performance, Charge is banked understanding, capture is seeing
   and sparing. Antagonist is an institution with a method for taking creatures *without* breaking
@@ -206,4 +214,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-22
+23
