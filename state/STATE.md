@@ -47,7 +47,7 @@ tick-ritual discipline rather than a gate until Leo wires them in.
 Four design documents are waiting, in this order. None needs re-deciding; all need building.
 1. `design/encounters.md` — move the roster to `game/data/encounters.json`, delete
    `build_battle.gd`'s `TEAM` copy outright. **The file is written**:
-   `design/proto/encounters.json` (ids `first_blood`, `the_ridge`, `first_blood_unpaired`),
+   `design/proto/encounters.json` (ids `kiln_duel`, `first_blood`, `the_ridge`, `first_blood_unpaired`),
    validated by `agreements.py` and already read by the solver. Copy it across and write the
    loader.
 2. `design/first_blood_balance.md` — apply the re-pairing, confirm both scripted lines, tick M3's
@@ -75,10 +75,19 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    forces every scene to agree.
 
 6. `design/capture.md` — M4's capture box. Needs the encounter/party work above first.
+   **`design/tutorial.md` adds a hard UI requirement to this box**: the capture window in a duel
+   is one decision wide, so the battle UI must announce the Offer the instant it becomes legal.
+   If the second Break does not visibly change the player's options, the tutorial deletes a
+   creature instead of teaching. Nothing else queued depends on the UI this much.
+
+7. `design/tutorial.md` — the Kiln Yards duel (`kiln_duel` in `design/proto/encounters.json`,
+   `tutorial: true`). A side of **one** creature: `build_battle.gd` already draws all four slot
+   markers regardless of occupancy, so the loader from item 1 must tolerate a missing slot rather
+   than assume two per side.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check and the fifteen cross-file agreements, and *loudly skips* the GDScript suite until
+self-check and the nineteen cross-file agreements, and *loudly skips* the GDScript suite until
 `game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
 says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
@@ -92,6 +101,24 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **A tutorial gets the opposite contract from a tactical fight, and its own check** (tick 51).
+  `encounters.md`'s checklist wants naive play to lose; a tutorial must not be losable. An
+  encounter marked `"tutorial": true` in `encounters.json` skips the discrimination and
+  Charge-economy rules and is held to three others instead, checked in `agreements.py`: naive
+  wins, the enemy is capturable, and mashing attack costs you the creature. The exemption without
+  the replacement rule would have been a hole. `python3 design/proto/combat_solver.py tutorial
+  --encounter kiln_duel` prints the numbers.
+- **The capture window is one decision wide and nobody tuned it** (tick 51). Two weak hits bank
+  the two Charges an Offer costs; three hits kill. Six of the eight capturable duels in the
+  roster have zero spare attacks. Do not "fix" this by repricing `OFFER_COST` (measured: cost 1
+  gives one spare attack, and retunes the whole capture system) or by giving a tutorial creature
+  bespoke HP (measured: +50% gives two). The recovery is that the region keeps producing the
+  encounter.
+- **The solver supports sides of one creature** (tick 51), and the fix was in the *readers*, not
+  the state layout: tick 50 made `unpack`/`pack` variable-width and left the policy functions
+  indexing enemies at 2 and 3 and `melee_charge` reading Charge off `s[4]`. Use `slot_index(side,
+  slot)`, `enemy_slots()` and `s[len(TEAM)]`; never a literal offset. `parties` now refuses to
+  answer for an encounter that fixes the player's side.
 - **`design/*.md` is published at `/design/<slug>`** (tick 19): the site renders every design
   document, and backticked `design/foo.md` references in devlog entries auto-link to them. So a
   new design doc needs no site change — but it does need a `# Title` heading and a real first
@@ -393,4 +420,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-50
+51

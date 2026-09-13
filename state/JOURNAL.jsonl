@@ -49,3 +49,4 @@
 {"tick": 48, "date": "2026-09-13", "task": "Write three NPCs, and let the checker enforce the rules they are written to", "status": "ok", "visual": false, "commit": "86502f41921b068d537edbc61bd1b603d38121b4", "slug": "0049-three-voices"}
 {"tick": 49, "date": "2026-09-13", "task": "Measure party choice, and find no simple rule predicts it", "status": "design", "visual": false, "commit": "26af0697d7d3f3a5a0dc554017086505fe9ed2b5", "slug": "0050-party-choice"}
 {"tick": 50, "date": "2026-09-13", "task": "Find that an encounter can reward skill and still admit only one party", "status": "design", "visual": false, "commit": "2ad793ac7b9ca30f93f593636fdeff9334b5a2ec", "slug": "0051-openness"}
+{"tick": 51, "date": "2026-09-13", "task": "Build the tutorial duel, and find its capture window is one decision wide", "status": "design", "visual": false, "commit": "ce55f0bd5981eb5d994f1a1b4b2c4bd6111b6335", "slug": "0052-one-decision"}
