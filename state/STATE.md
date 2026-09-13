@@ -135,6 +135,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Prototype sprites are committed and published** (tick 33): `design/proto/sprites/*.png`,
+  copied into the site by `build.mjs` and shown in `design/roster.md` via plain markdown images.
+  Regenerate with `FORGE_OUT=design/proto/sprites python3 design/proto/creature_forge.py`;
+  `agreements.py` compares bytes, so a stale sprite fails. They are **not** game assets — real
+  ones need `godot --headless --import`. **Habit worth keeping: when a tick creates a new way for
+  two things to disagree, add the check in the same tick.**
 - **Regions: Ground / Work / Attention** (tick 32): `design/regions.md`, `game/data/regions.json`.
   Attention decides the creatures, creatures decide the types, types decide the palette — so a
   reskin cannot fill in line three, which is the free check against a world of palette swaps.
@@ -279,4 +285,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-32
+33
