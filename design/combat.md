@@ -135,3 +135,10 @@ penalty, Charge's power bonus) are the ones to retune, not the shape of the syst
 > where every melee attack lands, so Swap moves a creature into danger
 > uncomposed. A swapped-in creature now arrives with full Guard, which is what
 > Guard already meant.
+
+> **The three positional rules above are audited in [`position.md`](position.md),
+> and their importance is the reverse of the space they are given here.** Melee
+> being locked to Front is structural — removing it makes the fight unwinnable.
+> The Back penalty is what stops correct targeting from winning without the
+> Charge economy. The Front damage bonus, argued for at greatest length, changes
+> none of the encounter's three defining outcomes.

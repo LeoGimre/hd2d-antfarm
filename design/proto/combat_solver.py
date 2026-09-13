@@ -43,8 +43,12 @@ TYPES = _load("types.json", "types")
 CREATURES = copy.deepcopy(BASE_CREATURES)
 
 # CombatResolver's constants, mirrored.
-FRONT_DAMAGE_BONUS = 2.0
-BACK_TARGET_MULTIPLIER = 0.75
+# Overridable so combat.md's positional claims can be tested by removing them:
+# "Front deals slightly more damage ... so the choice to advance or protect a
+# unit is a real trade, not a strictly-better move", and "Back is safer, not
+# safe". A constant that changes no outcome when deleted is not load-bearing.
+FRONT_DAMAGE_BONUS = float(os.environ.get("FRONT_BONUS", "2.0"))
+BACK_TARGET_MULTIPLIER = float(os.environ.get("BACK_MULT", "0.75"))
 CHARGE_MULTIPLIER = 1.5
 BROKEN_TAKES_MORE_DAMAGE = 1.5
 RESIST_HEAL = 2
@@ -57,6 +61,8 @@ OFFER_COST = int(os.environ.get("OFFER_COST", "2"))
 # "window": the offer must land while the target is still Broken, and only on
 # its first break. "persist": one break marks it Seen for the rest of the fight.
 SEEN_MODE = os.environ.get("SEEN_MODE", "persist")
+
+TALLY = {}
 
 KEYS = ["PlayerFront", "PlayerBack", "EnemyFront", "EnemyBack"]
 
@@ -150,12 +156,19 @@ def advance(qs):
     return best
 
 
+# MELEE_REACH=any removes combat.md's central reach rule, so its contribution
+# can be measured rather than assumed.
+MELEE_REACH = os.environ.get("MELEE_REACH", "front")
+
+
 def pick_target(cs, taken, ai, move):
     """battle.gd._pick_target. Melee reaches Front, or Back once Front falls;
     the enemy AI aims ranged at Back on purpose."""
     front, back = (2, 3) if side_of(ai) == "player" else (0, 1)
     live = lambda i: not cs[i][5] and not taken[i]
     if move["category"] == "melee":
+        if MELEE_REACH == "any":
+            return back if live(back) else (front if live(front) else None)
         return front if live(front) else (back if live(back) else None)
     return back if live(back) else (front if live(front) else None)
 
@@ -200,6 +213,9 @@ def resolve_and_apply(cs, pc, ec, seen, ai, di, move, charge):
             pc += 1
         else:
             ec += 1
+    # Where damage lands, for the positional audit. Keyed by the *defender's*
+    # side and slot at the moment of the hit.
+    TALLY[(side_of(di), defender[1])] = TALLY.get((side_of(di), defender[1]), 0) + hp_damage
     return pc, ec, (eff, hp_damage, gdmg, breaks, charge)
 
 
