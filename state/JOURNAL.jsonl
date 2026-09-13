@@ -40,3 +40,4 @@
 {"tick": 39, "date": "2026-09-13", "task": "Decide the Front bonus on two encounters, and correct three ticks of reading it", "status": "design", "visual": false, "commit": "42165b4ec072c2e29cb230f3b82d3add7d38ff57", "slug": "0040-front-bonus-decided"}
 {"tick": 40, "date": "2026-09-13", "task": "Make the constants sweep conservative across encounters, and catch a second one", "status": "ok", "visual": false, "commit": "8088ef6785e88f6066c5445ae1d4f94af0ae2d77", "slug": "0041-conservative-by-default"}
 {"tick": 41, "date": "2026-09-13", "task": "Generate the combat test fixtures instead of writing them by hand", "status": "ok", "visual": false, "commit": "c2bcc4a166f09c2b43916236875c2112943df8c9", "slug": "0042-generated-fixtures"}
+{"tick": 42, "date": "2026-09-13", "task": "Give the design corpus a reading order, and make the site lead with it", "status": "ok", "visual": false, "commit": "9f8524550c2825e5fa404b7a1bc5300d228a2f32", "slug": "0043-reading-order"}

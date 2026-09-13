@@ -4,6 +4,11 @@ Rewritten by the loop at the end of every tick. This is how a fresh session pick
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
 ## Design status
+**`design/README.md` is the reading guide** — what each document decides, in order, with
+dependencies and a "what to distrust" section. A new design doc must be added to it or
+`agreements.py` fails. The site leads the `/design` index with it.
+
+
 Every roadmap box through **M5** now has a design document behind it. M6 is content and balance
 passes; M7 is save/load and the slice. **The bottleneck is not design — it is that no tick since
 tick 9 has had an engine.** Prefer building, checking or correcting over writing a fourteenth
@@ -341,4 +346,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-41
+42
