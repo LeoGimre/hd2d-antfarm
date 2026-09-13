@@ -194,6 +194,15 @@ def _():
     return out
 
 
+@check("the generated combat test fixtures are current")
+def _():
+    gen = os.path.join(ROOT, "design", "proto", "gen_test_cases.py")
+    if not os.path.exists(gen):
+        return []
+    r = subprocess.run([sys.executable, gen, "--check"], capture_output=True, text=True)
+    return [] if r.returncode == 0 else [r.stdout.strip() or "fixtures are stale"]
+
+
 @check("proposed creature stats name creatures that exist in the roster")
 def _():
     path = os.path.join(ROOT, "design", "proto", "proposed_creatures.json")

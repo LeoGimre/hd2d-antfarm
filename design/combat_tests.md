@@ -113,6 +113,40 @@ than any wall clock; `preview(n)` returns the same sequence `advance()` would an
 leaves real state untouched — call `preview(6)`, then `advance()` six times, and
 assert the ids match.
 
+### The expected values are generated, not written
+
+The table above was worked out by hand so a reader can check the arithmetic
+without running anything, and that is still its job. But hand-written expected
+values go stale the instant a constant moves, and three constants are currently
+under a live proposal in `design/first_blood_balance.md`.
+
+So the fixtures are generated:
+
+```
+python3 design/proto/gen_test_cases.py          # writes combat_cases.json
+python3 design/proto/gen_test_cases.py --check  # non-zero if stale
+```
+
+`design/proto/combat_cases.json` carries every tier-1 case — 32 damage
+combinations with their arithmetic spelled out, the Guard/effectiveness table,
+eight `breaks_defender` edges, the full type chart including the
+unknown-type-degrades-to-neutral case, and the turn queue's initial schedule and
+advance order — plus tier 2's outcomes for **both** encounters and tier 3's
+golden trace.
+
+Two properties make it worth generating rather than writing. It comes from the
+model whose constants `farm/agreements.py` already checks against
+`combat_resolver.gd`, so the fixtures cannot disagree with the engine without
+something failing loudly. And `agreements.py` also checks the file is current,
+so a constant change that nobody regenerated after is caught rather than
+silently baked in.
+
+**For the engine tick:** copy it to `game/tests/cases.json` and write a runner
+that walks each section. That is tiers 1 and 2 of this document, minus the
+GDScript — the thinking is done and what remains is transcription. Note the
+fixture records the constants *as they ship today*; applying the proposed retune
+means regenerating it in the same commit.
+
 ## Tier 2 — outcomes
 
 This is the tier worth building the harness for. M3's fourth box is *"a battle
