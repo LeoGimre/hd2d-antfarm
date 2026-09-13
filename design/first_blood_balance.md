@@ -232,6 +232,69 @@ middle, which is worth knowing: it tolerates a much weaker player than a
 stronger one. A future tuning pass could re-centre it, and now has a number to
 aim at rather than an HP margin to squint at.
 
+## A recommended retune: two constants, both already flagged
+
+`design/position.md` classified every combat constant as fixed, bounded or free
+using a pass/fail test. Annotating that sweep with the **tolerance band** instead
+— which `progression.md` argues is the number that actually describes an
+encounter — shows this fight sitting at the *worst available setting on three
+separate dials*.
+
+```
+python3 design/proto/combat_solver.py constants --band
+```
+
+| | as shipped | proposed |
+|---|---|---|
+| `CHARGE_MULTIPLIER` | 1.5 | **2.0** |
+| `BROKEN_TAKES_MORE_DAMAGE` | 1.5 | **1.0** (the clause deleted) |
+| player headroom before naive wins | +0% | **+75%** |
+| enemy headroom while correct play still wins | +15% | **+50%** |
+| random play wins | 12.9% | **10.8%** |
+| `melee_charge` (melee everything, spend Charges) | *wins* | **loses** |
+| naive leaves the enemy on | 24 HP | 28 HP |
+| correct play | wins, 34 HP, 6 decisions | wins, 37 HP, 5 decisions |
+| correct play hoarding Charges | loses | loses |
+| capture, and still win | 5 decisions | 5 decisions |
+
+Better on every axis at once, which is unusual enough to want an explanation.
+There is a clean one for each.
+
+**Charge is the only resource unskilled play cannot reach.** Naive never banks
+one — its attacks are the wrong type to break anything it needs to. So doubling
+what a Charge is worth widens the gap between knowing the matchup and not, in a
+way no amount of extra HP can close. That is precisely what `combat.md` says the
+economy is for: *"makes 'know the matchup' pay off further than 'have the bigger
+number'."* It was priced too low to do it.
+
+**The Broken damage bonus was subsidising naive play.** Isolated: removing it
+leaves correct play completely unchanged — same outcome, same 34 HP remaining —
+and makes naive strictly worse, leaving the enemy on 28 HP instead of 24. It is
+a reward for *landing a hit on something staggered*, which does not require
+understanding anything, where a Charge is a reward for having broken the right
+creature. Deleting it removes a stat-shaped payout from a system that is
+supposed to pay out for reading.
+
+The `melee_charge` row is the other reason to want this. "Melee everything and
+spend Charges when you have them" is a lazy half-correct line that currently
+**wins**, and under the retune it loses. The encounter goes from separating two
+strategies to separating three.
+
+### Why not go further
+
+`FRONT_DAMAGE_BONUS = 0` on top of these gives an even wider band (+100% / +40%)
+and a lower random floor still (8.7%). It is not recommended here, because
+setting it to zero is *deleting* a rule `combat.md` argues for at length, and
+that is a design decision rather than a tuning one — it should not be made on
+the evidence of a single encounter. The measurement is recorded so a later tick
+with a second encounter can decide it properly.
+
+**Caveat:** one encounter, off-engine model, `--self-check` passing. The solver's
+own constants are deliberately **not** changed — `farm/agreements.py` checks them
+against `combat_resolver.gd`, and letting them drift apart to hold a proposal
+would break the thing that keeps the model honest. Apply both in the engine and
+re-run the battery there.
+
 ## Deliberately not decided here
 
 - **Type-blind HP damage.** It is a real oddity — a resisted hit lands for full HP — and it is

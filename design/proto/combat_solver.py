@@ -605,7 +605,54 @@ SWEEP = [
 ]
 
 
-def sweep_constants():
+BAND_STEPS = [1.02, 1.05, 1.10, 1.15, 1.20, 1.30, 1.40, 1.50, 1.75, 2.00]
+
+
+def band():
+    """How far each side can be moved before the encounter stops discriminating.
+
+    design/progression.md calls this the number that actually describes an
+    encounter's balance, as against HP margin. Returns (player_headroom,
+    enemy_headroom) as fractions, or None if the encounter does not
+    discriminate at parity. Censored at +100%.
+
+    This is a strictly finer measure than discriminates(), and the difference
+    matters: BROKEN_TAKES_MORE_DAMAGE passes the binary test at every value and
+    moves the band from +20% to +75%. A constant can be "free" and still be the
+    most important dial in the file.
+    """
+    global CREATURES
+    base = copy.deepcopy(CREATURES)
+    player_ids = [c for c, side, _ in TEAM if side == "player"]
+    enemy_ids = [c for c, side, _ in TEAM if side == "enemy"]
+
+    def scale(ids, m):
+        global CREATURES
+        CREATURES = copy.deepcopy(base)
+        for cid in ids:
+            CREATURES[cid]["max_hp"] = int(round(CREATURES[cid]["max_hp"] * m))
+
+    try:
+        if not discriminates():
+            return None
+        up = 1.0
+        for m in BAND_STEPS:
+            scale(player_ids, m)
+            if play(naive)[0] == "player":
+                break
+            up = m
+        low = 1.0
+        for m in BAND_STEPS:
+            scale(enemy_ids, m)
+            if play(typed)[0] != "player":
+                break
+            low = m
+        return up - 1.0, low - 1.0
+    finally:
+        CREATURES = base
+
+
+def sweep_constants(with_band=False):
     g = globals()
     rows = []
     for name, values in SWEEP:
@@ -614,9 +661,10 @@ def sweep_constants():
         for v in values:
             g[name] = v
             try:
-                results.append((v, discriminates()))
+                ok = discriminates()
+                results.append((v, ok, band() if (ok and with_band) else None))
             except Exception:
-                results.append((v, False))
+                results.append((v, False, None))
         g[name] = original
         rows.append((name, original, results))
     return rows
@@ -671,6 +719,9 @@ def main():
     ap.add_argument("--no-capture", action="store_true",
                     help="disable the Offer action (the rule set before capture existed)")
     ap.add_argument("--depth", type=int, default=18)
+    ap.add_argument("--band", action="store_true",
+                    help="constants: also report each value's tolerance band, which is a "
+                         "strictly finer measure than the pass/fail classification")
     args = ap.parse_args()
 
     if args.no_capture:
@@ -731,11 +782,13 @@ def main():
         print("  (naive loses AND correct play wins AND hoarding Charges loses)")
         print()
         buckets = {"free": [], "bounded": [], "fixed": []}
-        for name, current, results in sweep_constants():
-            cells = "  ".join("%s%s\033[0m" % ("\033[32m" if ok else "\033[31m",
-                                               "%s=%s" % ("ok" if ok else "NO", v))
-                              for v, ok in results)
-            good = [v for v, ok in results if ok]
+        for name, current, results in sweep_constants(with_band=args.band):
+            cells = "  ".join("%s%s\033[0m%s" % (
+                "\033[32m" if ok else "\033[31m",
+                "%s=%s" % ("ok" if ok else "NO", v),
+                "" if b is None else "(%+.0f/%+.0f)" % (b[0] * 100, b[1] * 100))
+                for v, ok, b in results)
+            good = [v for v, ok, _b in results if ok]
             # A binary "load-bearing" verdict lumps a constant with a working
             # range together with one that cannot move at all, which is how the
             # first version of this table misread FRONT_DAMAGE_BONUS.
