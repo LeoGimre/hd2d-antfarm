@@ -41,48 +41,73 @@ That is the whole rule, and everything that makes it hard is already in the game
   You have to have understood the fight, not landed a swing.
 - **The target has to survive**, while it is still attacking you and while you
   are spending turns not killing it.
-- **Charges are the resource that wins fights faster.** Every capture is
-  literally paid for with the tempo that would have ended the battle sooner.
+- **Charges are the resource that wins fights faster**, so a capture spends
+  two bursts. See the correction below: in this small encounter that does *not*
+  measurably lengthen the fight, and "capture should cost tempo" remains an
+  unmet design goal rather than something the rule currently delivers.
 
 ## What the solver said
 
-Searched exhaustively against the re-paired proof battle from
+Searched against the re-paired proof battle from
 `design/first_blood_balance.md` — player Rootshell/Tidalpup, enemy Emberling
-(Front, speed 11) and Galewing (Back, speed 14). "Capture" means capture the
-named creature; "capture and win" means capture it *and* still finish the battle
-alive, which is the question that actually matters.
+(Front, speed 11) and Galewing (Back, speed 14). Every row below is reproducible
+from the committed tool:
 
-| variant | Emberling | Galewing | random play stumbles in |
+```
+SEEN_MODE=window OFFER_COST=1 python3 design/proto/combat_solver.py capture
+```
+
+Decision counts are **minima**, found by iterative deepening. "Capture and win"
+means capture the named creature *and* still finish the battle alive, which is
+the question that actually matters.
+
+| variant | Emberling | Galewing | random play captures |
 |---|---|---|---|
-| one-turn Broken window, 1 Charge | **2 decisions** | **impossible** | 5.8% / 0.0% |
-| one-turn Broken window, 2 Charges | impossible | impossible | 0.0% / 0.0% |
-| Seen persists, 1 Charge | **2 decisions** | 4 decisions | 14.3% / 9.3% |
-| **Seen persists, 2 Charges** | 4 (7 to also win) | 4 (5 to also win) | **3.7% / 3.0%** |
+| one-turn Broken window, 1 Charge | 2 (5 to also win) | **impossible** | — |
+| one-turn Broken window, 2 Charges | **impossible** | **impossible** | — |
+| Seen persists, 1 Charge | 2 (4 to also win) | 3 (4) | 16.9% / 12.8% |
+| **Seen persists, 2 Charges** | 3 (5 to also win) | 3 (5) | **3.3% / 4.5%** |
+| Seen persists, 3 Charges | 4 (6) | 4 (5) | 0.6% / 0.8% |
 
-Three findings, none of which I would have got by thinking about it.
+Two findings, neither of which I would have got by thinking about it.
 
 **A one-turn window makes fast creatures uncapturable, not hard to capture.**
-This was my first design, and it was elegant: break the creature, and while it
+This was the first design, and it was elegant: break the creature, and while it
 is Broken and losing a turn, make the offer. Against Galewing — speed 14 against
 a party of 7 and 9 — no player turn ever lands inside the window. Not difficult.
-Impossible, across 8151 searched states. A collection game with an uncollectable
-creature has a bug, not a challenge.
+Impossible, across 69,520 searched states. A collection game with an
+uncollectable creature has a bug, not a challenge. Requiring two Charges on top
+of the window makes *both* enemies uncapturable, because the second Charge
+cannot be banked before the first window closes.
 
-**A capture that pays for itself is not a plan.** With one Charge, the break that
-makes a creature Seen banks exactly the Charge that then buys it. Capture
-collapsed to two decisions — hit it once, take it — before the enemy had
-meaningfully acted. Requiring two is what forces the Charge to come from
-somewhere other than the moment of the capture, which is the "setup" the
-`GAME.md` seed is asking for, and it drops accidental captures from 14% to under
-4%.
+**A capture that pays for itself is not a plan.** With one Charge, the break
+that makes a creature Seen banks exactly the Charge that then buys it. Random
+play stumbles into a capture about one battle in six. Requiring two forces the
+payment to come from somewhere other than the moment of the capture — which is
+the "setup" the `GAME.md` seed asks for — and drops accidental captures to
+around one in twenty-five. Three Charges drops it to one in a hundred and fifty,
+which is past the point of being a plan and into being a chore.
 
-**Capture costs tempo, measurably.** Winning the proof battle takes 6 player
-decisions. Capturing Emberling *and* winning takes 7. The price is visible in
-the numbers, which is what a resource cost should be.
+### Correction: capture does not currently cost tempo
 
-**Caveat, same as always:** this is the off-engine model, validated against a
-committed engine result but still a model. Re-confirm in-engine before ticking
-anything.
+An earlier draft of this document claimed the proof battle takes 6 player
+decisions to win and 7 to capture-and-win, and concluded that the cost of
+collecting was visible in the count. **Both numbers were wrong.** They came from
+a depth-first search that returns *a* line rather than the shortest one, so its
+length depended on the order the search happened to list moves in — which is not
+a fact about the game. Measured properly by iterative deepening: the shortest
+win is **5** decisions, with or without capture available, and capture-and-win
+is also 5.
+
+So the tempo cost is not there. Two Charges is still the right cost — the
+self-financing argument and the accident rate are the real evidence, and both
+survive — but the claim that collecting slows you down does not, in this
+encounter. It may reappear in longer fights where Charges are scarcer relative
+to the number of turns. Until something measures that, it is an aspiration.
+
+The lesson generalises past capture: **a decision count from a depth-first
+search is not a minimum**, and quoting one as though it were is how a design
+argument ends up resting on the order of a `for` loop.
 
 ## What this means for encounters
 
