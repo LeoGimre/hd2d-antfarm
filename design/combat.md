@@ -123,3 +123,8 @@ kill, swap the exposed creature back before the enemy's burst lands — should w
 same levels, same four creatures. If a future tick builds the four creatures and that second line
 doesn't reliably beat the first, the numbers in this document (Guard size, the Back damage
 penalty, Charge's power bonus) are the ones to retune, not the shape of the systems.
+
+> **Followed up in [`first_blood_balance.md`](first_blood_balance.md).** That document solves this
+> battle exhaustively and finds the paragraph above was right to expect a retune — but wrong about
+> which number. Nothing in this design needed changing; the four creatures were paired onto the
+> wrong sides, which aimed the player's only type advantage at the enemy it least needed to kill.
