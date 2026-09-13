@@ -51,3 +51,4 @@
 {"tick": 50, "date": "2026-09-13", "task": "Find that an encounter can reward skill and still admit only one party", "status": "design", "visual": false, "commit": "2ad793ac7b9ca30f93f593636fdeff9334b5a2ec", "slug": "0051-openness"}
 {"tick": 51, "date": "2026-09-13", "task": "Build the tutorial duel, and find its capture window is one decision wide", "status": "design", "visual": false, "commit": "ce55f0bd5981eb5d994f1a1b4b2c4bd6111b6335", "slug": "0052-one-decision"}
 {"tick": 52, "date": "2026-09-13", "task": "Measure the capture window everywhere, and find the duel was not special", "status": "design", "visual": false, "commit": "2cb795bf818bd319b8022ce0aa53cfb251d40448", "slug": "0053-the-window"}
+{"tick": 53, "date": "2026-09-13", "task": "Draw the battle HUD from real solver state, and let it correct itself twice", "status": "design", "visual": false, "commit": "d3e1480af90d8f6d159a71c08f7ad091f833d952", "slug": "0054-drawing-the-offer"}

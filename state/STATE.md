@@ -81,14 +81,20 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    state change that cannot be missed, not a button that quietly ungreys. Nothing else queued
    depends on the UI this much.
 
-7. `design/tutorial.md` — the Kiln Yards duel (`kiln_duel` in `design/proto/encounters.json`,
+7. `design/battle_hud.md` — **build the battle HUD against the mockups, not from scratch.**
+   `design/proto/battle_hud.py` draws the board from live solver state and the frames are
+   committed under `design/proto/mockups/`. The Offer banner rides the target cursor (one at a
+   time), creatures anchor by their feet, and an encounter marked `tutorial` hides the empty slot
+   markers. `agreements.py` fails if the committed frames drift from the generator.
+
+8. `design/tutorial.md` — the Kiln Yards duel (`kiln_duel` in `design/proto/encounters.json`,
    `tutorial: true`). A side of **one** creature: `build_battle.gd` already draws all four slot
    markers regardless of occupancy, so the loader from item 1 must tolerate a missing slot rather
    than assume two per side.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check and the twenty cross-file agreements, and *loudly skips* the GDScript suite until
+self-check and the twenty-one cross-file agreements, and *loudly skips* the GDScript suite until
 `game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
 says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
@@ -102,6 +108,11 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Design questions about a screen get drawn, not written** (tick 53). `design/proto/battle_hud.py`
+  renders the board from live solver state; run it with no arguments to redo every frame. It
+  corrected two layout decisions within an hour that prose had not caught in two ticks — an Offer
+  banner on every offerable enemy (two at once in `first_blood`), and a target cursor anchored to
+  the sprite box rather than the body inside it. Commit the frames; `agreements.py` checks them.
 - **Capture costs no tempo and the window is 0–2 decisions wide, everywhere** (tick 52).
   `cap+win` equals `win` in all three encounters, so `capture.md`'s tempo retraction now holds on
   three fights rather than one. But the Offer opens and shuts inside a couple of decisions,
@@ -430,4 +441,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-52
+53
