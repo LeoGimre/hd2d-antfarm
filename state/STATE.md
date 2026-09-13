@@ -139,6 +139,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Always run `constants --all-encounters`** (tick 40): a value counts as safe only if it holds on
+  every balanced encounter. Current conservative answer — **fixed**: `MELEE_REACH`=front,
+  `RESIST_HEAL`=2. **Bounded**: `FRONT_DAMAGE_BONUS` 1–2, `BACK_TARGET_MULTIPLIER` ≤0.75,
+  `CHARGE_MULTIPLIER` ≥1.5, `GUARD_REGEN` ≥1. **Free**: `BROKEN_TAKES_MORE_DAMAGE`, `SWAP_MODE`.
+  `RESIST_HEAL` was called decorative on one encounter and breaks the Ridge at 0 — of the two
+  rules nominated as inert, only Broken's damage half survives.
 - **A one-encounter measurement is wrong in one direction: "this rule does nothing"** (tick 39).
   `FRONT_DAMAGE_BONUS` looked like slack for three ticks; on the Ridge, zeroing it means the fight
   **does not work at all**. Slack in one fight is not slack everywhere. **Read `position.md`'s
@@ -330,4 +336,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-39
+40
