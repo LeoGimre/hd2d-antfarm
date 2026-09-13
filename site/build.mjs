@@ -540,6 +540,18 @@ function main() {
     }
   }
 
+  // The battle HUD mockups, drawn from live solver state by
+  // design/proto/battle_hud.py. Kept out of /sprites/ deliberately: that
+  // directory's files are paired <id>.png / <id>_b.png for the idle animation,
+  // and a mockup dropped in there would be treated as half a creature.
+  const mockSrc = join(ROOT, "design", "proto", "mockups");
+  if (existsSync(mockSrc)) {
+    mkdirSync(join(OUT, "mockups"), { recursive: true });
+    for (const f of readdirSync(mockSrc).filter((f) => f.endsWith(".png"))) {
+      copyFileSync(join(mockSrc, f), join(OUT, "mockups", f));
+    }
+  }
+
   console.log(
     `site: ${entries.length} entries, ${docs.length} design docs, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
   );

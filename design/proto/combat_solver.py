@@ -186,6 +186,25 @@ def advance(qs):
     return best
 
 
+def upcoming(s, n=6):
+    """The next `n` actors, in order, without mutating anything.
+
+    The queue is deterministic — that is a pillar, not an implementation detail
+    — and a player who cannot read it is playing a random game with extra
+    steps. design/proto/battle_hud.py draws this, which is what it is for.
+    Skips the dead and the already-taken, exactly as advance()'s callers do."""
+    cs, _pc, _ec, qs, _seen, taken = unpack(s)
+    qs = list(qs)
+    out = []
+    for _ in range(n * 4):
+        if len(out) >= n:
+            break
+        i = advance(qs)
+        if not (cs[i][5] or taken[i]):
+            out.append(i)
+    return out
+
+
 # MELEE_REACH=any removes combat.md's central reach rule, so its contribution
 # can be measured rather than assumed.
 MELEE_REACH = os.environ.get("MELEE_REACH", "front")

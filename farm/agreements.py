@@ -493,6 +493,38 @@ def _():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+@check("the committed HUD mockups still match what battle_hud.py draws")
+def _():
+    """The mockups in design/battle_hud.md are drawn from live solver state, so
+    a rules or stat change silently invalidates them. A stale picture of a
+    balance decision is worse than no picture: it looks like evidence."""
+    import shutil, tempfile
+    src = os.path.join(ROOT, "design", "proto", "mockups")
+    gen = os.path.join(ROOT, "design", "proto", "battle_hud.py")
+    if not (os.path.isdir(src) and os.path.exists(gen)):
+        return []
+    tmp = tempfile.mkdtemp(prefix="agreements-mockups-")
+    try:
+        r = subprocess.run([sys.executable, gen], capture_output=True, text=True,
+                           env=dict(os.environ, HUD_OUT=tmp))
+        if r.returncode != 0:
+            return ["battle_hud.py failed: %s" % (r.stderr.strip().splitlines() or [""])[-1]]
+        committed = {f for f in os.listdir(src) if f.endswith(".png")}
+        produced = {f for f in os.listdir(tmp) if f.endswith(".png")}
+        out = []
+        for f in sorted(committed - produced):
+            out.append("%s is committed but battle_hud.py no longer draws it" % f)
+        for f in sorted(produced - committed):
+            out.append("%s is drawn but not committed (site/ will 404 on it)" % f)
+        for f in sorted(committed & produced):
+            if open(os.path.join(src, f), "rb").read() != open(os.path.join(tmp, f), "rb").read():
+                out.append("%s differs from what battle_hud.py draws now — "
+                           "rerun python3 design/proto/battle_hud.py" % f)
+        return out
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 @check("design/roster.md and the sprite generator list the same creatures")
 def _():
     sys.path.insert(0, os.path.join(ROOT, "design", "proto"))

@@ -49,7 +49,11 @@ Read in this order. Each one corrects something in the one before.
    a creature can be captured rather than killed is one decision wide, nobody
    chose that, and it is the whole lesson. A tutorial needs the opposite of the
    encounter checklist, so it gets a contract of its own.
-8. **[`combat_tests.md`](combat_tests.md)** — how any of this gets under test,
+8. **[`battle_hud.md`](battle_hud.md)** — what the fight looks like, drawn from
+   real solver state rather than imagined. Exists because `capture.md`'s
+   conclusion is a claim about a screen, and the Offer announcement turned out
+   to have rules that only appear once you draw it wrong.
+9. **[`combat_tests.md`](combat_tests.md)** — how any of this gets under test,
    given that the loop may not edit its own gate.
 
 ## Content and how it is made
