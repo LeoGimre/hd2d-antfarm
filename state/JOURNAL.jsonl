@@ -30,3 +30,4 @@
 {"tick": 29, "date": "2026-09-13", "task": "Check the things this project claims must agree, and fix the two that did not", "status": "ok", "visual": false, "commit": "fa363afb5a6c879487f728d55f04345b9265c130", "slug": "0030-agreements"}
 {"tick": 30, "date": "2026-09-13", "task": "Lead the front page with the newest tick, not the newest clip", "status": "ok", "visual": false, "commit": "3d83c1b4eb5b83a4051a60cc1c7c0815179a8b3d", "slug": "0031-lead-with-now"}
 {"tick": 31, "date": "2026-09-13", "task": "Design dialogue around one testable bar: a line you only see because you changed", "status": "design", "visual": false, "commit": "01daafa7112c87c511eba7e2f5d8f186040a8c2f", "slug": "0032-dialogue"}
+{"tick": 32, "date": "2026-09-13", "task": "Design region authoring, and make \"distinct\" something a region has to earn", "status": "design", "visual": false, "commit": "c6badb0f82f4e7274e55f91851f3641a0dc87c39", "slug": "0033-regions"}

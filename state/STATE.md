@@ -3,6 +3,12 @@
 Rewritten by the loop at the end of every tick. This is how a fresh session picks up where the last
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
+## Design status
+Every roadmap box through **M5** now has a design document behind it. M6 is content and balance
+passes; M7 is save/load and the slice. **The bottleneck is not design — it is that no tick since
+tick 9 has had an engine.** Prefer building, checking or correcting over writing a fourteenth
+document.
+
 ## Current milestone
 M3 — First blood. Boxes 1–3 done. Box 4 (a battle that can be lost badly, won well) is **solved on
 paper but not in the engine**; box 5 (combat logic under unit test) is untouched.
@@ -129,6 +135,14 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Regions: Ground / Work / Attention** (tick 32): `design/regions.md`, `game/data/regions.json`.
+  Attention decides the creatures, creatures decide the types, types decide the palette — so a
+  reskin cannot fill in line three, which is the free check against a world of palette swaps.
+  Geometry is code (`build_region_<id>.gd`, hand-authored, comments are the valuable part);
+  look/encounters/conversations/exits are data. **Only `hd2d_look.md`'s permitted knobs may vary
+  per region — never the key angle**, which is baked into every sprite. Build the Ridge first: the
+  emptiest, so the cheapest geometry and the hardest test of "distinct". For `agreements.py` once
+  regions exist: every exit's destination must exist and have an exit back.
 - **Dialogue: ordered nodes, first match wins** (tick 31): `design/dialogue.md`,
   `game/data/conversations.json`. The bar that makes M5's "worth talking to twice" checkable: **an
   NPC is not finished until it has at least one line that only appears because of something the
@@ -265,4 +279,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-31
+32
