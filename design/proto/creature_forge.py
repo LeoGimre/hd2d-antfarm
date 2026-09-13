@@ -52,6 +52,15 @@ def taper(g, x0, y0, x1, y1, w0, w1, ch=FILL):
         w = w0 + (w1 - w0) * t
         ellipse(g, x, y, w, w, ch)
 
+def taper_edged(g, x0, y0, x1, y1, w0, w1):
+    """A limb that has to read *inside* another part's silhouette. Draw it one
+    pixel fatter in the outline colour first, then fill. See the "only the
+    silhouette reads" rule in design/creature_sprites.md: without this the
+    brawler plan's arms and legs are simply absent."""
+    taper(g, x0, y0, x1, y1, w0 + 1.0, w1 + 1.0, "K")
+    taper(g, x0, y0, x1, y1, w0, w1, FILL)
+
+
 # ---------------------------------------------------------------- palette
 
 def ramp(hue, sat, name=""):
@@ -239,6 +248,85 @@ def avian(p):
     ellipse(g, hx + p["head_r"] * 1.1, hy + 0.4, p["beak"], p["beak"] * 0.55)
     return g, (hx, hy)
 
+def blob(p):
+    """Floating, limbless. Reads by outline alone, so it has to earn its
+    silhouette with lobes rather than limbs."""
+    g = blank()
+    cx, cy = p.get("cx", 20), GROUND - p["hover"]
+    ellipse(g, cx, cy, p["rx"], p["ry"])
+    for i in range(p.get("lobes", 3)):
+        a = math.pi * (0.25 + 0.5 * i / max(1, p.get("lobes", 3) - 1))
+        ellipse(g, cx + math.cos(a) * p["rx"] * 0.85,
+                cy + math.sin(a) * p["ry"] * 0.9, p["lobe_r"], p["lobe_r"])
+    for i in range(p.get("tendrils", 0)):
+        ox = (i - (p["tendrils"] - 1) / 2) * 3.2
+        taper(g, cx + ox, cy + p["ry"] * 0.7, cx + ox * 1.5,
+              cy + p["ry"] + p["tendril_len"], 1.3, 0.5)
+    return g, (cx + p["rx"] * 0.35, cy - p["ry"] * 0.35)
+
+def insectoid(p):
+    """Low, wide, many-legged. The read is 'lots of legs', so the far bank goes
+    in the FAR channel and the near bank splays wider than a quadruped's."""
+    g = blank()
+    cx = p.get("cx", 20)
+    by = GROUND - p["leg"] - p["body_ry"]
+    n = p.get("legs", 3)
+    for i in range(n):
+        ox = (i - (n - 1) / 2) * p["body_rx"] * 0.72
+        taper(g, cx + ox - 1.4, by + p["body_ry"] * 0.3,
+              cx + ox - 3.0, GROUND - 1.5, p["leg_w"] * 0.85, p["leg_w"] * 0.6, FAR)
+    ellipse(g, cx, by, p["body_rx"], p["body_ry"])
+    ellipse(g, cx - p["body_rx"] * 0.75, by + p["body_ry"] * 0.15,
+            p["body_rx"] * 0.5, p["body_ry"] * 0.75)
+    for i in range(n):
+        ox = (i - (n - 1) / 2) * p["body_rx"] * 0.72
+        taper(g, cx + ox, by + p["body_ry"] * 0.45,
+              cx + ox + p["splay"], GROUND, p["leg_w"], p["leg_w"] * 0.7)
+    hx = cx + p["body_rx"] * 0.85
+    hy = by - p["body_ry"] * 0.15
+    ellipse(g, hx, hy, p["head_r"] * 1.15, p["head_r"])
+    for sign in (-1, 1):
+        taper(g, hx, hy - p["head_r"] * 0.6, hx + p["ant"] * 0.8,
+              hy - p["ant"] * (0.9 if sign > 0 else 0.5), 0.9, 0.5)
+    return g, (hx, hy)
+
+def _brawler_flat(p):
+    """Kept only as the counter-example: every part inside the torso silhouette,
+    which renders three different creatures as three identical beans."""
+    """Upright biped. Head high and arms forward -- the one plan whose
+    silhouette says 'this thing hits you' before any colour is read."""
+    g = blank()
+    cx = p.get("cx", 20)
+    hip = GROUND - p["leg"]
+    taper(g, cx - 1.8, hip, cx - 3.0, GROUND, p["leg_w"], p["leg_w"] * 0.8, FAR)
+    taper(g, cx - 1.0, hip - p["torso"] * 0.2, cx - p["arm"] * 0.7,
+          hip - p["torso"] * 0.75, p["arm_w"] * 0.8, p["arm_w"] * 0.55, FAR)
+    taper(g, cx, hip - p["torso"], cx, hip, p["torso_w"], p["torso_w"] * 1.15)
+    taper(g, cx + 0.8, hip, cx + 1.6, GROUND, p["leg_w"], p["leg_w"] * 0.85)
+    taper(g, cx + 1.0, hip - p["torso"] * 0.8, cx + p["arm"],
+          hip - p["torso"] * 0.45, p["arm_w"], p["arm_w"] * 0.75)
+    hx, hy = cx + 0.5, hip - p["torso"] - p["head_r"] * 0.75
+    ellipse(g, hx, hy, p["head_r"] * 1.05, p["head_r"])
+    return g, (hx, hy)
+
+def brawler(p):
+    g = blank()
+    cx = p.get("cx", 20)
+    hip = GROUND - p["leg"]
+    taper(g, cx - 1.8, hip, cx - 3.0, GROUND, p["leg_w"], p["leg_w"] * 0.8, FAR)
+    taper(g, cx - 1.0, hip - p["torso"] * 0.2, cx - p["arm"] * 0.7,
+          hip - p["torso"] * 0.75, p["arm_w"] * 0.8, p["arm_w"] * 0.55, FAR)
+    taper(g, cx, hip - p["torso"], cx, hip, p["torso_w"], p["torso_w"] * 1.15)
+    taper_edged(g, cx + 0.8, hip, cx + 1.6, GROUND, p["leg_w"], p["leg_w"] * 0.85)
+    taper_edged(g, cx + 1.0, hip - p["torso"] * 0.8, cx + p["arm"],
+                hip - p["torso"] * 0.45, p["arm_w"], p["arm_w"] * 0.75)
+    hx, hy = cx + 0.5, hip - p["torso"] - p["head_r"] * 0.75
+    taper(g, cx + 0.2, hip - p["torso"] * 0.95, hx, hy, p["head_r"] * 0.5, p["head_r"] * 0.5, "K")
+    ellipse(g, hx, hy, p["head_r"] * 1.05 + 0.9, p["head_r"] + 0.9, "K")
+    ellipse(g, hx, hy, p["head_r"] * 1.05, p["head_r"])
+    return g, (hx, hy)
+
+
 # ---------------------------------------------------------------- features
 
 def crest(g, anchor, n, size, spread=2.0):
@@ -286,45 +374,80 @@ def groove(g, cx, cy, rx, ry):
 HUE = {"Ember": 0.035, "Tide": 0.545, "Gale": 0.44, "Root": 0.28}
 SAT = {"Ember": 0.85, "Tide": 0.72, "Gale": 0.40, "Root": 0.62}
 
-ROSTER = {
-  "emberling": dict(plan="quadruped", type="Ember", feats=["horns"], p=dict(
-      body_rx=7.0, body_ry=4.6, leg=5, leg_w=1.7, neck=5, neck_w=1.9,
-      head_r=3.2, snout=1.9, tail=6, tail_w=1.6, tail_lift=4, splay=0.6)),
-  "rootshell": dict(plan="quadruped", type="Root", feats=["shell"], p=dict(
-      body_rx=8.6, body_ry=5.6, leg=3, leg_w=2.4, neck=3, neck_w=2.2,
-      head_r=3.0, snout=1.6, tail=3, tail_w=1.4, tail_lift=0, splay=1.2)),
-  "tidalpup":  dict(plan="serpent", type="Tide", feats=["crest"], p=dict(
-      length=21, amp=4.0, rise=11, body_w=3.6, head_r=3.6, waves=1.2, coils=24)),
-  "galewing":  dict(plan="avian", type="Gale", feats=["crest"], p=dict(
-      body_rx=5.4, body_ry=4.4, leg=6, leg_w=1.2, wing=13, wing_w=2.6,
-      neck_w=1.6, head_r=2.8, beak=2.0)),
-}
+Q, S, A, B, I, R = "quadruped", "serpent", "avian", "blob", "insectoid", "brawler"
 
-PLANS = {"quadruped": quadruped, "serpent": serpent, "avian": avian}
+def q(**kw):
+    base = dict(body_rx=7.0, body_ry=4.6, leg=5, leg_w=1.7, neck=5, neck_w=1.9,
+                head_r=3.2, snout=1.8, tail=6, tail_w=1.6, tail_lift=4, splay=0.6)
+    base.update(kw); return base
 
-SHELLS = []
+ROSTER = [
+ ("emberling", Q, "Ember", ["horns"], q()),
+ ("ashmane",   Q, "Ember", ["crest"], q(body_rx=9.0, body_ry=5.6, leg=7, leg_w=2.2,
+                                        neck=7, neck_w=2.4, head_r=3.6, tail=8, tail_lift=6)),
+ ("cinderpup", Q, "Ember", [],        q(body_rx=5.4, body_ry=3.8, leg=3, leg_w=1.6,
+                                        neck=3, neck_w=1.7, head_r=3.0, tail=4, tail_lift=2)),
+ ("rootshell", Q, "Root",  ["shell"], q(body_rx=8.6, body_ry=5.6, leg=3, leg_w=2.4,
+                                        neck=3, neck_w=2.2, head_r=3.0, snout=1.6,
+                                        tail=3, tail_w=1.4, tail_lift=0, splay=1.2)),
+ ("boughback", Q, "Root",  ["shell", "horns"], q(body_rx=10.0, body_ry=6.4, leg=4, leg_w=3.0,
+                                        neck=4, neck_w=2.8, head_r=3.4, tail=4, tail_lift=1,
+                                        splay=1.6)),
+ ("tidalpup",  S, "Tide",  ["crest"], dict(length=21, amp=4.0, rise=11, body_w=3.6,
+                                           head_r=3.6, waves=1.2, coils=24)),
+ ("brinecoil", S, "Tide",  [],        dict(length=25, amp=7.0, rise=6, body_w=2.6,
+                                           head_r=2.8, waves=2.1, coils=28)),
+ ("deepmaw",   S, "Tide",  ["horns"], dict(length=17, amp=3.0, rise=15, body_w=4.6,
+                                           head_r=4.6, waves=0.9, coils=22)),
+ ("mirecoil",  S, "Root",  ["crest"], dict(length=23, amp=5.5, rise=8, body_w=3.2,
+                                           head_r=3.2, waves=1.7, coils=26)),
+ ("galewing",  A, "Gale",  ["crest"], dict(body_rx=5.4, body_ry=4.4, leg=6, leg_w=1.2,
+                                           wing=13, wing_w=2.6, neck_w=1.6, head_r=2.8, beak=2.0)),
+ ("stormcrest",A, "Gale",  ["horns"], dict(body_rx=6.8, body_ry=5.2, leg=8, leg_w=1.5,
+                                           wing=17, wing_w=3.2, neck_w=2.0, head_r=3.2, beak=2.6)),
+ ("emberkite", A, "Ember", [],        dict(body_rx=4.4, body_ry=3.6, leg=4, leg_w=1.0,
+                                           wing=15, wing_w=2.0, neck_w=1.3, head_r=2.4, beak=2.2)),
+ ("mistmote",  B, "Gale",  [],        dict(hover=16, rx=6.0, ry=5.2, lobes=3, lobe_r=2.6,
+                                           tendrils=3, tendril_len=6)),
+ ("bogbloom",  B, "Root",  ["crest"], dict(hover=9, rx=8.0, ry=6.0, lobes=4, lobe_r=3.2,
+                                           tendrils=4, tendril_len=4)),
+ ("gloamdrift",B, "Tide",  [],        dict(hover=13, rx=5.0, ry=6.6, lobes=2, lobe_r=2.2,
+                                           tendrils=5, tendril_len=8)),
+ ("chitterlin",I, "Root",  [],        dict(body_rx=7.0, body_ry=3.4, leg=4, leg_w=1.4,
+                                           legs=3, splay=1.8, head_r=2.6, ant=5)),
+ ("emberjaw",  I, "Ember", ["horns"], dict(body_rx=8.4, body_ry=4.2, leg=3, leg_w=1.9,
+                                           legs=4, splay=2.4, head_r=3.2, ant=3)),
+ ("thundercuff",R,"Gale",  ["horns"], dict(leg=9, leg_w=2.2, torso=11, torso_w=4.4,
+                                           arm=8, arm_w=2.2, head_r=3.4)),
+ ("kelpfist",  R, "Tide",  ["crest"], dict(leg=7, leg_w=2.6, torso=9, torso_w=5.2,
+                                           arm=7, arm_w=2.8, head_r=3.0)),
+ ("charbrute", R, "Ember", [],        dict(leg=6, leg_w=3.0, torso=8, torso_w=6.0,
+                                           arm=6, arm_w=3.2, head_r=2.8)),
+]
 
-def build(cid, spec, outdir):
-    SHELLS.clear()
-    g, anchor = PLANS[spec["plan"]](spec["p"])
-    for f in spec["feats"]:
+PLANS = dict(quadruped=quadruped, serpent=serpent, avian=avian,
+             blob=blob, insectoid=insectoid, brawler=brawler)
+
+def build(cid, plan, ctype, feats, p, outdir):
+    g, anchor = PLANS[plan](p)
+    shells = []
+    for f in feats:
         if f == "horns": horns(g, anchor, 4.0)
         elif f == "crest": crest(g, anchor, 3, 4.0, spread=1.6)
         elif f == "shell":
-            pp = spec["p"]
-            by = GROUND - pp["leg"] - pp["body_ry"]
-            cxx = pp.get("cx", 19)
-            shell(g, (cxx, by, pp["body_rx"], pp["body_ry"]))
-            SHELLS.append((cxx, by - pp["body_ry"] * 0.35, pp["body_rx"] * 1.05, pp["body_ry"] * 0.95))
+            by = GROUND - p["leg"] - p["body_ry"]
+            cxx = p.get("cx", 19)
+            shell(g, (cxx, by, p["body_rx"], p["body_ry"]))
+            shells.append((cxx, by - p["body_ry"] * 0.35, p["body_rx"] * 1.05,
+                           p["body_ry"] * 0.95))
     g = shade(g)
-    for sh in SHELLS:
+    for sh in shells:
         groove(g, *sh)
-    eye(g, anchor, 1, 0, big=spec["p"].get("head_r", 3) >= 3.2)
+    eye(g, anchor, 1, 0, big=p.get("head_r", 3) >= 3.2)
     g = outline(g)
-    pal = ramp(HUE[spec["type"]], SAT[spec["type"]])
-    return render(g, pal, os.path.join(outdir, cid + ".png"))
+    return render(g, ramp(HUE[ctype], SAT[ctype]), os.path.join(outdir, cid + ".png"))
 
-OUT = os.environ.get("FORGE_OUT", "/tmp/creature_forge")
+
 # ------------------------------------------------- looking at the result
 #
 # The whole point of this prototype is that somebody opened the output. A 40x44
@@ -371,32 +494,37 @@ def read_png(path):
         prev = line
     return w, h, rows
 
-def sheet(paths, scale=8, pad=6, bg=(38, 42, 50, 255)):
+def sheet(paths, cols=5, scale=5, pad=4, bg=(38, 42, 50, 255)):
     imgs = [read_png(p) for p in paths]
     cw = max(i[0] for i in imgs) * scale + pad * 2
     ch = max(i[1] for i in imgs) * scale + pad * 2
-    W, H = cw * len(imgs), ch
-    out = [[bg] * W for _ in range(H)]
+    rows_n = (len(imgs) + cols - 1) // cols
+    GW, GH = cw * cols, ch * rows_n
+    out = [[bg] * GW for _ in range(GH)]
     for k, (w, h, rows) in enumerate(imgs):
-        ox = k * cw + pad
+        ox, oy = (k % cols) * cw + pad, (k // cols) * ch + pad
         for y in range(h):
             for x in range(w):
-                px = rows[y][x]
-                if px[3] == 0:
+                p = rows[y][x]
+                if p[3] == 0:
                     continue
                 for sy in range(scale):
                     for sx in range(scale):
-                        out[pad + y*scale + sy][ox + x*scale + sx] = px
-    return W, H, out
+                        out[oy + y*scale + sy][ox + x*scale + sx] = p
+    return GW, GH, out
+
+
+
+OUT = os.environ.get("FORGE_OUT", "/tmp/creature_forge")
 
 
 def main():
     made = []
-    for cid, spec in ROSTER.items():
-        made.append(build(cid, spec, OUT))
+    for (cid, plan, ctype, feats, p) in ROSTER:
+        made.append(build(cid, plan, ctype, feats, p, OUT))
         print(made[-1])
     if "--sheet" in sys.argv:
-        w, h, px = sheet(made)
+        w, h, px = sheet(made, cols=5)
         print(write_png(os.path.join(OUT, "_sheet.png"), w, h, px))
 
 

@@ -113,6 +113,62 @@ biped, each in its type's colour, all under the same light. Three out of four
 from one generator is enough to believe the grammar; the fourth is a tuning
 problem, not a structural one.
 
+## Does it scale?
+
+The grammar's whole claim is about sixty creatures, and four creatures do not
+test it. So the prototype was pushed to **twenty entries across six body plans**
+— three more plans (`blob`, `insectoid`, `brawler`) and enough proportion spread
+to cover a roster's worth of shapes — and the sheet was looked at again.
+
+**It holds.** Twenty silhouettes read as twenty creatures: lanky quadrupeds,
+squat shelled ones, three visibly different serpents, birds, drifting jellyfish,
+low many-legged things, upright brutes. Type hue does the rest of the work
+instantly.
+
+Two structural things came out of it.
+
+**Same plan plus different proportions produces family resemblance, and that is
+a feature.** `emberling`/`ashmane`/`cinderpup` read as one species at three
+sizes, which is exactly what an evolution line should look like. But it means
+roster *variety* is driven by the number of body plans, not by the number of
+entries. Six plans carried twenty comfortably; sixty probably wants ten to
+twelve. That is a much better number to know now than after forty creatures
+have been authored against six.
+
+**And the rule that matters most:**
+
+> **Only the silhouette reads. Anything inside it must be given its own edge.**
+
+The `brawler` plan proved this by failing completely. Its torso, arms and legs
+all overlap, so all three brawlers rendered as featureless beans — three
+different creatures, indistinguishable, no head, no arms, no legs. Nothing was
+wrong with the proportions; the parts were simply *inside* the silhouette, and
+the silhouette is the only thing the eye gets. Drawing each interior part one
+pixel fatter in the outline colour before filling it — `taper_edged()`, four
+lines — brought all three back as upright figures with a head, a shoulder line,
+an arm across the chest and separated legs.
+
+That rule subsumes the shell finding from the first pass. A shell merging into
+a body and an arm merging into a torso are the same bug, and the groove and the
+edged limb are the same fix. Worth stating once, at the top, for whoever writes
+body plan number seven.
+
+Its limit is visible too. `charbrute` — a torso 6 wide with arms 3.2 wide — is
+still nearly a bean even with edges, because a part nearly as wide as the thing
+it sits on cannot be separated by a one-pixel line. When a creature will not
+read after edging, the proportions are wrong, not the renderer.
+
+One correction to the first pass: Emberling's dark leg mass, which looked
+fatal at 8× on its own, reads acceptably at roster scale among its peers. The
+diagnosis — a thin part has no interior — still stands and still wants fixing,
+but it was judged too harshly from a single blown-up sprite. Looking at one
+thing very large is not the same as looking at the set.
+
+**The twenty names are placeholders.** They exist to spread shapes across the
+plans, not to propose a roster. What these creatures actually *are* — the
+fiction, the naming, why a player would want one — is its own design tick and
+has not happened.
+
 ## Rejected alternatives
 
 - **One hand-authored character map per creature**, as the traveler is done
