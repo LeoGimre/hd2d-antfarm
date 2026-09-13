@@ -75,10 +75,11 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    forces every scene to agree.
 
 6. `design/capture.md` — M4's capture box. Needs the encounter/party work above first.
-   **`design/tutorial.md` adds a hard UI requirement to this box**: the capture window in a duel
-   is one decision wide, so the battle UI must announce the Offer the instant it becomes legal.
-   If the second Break does not visibly change the player's options, the tutorial deletes a
-   creature instead of teaching. Nothing else queued depends on the UI this much.
+   **It carries a hard UI requirement**: the capture window is 0–2 decisions wide in *every*
+   encounter measured (`combat_solver.py window`), and in the two-a-side fights it shuts because
+   the player wins. So the battle UI must announce the Offer the instant it becomes legal — a
+   state change that cannot be missed, not a button that quietly ungreys. Nothing else queued
+   depends on the UI this much.
 
 7. `design/tutorial.md` — the Kiln Yards duel (`kiln_duel` in `design/proto/encounters.json`,
    `tutorial: true`). A side of **one** creature: `build_battle.gd` already draws all four slot
@@ -87,7 +88,7 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check and the nineteen cross-file agreements, and *loudly skips* the GDScript suite until
+self-check and the twenty cross-file agreements, and *loudly skips* the GDScript suite until
 `game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
 says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
@@ -101,6 +102,15 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Capture costs no tempo and the window is 0–2 decisions wide, everywhere** (tick 52).
+  `cap+win` equals `win` in all three encounters, so `capture.md`'s tempo retraction now holds on
+  three fights rather than one. But the Offer opens and shuts inside a couple of decisions,
+  because the hits that bank Charges are the hits that end the fight — and in a two-a-side fight
+  it shuts because the player *wins*, which gives them no feedback at all. `combat_solver.py
+  window --encounter <id>` prints the table.
+- **`capture_window()` used to walk to the wrong state** (tick 52). It stopped before the line's
+  last decision, which is the Offer only in a duel. Now it stops at the first state where
+  `offer_ok` is true. If a measurement here looks implausible, suspect the walk before the rules.
 - **A tutorial gets the opposite contract from a tactical fight, and its own check** (tick 51).
   `encounters.md`'s checklist wants naive play to lose; a tutorial must not be losable. An
   encounter marked `"tutorial": true` in `encounters.json` skips the discrimination and
@@ -420,4 +430,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-51
+52
