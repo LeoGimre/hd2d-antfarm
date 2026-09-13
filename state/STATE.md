@@ -129,6 +129,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Shade from a local surface normal, never from the centroid** (tick 26): the thin-limb problem
+  that beat three attempts. A centroid-relative "how much does this face the light" puts every leg
+  below the centroid, so both sides of a limb read as unlit and there is no lit edge to find.
+  `normals()` estimates a real per-pixel normal from nearby empty space; a 3px limb then gets a lit
+  edge, a base spine and a shadowed edge. Fixed every plan, not just the broken one. Open: the
+  roster is lighter overall now, and the shadow threshold wants revisiting against a real scene's
+  key light rather than a flat swatch.
 - **Only the silhouette reads** (tick 16): the one rule the sprite technique turns on. Anything
   drawn *inside* another part's outline is invisible — it must be drawn a pixel fatter in the
   outline colour first (`taper_edged`). Rootshell's vanishing shell and the brawler plan rendering
@@ -228,4 +235,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-25
+26
