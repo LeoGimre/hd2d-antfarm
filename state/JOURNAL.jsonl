@@ -47,3 +47,4 @@
 {"tick": 46, "date": "2026-09-13", "task": "Move the encounters into data, and turn last week's finding into a check", "status": "ok", "visual": false, "commit": "ed01e8f68e73923e0ef252040a81b36483ebc74d", "slug": "0047-encounters-in-data"}
 {"tick": 47, "date": "2026-09-13", "task": "Write the regions data, and make the house style a rule that argues back", "status": "ok", "visual": false, "commit": "e93c62311191437171983d6fe60266f30d4a6055", "slug": "0048-regions-in-data"}
 {"tick": 48, "date": "2026-09-13", "task": "Write three NPCs, and let the checker enforce the rules they are written to", "status": "ok", "visual": false, "commit": "86502f41921b068d537edbc61bd1b603d38121b4", "slug": "0049-three-voices"}
+{"tick": 49, "date": "2026-09-13", "task": "Measure party choice, and find no simple rule predicts it", "status": "design", "visual": false, "commit": "26af0697d7d3f3a5a0dc554017086505fe9ed2b5", "slug": "0050-party-choice"}

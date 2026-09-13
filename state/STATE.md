@@ -143,6 +143,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   visits** (a requirement on `design/encounters.md`'s format), and dialogue must remember what the
   player has done. Flagged, not designed: how an unbroken creature fights differently — that goes
   to the solver, not a paragraph.
+- **Party choice is decisive and unpredictable** (tick 49): 2 of 12 pairs can beat The Ridge at
+  all. It is the **types, not the stats** — transplanting Rootshell's HP/Guard/speed onto
+  Emberling or Galewing saves neither. And **no simple rule predicts it**: "front resists an
+  enemy" and tick 38's "both can break something" are necessary-not-sufficient filters; two other
+  candidates are wrong. Consequence: **a party UI must never show a coverage score** — show the
+  matchup grid and let the player be right.
 - **Progression adds options, never magnitude** (tick 21): `design/progression.md`, measured.
   Scaling *both* sides changes nothing up to x3 — magnitude is free — but relative advantage has a
   tolerance of only about **-15% to +5%**: +5% player HP, +3 move power, or **+1 Guard** each flip
@@ -381,4 +387,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-48
+49
