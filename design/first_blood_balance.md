@@ -175,6 +175,63 @@ Three implementation notes:
 - **Re-confirm before ticking the box.** Everything here is a model. Run both lines in-engine
   first.
 
+## Since this was written
+
+Four ticks of later work changed what some of the numbers above mean. Rather
+than quietly editing them — this document is also the record of a decision, and
+the decision was right — here is what has moved.
+
+### Everything above is now reproducible
+
+The solver this document was built on is committed as
+`design/proto/combat_solver.py`. The two policy tables are:
+
+```
+python3 design/proto/combat_solver.py lines --encounter current  --no-capture
+python3 design/proto/combat_solver.py lines --encounter repaired --no-capture
+```
+
+`--no-capture` matters. `design/capture.md` added an Offer action *after* these
+measurements, and an available Offer changes what random play can stumble into:
+the re-paired encounter's random win rate is **8.5%** under the rule set
+measured here and **13.0%** with capture available. The published 8.4% was
+correct for the rules that existed at the time. Always state which rule set a
+random-play figure came from.
+
+### The HP-left columns are no longer the signal
+
+`design/progression.md` retracted HP margin as a measure of how close a fight
+is, and this document is the main offender. Naive loses the re-paired battle with
+the enemy holding 24 of 52 HP, which reads comfortable — and **five percent more
+player HP reverses the result.** Surviving one extra hit buys one extra turn, and
+turns compound, so HP remaining and tuning margin are barely related.
+
+The columns stay because they are useful colour and because "0 / 41" versus
+"0 / 10" does say something about how badly a line lost. But the outcome column
+is the finding, and the number that describes the encounter is below.
+
+### The tolerance band, which is the real balance number
+
+```
+python3 design/proto/combat_solver.py tolerance --encounter repaired
+```
+
+| advantage | naive | correct |
+|---|---|---|
+| none | loses | **wins** |
+| player HP ×1.05 | *wins* | wins |
+| player Guard +1 | *wins* | wins |
+| enemy HP ×1.15 | loses | **wins** |
+| enemy HP ×1.20 | loses | *loses* |
+| both sides HP ×3.0 | loses | **wins** |
+
+The re-paired encounter discriminates skill across a relative-power window of
+roughly **−15% to +5%**, and is scale-invariant outside that — tripling both
+sides changes nothing. It sits closer to the upper edge of its own band than the
+middle, which is worth knowing: it tolerates a much weaker player than a
+stronger one. A future tuning pass could re-centre it, and now has a number to
+aim at rather than an HP margin to squint at.
+
 ## Deliberately not decided here
 
 - **Type-blind HP damage.** It is a real oddity — a resisted hit lands for full HP — and it is

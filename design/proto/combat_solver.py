@@ -309,6 +309,10 @@ def apply_choice(s, i, choice, log=None):
     return pack(cs, pc, ec, qs, seen, taken)
 
 
+# Capture arrived (design/capture.md) after the balance work in
+# design/first_blood_balance.md was measured, and an available Offer changes
+# what random play can stumble into. --no-capture reproduces the earlier rule
+# set so the two sets of numbers can be compared honestly.
 NO_OFFERS = os.environ.get("NO_OFFERS") == "1"
 
 
@@ -574,8 +578,13 @@ def main():
     ap.add_argument("policy", nargs="?", default="typed")
     ap.add_argument("--encounter", default="repaired", choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
+    ap.add_argument("--no-capture", action="store_true",
+                    help="disable the Offer action (the rule set before capture existed)")
     ap.add_argument("--depth", type=int, default=18)
     args = ap.parse_args()
+
+    if args.no_capture:
+        globals()["NO_OFFERS"] = True
 
     if args.self_check:
         sys.exit(0 if self_check() else 1)
