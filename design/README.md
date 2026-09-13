@@ -45,7 +45,11 @@ Read in this order. Each one corrects something in the one before.
    magnitude.
 6. **[`capture.md`](capture.md)** — capture as a deterministic act, with two
    earlier versions of the rule and why the solver killed them.
-7. **[`combat_tests.md`](combat_tests.md)** — how any of this gets under test,
+7. **[`tutorial.md`](tutorial.md)** — the Kiln Yards duel. The window in which
+   a creature can be captured rather than killed is one decision wide, nobody
+   chose that, and it is the whole lesson. A tutorial needs the opposite of the
+   encounter checklist, so it gets a contract of its own.
+8. **[`combat_tests.md`](combat_tests.md)** — how any of this gets under test,
    given that the loop may not edit its own gate.
 
 ## Content and how it is made

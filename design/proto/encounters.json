@@ -1,6 +1,24 @@
 {
-  "_comment": "Proposed content for game/data/encounters.json, in the format design/encounters.md decides. Kept in design/proto because it has not been through an engine; combat_solver.py reads it instead of carrying its own table, and farm/agreements.py validates it. An encounter is atomic \u2014 who fights whom. Which encounter occurs, where, and in what world state is a region's question and deliberately not expressible here.",
+  "_comment": "Proposed content for game/data/encounters.json, in the format design/encounters.md decides. Kept in design/proto because it has not been through an engine; combat_solver.py reads it instead of carrying its own table, and farm/agreements.py validates it. An encounter is atomic — who fights whom. Which encounter occurs, where, and in what world state is a region's question and deliberately not expressible here.",
   "encounters": [
+    {
+      "id": "kiln_duel",
+      "display_name": "In the Kiln Yards",
+      "tutorial": true,
+      "note": "design/tutorial.md. Act one's duel: one creature each, so nothing about the Front/Back board has to be explained yet. Tidalpup is type-advantaged on purpose — Guard falls faster than HP only when you are, which is why capture is reachable here at all. The enemy is absent from the Charge economy (Tide resists Ember) and that is the point, not an oversight: a tutorial that can be lost is a tutorial the player fails before it teaches.",
+      "player": [
+        {
+          "creature": "tidalpup",
+          "slot": "front"
+        }
+      ],
+      "enemy": [
+        {
+          "creature": "emberling",
+          "slot": "front"
+        }
+      ]
+    },
     {
       "id": "first_blood",
       "display_name": "First Blood",

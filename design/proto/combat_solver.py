@@ -83,15 +83,20 @@ def _load_encounters():
     does now, in design/proto/encounters.json — so the balance tool and the game
     read the same bytes rather than two tables that agree until they do not."""
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "encounters.json")
-    out = {}
+    out, meta = {}, {}
     with open(path) as f:
         for e in json.load(f)["encounters"]:
+            meta[e["id"]] = e
+            # A side may field one creature. build_battle.gd already renders all
+            # four slot markers "regardless of occupancy — the board's claim is
+            # two slots exist, not that both are full", so the empty slot is a
+            # board fact the scene has always been drawing.
             out[e["id"]] = [(m["creature"], side, m["slot"])
                             for side in ("player", "enemy") for m in e[side]]
-    return out
+    return out, meta
 
 
-ENCOUNTERS = _load_encounters()
+ENCOUNTERS, ENCOUNTER_META = _load_encounters()
 DEFAULT_ENCOUNTER = "first_blood"
 TEAM = ENCOUNTERS[DEFAULT_ENCOUNTER]
 
@@ -114,7 +119,7 @@ def effectiveness(atype, dtype):
 
 
 def side_of(i):
-    return "player" if i < 2 else "enemy"
+    return TEAM[i][1]
 
 
 # ---------------------------------------------------------------- state
@@ -132,7 +137,12 @@ def initial():
 
 
 def unpack(s):
-    return list(s[0:4]), s[4], s[5], list(s[6:10]), list(s[10:14]), list(s[14:18])
+    """The state tuple sizes itself from TEAM, because a side may field one
+    creature rather than two — the board is two slots per side, not two bodies."""
+    n = len(TEAM)
+    return (list(s[0:n]), s[n], s[n + 1],
+            list(s[n + 2:2 * n + 2]), list(s[2 * n + 2:3 * n + 2]),
+            list(s[3 * n + 2:4 * n + 2]))
 
 
 def pack(cs, pc, ec, qs, seen, taken):
@@ -148,7 +158,8 @@ def normalize(s):
 
 def winner(s):
     cs, _pc, _ec, _qs, _seen, taken = unpack(s)
-    gone = lambda side: all(cs[i][5] or taken[i] for i in range(4) if side_of(i) == side)
+    gone = lambda side: all(cs[i][5] or taken[i]
+                            for i in range(len(TEAM)) if side_of(i) == side)
     if gone("enemy"):
         return "player"
     if gone("player"):
@@ -157,8 +168,9 @@ def winner(s):
 
 
 def hp_left(s):
-    cs = s[0:4]
-    return sum(c[2] for c in cs[0:2]), sum(c[2] for c in cs[2:4])
+    cs = s[0:len(TEAM)]
+    return (sum(c[2] for i, c in enumerate(cs) if side_of(i) == "player"),
+            sum(c[2] for i, c in enumerate(cs) if side_of(i) == "enemy"))
 
 
 # ---------------------------------------------------------------- rules
@@ -166,7 +178,7 @@ def hp_left(s):
 def advance(qs):
     """TurnQueue.advance(): strict < means ties go to the earliest array index."""
     best = 0
-    for i in range(1, 4):
+    for i in range(1, len(qs)):
         if qs[i][1] < qs[best][1]:
             best = i
     speed, sched = qs[best]
@@ -181,11 +193,22 @@ MELEE_REACH = os.environ.get("MELEE_REACH", "front")
 GUARD_REGEN = int(os.environ.get("GUARD_REGEN", "1"))
 
 
+def slot_index(side, slot):
+    """Index of the creature standing in a side's slot, or None if that slot is
+    empty. A side may field one creature — see design/tutorial notes in
+    design/second_encounter.md — so a slot is a place, not a guaranteed body."""
+    for i, (_cid, s_, l_) in enumerate(TEAM):
+        if s_ == side and l_ == slot:
+            return i
+    return None
+
+
 def pick_target(cs, taken, ai, move):
-    """battle.gd._pick_target. Melee reaches Front, or Back once Front falls;
-    the enemy AI aims ranged at Back on purpose."""
-    front, back = (2, 3) if side_of(ai) == "player" else (0, 1)
-    live = lambda i: not cs[i][5] and not taken[i]
+    """battle.gd._pick_target. Melee reaches Front, or Back once Front falls or
+    is empty; the enemy AI aims ranged at Back on purpose."""
+    other = "enemy" if side_of(ai) == "player" else "player"
+    front, back = slot_index(other, "front"), slot_index(other, "back")
+    live = lambda i: i is not None and not cs[i][5] and not taken[i]
     if move["category"] == "melee":
         if MELEE_REACH == "any":
             return back if live(back) else (front if live(front) else None)
@@ -310,7 +333,10 @@ def apply_choice(s, i, choice, log=None):
         return pack(cs, pc, ec, qs, seen, taken)
 
     if choice[0] == "swap":
-        partner = 1 if i == 0 else 0
+        mine = side_of(i)
+        partner = slot_index(mine, "back" if TEAM[i][2] == "front" else "front")
+        if partner is None or partner == i:
+            return None                          # nothing to swap with
         a, b = cs[i], cs[partner]
         a2 = (a[0], b[1], a[2], a[3], a[4], a[5], a[6])
         b2 = (b[0], a[1], b[2], b[3], b[4], b[5], b[6])
@@ -340,8 +366,8 @@ def apply_choice(s, i, choice, log=None):
     else:
         move = MOVES[CREATURES[cid]["moves"][1]]
         charge = choice[2] and pc > 0
-        di = 2 if choice[1] == "front" else 3
-        if cs[di][5] or taken[di]:
+        di = slot_index("enemy", choice[1])
+        if di is None or cs[di][5] or taken[di]:
             return None  # battle.gd would simply keep waiting; not a legal line
     pc, ec, info = resolve_and_apply(cs, pc, ec, seen, i, di, move, charge)
     if log is not None:
@@ -364,18 +390,32 @@ NO_SWAP = os.environ.get("NO_SWAP") == "1"
 SWAP_MODE = os.environ.get("SWAP_MODE", "full")
 
 
+def enemy_slots():
+    """(index, slot tag) for every enemy slot this encounter actually fields.
+
+    A side may field one creature (design/narrative.md's act one is a duel), so
+    nothing may assume both tags exist or that the enemies sit at 2 and 3."""
+    return [(ti, tag) for tag in ("front", "back")
+            for ti in (slot_index("enemy", tag),) if ti is not None]
+
+
+def has_partner(i):
+    return slot_index(side_of(i), "back" if TEAM[i][2] == "front" else "front") not in (None, i)
+
+
 def legal_choices(s, i):
     cs, pc, _ec, _qs, _seen, taken = unpack(s)
     out = []
-    for ti in (2, 3):
+    for ti, _tag in enemy_slots():
         if not NO_OFFERS and offer_ok(s, ti):
             out.append(("offer", ti))
     for ch in ([False, True] if pc > 0 else [False]):
         out.append(("melee", ch))
-        for tag, ti in (("front", 2), ("back", 3)):
-            if not cs[ti][5] and not taken[ti]:
+        for tag in ("front", "back"):
+            ti = slot_index("enemy", tag)
+            if ti is not None and not cs[ti][5] and not taken[ti]:
                 out.append(("ranged", tag, ch))
-    if not NO_SWAP:
+    if not NO_SWAP and has_partner(i):
         out.append(("swap",))
     return out
 
@@ -392,21 +432,22 @@ def naive(s, i, n):
 
 
 def melee_charge(s, i, n):
-    return ("melee", s[4] > 0)
+    return ("melee", s[len(TEAM)] > 0)
 
 
 def snipe_back(s, i, n):
     cs, _pc, _ec, _qs, _seen, taken = unpack(s)
-    if not cs[3][5] and not taken[3]:
-        return ("ranged", "back", s[4] > 0)
-    return ("melee", s[4] > 0)
+    bi = slot_index("enemy", "back")
+    if bi is not None and not cs[bi][5] and not taken[bi]:
+        return ("ranged", "back", s[len(TEAM)] > 0)
+    return ("melee", s[len(TEAM)] > 0)
 
 
 def anti_typed(s, i, n):
     """Attack whoever resists you -- the wrong read, deliberately."""
     cs, _pc, _ec, _qs, _seen, taken = unpack(s)
     me = cs[i][0]
-    for ti, tag in ((2, "front"), (3, "back")):
+    for ti, tag in enemy_slots():
         if cs[ti][5] or taken[ti]:
             continue
         if _eff_between(me, cs[ti][0]) == "resist":
@@ -420,12 +461,13 @@ def typed(s, i, n):
     cs, pc, _ec, _qs, _seen, taken = unpack(s)
     me = cs[i][0]
     ch = pc > 0
-    for ti, tag in ((2, "front"), (3, "back")):
+    for ti, tag in enemy_slots():
         if cs[ti][5] or taken[ti]:
             continue
         if _eff_between(me, cs[ti][0]) == "weak":
             return ("melee", ch) if tag == "front" else ("ranged", "back", ch)
-    if not cs[2][5] and not taken[2]:
+    fi = slot_index("enemy", "front")
+    if fi is not None and not cs[fi][5] and not taken[fi]:
         return ("melee", ch)
     return ("ranged", "back", ch)
 
@@ -444,9 +486,9 @@ def typed_swap(s, i, n):
     the search minimises decisions, so it will never pay a turn for durability
     it does not strictly need. This measures the other thing — whether Swap buys
     margin — by spending the turn up front and then playing correctly."""
-    if n == 0:
+    if n == 0 and has_partner(i):
         return ("swap",)
-    return typed(s, i, n - 1)
+    return typed(s, i, n - 1 if n else n)
 
 
 POLICIES = {
@@ -751,6 +793,64 @@ def party_openness(pool=None):
 
 # ---------------------------------------------------------------- self-check
 
+def capture_window(target_index):
+    """Play the shortest line that captures `target_index`, then ask how many
+    further attacks the target would survive if the player kept swinging
+    instead of taking the Offer.
+
+    Returns (decisions, hp_when_the_offer_first_became_legal, spare_hits), or
+    None if the target cannot be captured at all. spare_hits is the width of
+    the window the player has to notice: 0 means the very next attack kills the
+    creature they could have had.
+    """
+    line, _n = _deepen(lambda d: search_capture(target_index, True, d), 12)
+    if line is None:
+        return None
+    s = initial()
+    for _who, c in line[:-1]:
+        s, i = run_to_player_choice(s)
+        s = apply_choice(s, i, c)
+    s, _i = run_to_player_choice(s)
+    hp = unpack(s)[0][target_index][2]
+    spare, t = 0, s
+    while spare <= 8:
+        t, j = run_to_player_choice(t)
+        if j is None or winner(t) is not None:
+            break
+        nt = apply_choice(t, j, ("melee", False))
+        if nt is None or unpack(nt)[0][target_index][5]:
+            break
+        t = nt
+        spare += 1
+    return len(line), hp, spare
+
+
+def tutorial_contract():
+    """What an encounter marked "tutorial" has to be, which is not what
+    design/encounters.md's checklist asks of a tactical fight.
+
+    A tactical fight must discriminate skill: naive play loses. A tutorial must
+    do the opposite — it may not be losable, because a player who has not yet
+    been told the rules will play naively and must survive doing so. What makes
+    it a lesson instead of a formality is that naive play throws something away:
+    the creature is capturable, and mashing the attack button kills it.
+
+    Returns a list of complaints; empty means the encounter holds."""
+    out = []
+    if play(naive)[0] != "player":
+        out.append("naive play does not win — a tutorial must not be losable")
+    for ti, _tag in enemy_slots():
+        name = CREATURES[TEAM[ti][0]]["display_name"]
+        w = capture_window(ti)
+        if w is None:
+            out.append("%s cannot be captured — the tutorial has no lesson to teach" % name)
+            continue
+        if w[2] > 3:
+            out.append("%s survives %d attacks after the Offer opens — nothing is at "
+                       "stake in choosing to stop" % (name, w[2]))
+    return out
+
+
 # Tick 9 committed this outcome, and a capture of it was published. If the port
 # still reproduces it move for move, the port is very probably faithful; if it
 # stops, this file is wrong until proven otherwise.
@@ -767,7 +867,7 @@ def self_check():
     set_encounter(SELF_CHECK["encounter"])
     log = []
     w, s, _n = play(POLICIES[SELF_CHECK["policy"]][0], log)
-    got = [(c[0], c[2]) for c in s[0:4]]
+    got = [(c[0], c[2]) for c in s[0:len(TEAM)]]
     ok = (w == SELF_CHECK["winner"] and len(log) == SELF_CHECK["events"]
           and got == SELF_CHECK["final"])
     print("self-check: %s" % ("PASS" if ok else "FAIL"))
@@ -791,7 +891,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("command", nargs="?", default="lines",
                     choices=["lines", "trace", "search", "tolerance", "capture",
-                             "constants", "parties"])
+                             "constants", "parties", "tutorial"])
     ap.add_argument("policy", nargs="?", default="typed")
     ap.add_argument("--encounter", default=DEFAULT_ENCOUNTER, choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
@@ -835,12 +935,12 @@ def main():
         for line in log:
             print("  " + line)
         print("  ---")
-        for key, c in zip(KEYS, s[0:4]):
-            print("  %-12s %-10s %-6s hp=%3d guard=%d %s" % (
-                key, CREATURES[c[0]]["display_name"], c[1], c[2], c[3],
+        for i, c in enumerate(s[0:len(TEAM)]):
+            print("  %-6s %-6s %-10s hp=%3d guard=%d %s" % (
+                TEAM[i][1], c[1], CREATURES[c[0]]["display_name"], c[2], c[3],
                 "DOWN" if c[5] else ""))
         print("  charge player=%d enemy=%d   winner=%s   %d player decisions"
-              % (s[4], s[5], w, n))
+              % (s[len(TEAM)], s[len(TEAM) + 1], w, n))
 
     elif args.command == "search":
         line, nodes = _deepen(search_win, args.depth)
@@ -897,6 +997,15 @@ def main():
             print("  Measured on ONE encounter. Add --all-encounters: a rule that looks like")
             print("  slack here may be holding another fight up (see design/position.md).")
 
+    elif args.command == "parties" and (
+            ENCOUNTER_META[args.encounter].get("tutorial")
+            or slot_index("player", "back") is None):
+        # Openness asks which parties may enter. A tutorial dictates the party —
+        # act one is the player's first creature and nothing else — so the
+        # question has no answer here, and party_openness would happily invent
+        # one by substituting a pair the encounter never offers.
+        print("  This encounter fixes the player's side; openness does not apply.")
+
     elif args.command == "parties":
         pool = [c for c in sorted(CREATURES)
                 if CREATURES[c].get("max_hp") and CREATURES[c].get("moves")]
@@ -914,8 +1023,26 @@ def main():
         print("  An encounter only one party can enter is a key check, not a tactical fight.")
         print("  Aim for several, and for more than one workable Front.")
 
+    elif args.command == "tutorial":
+        problems = tutorial_contract()
+        for ti, _tag in enemy_slots():
+            name = CREATURES[TEAM[ti][0]]["display_name"]
+            w = capture_window(ti)
+            if w is None:
+                print("  %-10s cannot be captured" % name)
+            else:
+                print("  %-10s capture in %d decisions; %d HP left when the Offer opens; "
+                      "%d spare attack%s" % (name, w[0], w[1], w[2], "" if w[2] == 1 else "s"))
+        print()
+        print("  mashing attack: %s wins" % play(naive)[0])
+        if problems:
+            for p_ in problems:
+                print("  FAILS: %s" % p_)
+        else:
+            print("  holds the tutorial contract: survivable, and mashing costs you the creature.")
+
     elif args.command == "capture":
-        for ti in (2, 3):
+        for ti, _tag in enemy_slots():
             name = CREATURES[TEAM[ti][0]]["display_name"]
             for req, tag in ((False, "capture"), (True, "capture and still win")):
                 line, nodes = _deepen(

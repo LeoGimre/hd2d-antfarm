@@ -352,14 +352,19 @@ def _():
         for side in ("player", "enemy"):
             members = e.get(side, [])
             slots = sorted(m.get("slot") for m in members)
-            if slots != ["back", "front"]:
-                out.append("%s: %s side has slots %s, expected exactly one front and one back"
+            # A side may field one creature — design/tutorial.md's duel does —
+            # but the occupied slot is Front. A lone creature standing in Back
+            # would be unreachable by a melee attack and the fight would stall.
+            if slots not in (["back", "front"], ["front"]):
+                out.append("%s: %s side has slots %s, expected a front and at most one back"
                            % (eid, side, slots))
             for m in members:
                 if m.get("creature") not in creatures:
                     out.append("%s: %s names unknown creature %r" % (eid, side, m.get("creature")))
         if e.get("counter_example"):
             continue                                   # deliberately not a valid fight
+        if e.get("tutorial"):
+            continue                # a different contract; checked separately below
         if any(m.get("creature") not in creatures
                for side in ("player", "enemy") for m in e.get(side, [])):
             continue                                   # already reported above
@@ -373,6 +378,30 @@ def _():
                                "it is absent from the Charge economy and the fight cannot "
                                "discriminate skill (see design/second_encounter.md)"
                                % (eid, m["creature"]))
+    return out
+
+
+@check("tutorial encounters hold the tutorial contract")
+def _():
+    """A tutorial is exempt from the Charge-economy rule above, so it needs a
+    rule of its own or it is exempt from everything. design/tutorial.md states
+    it: survivable by a player who knows nothing, and mashing the attack button
+    costs them the creature they could have had."""
+    path = os.path.join(ROOT, "design", "proto", "encounters.json")
+    solver = os.path.join(ROOT, "design", "proto", "combat_solver.py")
+    if not (os.path.exists(path) and os.path.exists(solver)):
+        return []
+    out = []
+    for e in json.load(open(path))["encounters"]:
+        if not e.get("tutorial"):
+            continue
+        r = subprocess.run([sys.executable, solver, "tutorial", "--encounter", e["id"]],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            out.append("%s: solver failed: %s" % (e["id"], r.stderr.strip().splitlines()[-1:]))
+        for line in r.stdout.splitlines():
+            if "FAILS:" in line:
+                out.append("%s: %s" % (e["id"], line.split("FAILS:", 1)[1].strip()))
     return out
 
 

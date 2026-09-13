@@ -9,11 +9,34 @@
         "work": "people fired pots here; two of five kilns still run",
         "attention": "it holds heat it no longer needs — things here sit on warmth and pretend it is coming back"
       },
-      "look": { "sky": "dusk_ash", "ambient_energy": 1.05,
-                "key_color": [1.0, 0.86, 0.66], "key_energy": 1.2, "fog": 0.010 },
-      "encounters": { "default": [], "quiet": [] },
-      "conversations": ["kiln_yard_woman", "the_stoker"],
-      "exits": [ { "to": "the_ridge", "from_marker": "NorthGate" } ]
+      "look": {
+        "sky": "dusk_ash",
+        "ambient_energy": 1.05,
+        "key_color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "key_energy": 1.2,
+        "fog": 0.01
+      },
+      "encounters": {
+        "default": [
+          "kiln_duel"
+        ],
+        "quiet": []
+      },
+      "conversations": [
+        "kiln_yard_woman",
+        "the_stoker"
+      ],
+      "exits": [
+        {
+          "to": "the_ridge",
+          "from_marker": "NorthGate"
+        }
+      ],
+      "quiet_note": "The Kiln Yards keep producing the duel. The capture window is one decision wide (design/tutorial.md), so a player who mashes loses the Emberling — and act one's premise dies with it unless the place offers another. It does; that is what a region is for."
     },
     {
       "id": "the_ridge",
@@ -23,17 +46,36 @@
         "work": "the fastest way between two valleys, and nobody stops",
         "attention": "it refuses to be arrived at — things here perform being out of reach"
       },
-      "look": { "sky": "high_cold", "ambient_energy": 0.9,
-                "key_color": [0.88, 0.92, 1.0], "key_energy": 1.15, "fog": 0.006 },
+      "look": {
+        "sky": "high_cold",
+        "ambient_energy": 0.9,
+        "key_color": [
+          0.88,
+          0.92,
+          1.0
+        ],
+        "key_energy": 1.15,
+        "fog": 0.006
+      },
       "encounters": {
-        "default": ["the_ridge"],
+        "default": [
+          "the_ridge"
+        ],
         "quiet": []
       },
       "quiet_note": "An empty list is the point. narrative.md's escalation is a place doing less of what it does when watched, and a region's creatures ARE that — so a Ridge the practice has been through produces nothing to meet. No new content is needed to show it.",
-      "conversations": ["the_surveyor"],
+      "conversations": [
+        "the_surveyor"
+      ],
       "exits": [
-        { "to": "kiln_yards", "from_marker": "SouthPath" },
-        { "to": "the_undercroft", "from_marker": "Shaft" }
+        {
+          "to": "kiln_yards",
+          "from_marker": "SouthPath"
+        },
+        {
+          "to": "the_undercroft",
+          "from_marker": "Shaft"
+        }
       ]
     },
     {
@@ -44,11 +86,28 @@
         "work": "it was foundations, then storage, then forgotten",
         "attention": "it keeps holding up something that is no longer there"
       },
-      "look": { "sky": "grating_dark", "ambient_energy": 0.7,
-                "key_color": [0.72, 0.86, 0.80], "key_energy": 0.9, "fog": 0.016 },
-      "encounters": { "default": [], "quiet": [] },
+      "look": {
+        "sky": "grating_dark",
+        "ambient_energy": 0.7,
+        "key_color": [
+          0.72,
+          0.86,
+          0.8
+        ],
+        "key_energy": 0.9,
+        "fog": 0.016
+      },
+      "encounters": {
+        "default": [],
+        "quiet": []
+      },
       "conversations": [],
-      "exits": [ { "to": "the_ridge", "from_marker": "Ladder" } ]
+      "exits": [
+        {
+          "to": "the_ridge",
+          "from_marker": "Ladder"
+        }
+      ]
     }
   ]
 }
