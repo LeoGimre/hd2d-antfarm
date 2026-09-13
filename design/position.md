@@ -79,6 +79,53 @@ things a balance pass may not touch casually:
 That distinction did not exist before this tick. Every constant in
 `combat_resolver.gd` looked equally adjustable, and two of them are not.
 
+## Extended to every constant, and one correction
+
+The three-rule audit above was done by hand. It is now a subcommand, so the
+answer stays current instead of being a snapshot:
+
+```
+python3 design/proto/combat_solver.py constants
+```
+
+It sets each constant to a range of values, re-runs the three assertions, and
+classifies the result. Two things came out that the hand audit missed.
+
+**Correction: the Front bonus is bounded, not free.** The section above tested
+it at zero, found nothing changed, and called it a free knob. Tested upward it
+breaks: at +4 the encounter stops discriminating. So it is safe anywhere in
+**0–2** and not above, which is a materially different instruction to a tuning
+pass than "move it freely."
+
+**Two rules are decorative.** Neither of these changes any outcome:
+
+- **`BROKEN_TAKES_MORE_DAMAGE`** works at every value from 1.0 to 2.0 — including
+  1.0, which removes the bonus entirely. `combat.md` sells Broken as two things:
+  *"it loses its next turn outright and takes 50% more damage."* Measured, only
+  the first half is doing anything. The value of Breaking a creature is the turn
+  you take from it.
+- **`RESIST_HEAL`** works at 0. The "small heal-back in spite" can be deleted
+  without affecting the encounter — though it must not *grow*: at 4 the fight
+  breaks.
+
+Neither should be deleted on this evidence alone. Both are cheap, both carry
+fiction that `creatures.md` leans on, and "changes no outcome in one encounter"
+is not "does nothing." But a tuning pass should know that reaching for them will
+not move the fight.
+
+The full picture, as of this tick:
+
+| | constants |
+|---|---|
+| **fixed** — one working value | `MELEE_REACH` (Front only) |
+| **bounded** — safe inside a range | `FRONT_DAMAGE_BONUS` 0–2 · `BACK_TARGET_MULTIPLIER` ≤0.75 · `CHARGE_MULTIPLIER` ≥1.5 · `RESIST_HEAL` ≤2 · `GUARD_REGEN` ≥1 |
+| **free** — every tested value works | `BROKEN_TAKES_MORE_DAMAGE` · `SWAP_MODE` |
+
+`CHARGE_MULTIPLIER ≥ 1.5` has a readable cause: below it, spending a Charge is
+not worth the declaration, correct play collapses into hoarding, and hoarding
+already loses. `GUARD_REGEN ≥ 1` likewise — with no regeneration nothing ever
+recovers its composure and the fight stops being about pressure at all.
+
 **Caveat:** one encounter, the off-engine model, `--self-check` passing. The
 melee-reach result is so large it is unlikely to be an artifact of these
 numbers. The Front-bonus result is the one most likely to change on a different

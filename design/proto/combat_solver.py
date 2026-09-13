@@ -159,6 +159,8 @@ def advance(qs):
 # MELEE_REACH=any removes combat.md's central reach rule, so its contribution
 # can be measured rather than assumed.
 MELEE_REACH = os.environ.get("MELEE_REACH", "front")
+# Guard regenerates by this much at the start of its owner's own turn.
+GUARD_REGEN = int(os.environ.get("GUARD_REGEN", "1"))
 
 
 def pick_target(cs, taken, ai, move):
@@ -243,7 +245,7 @@ def run_to_player_choice(s, log=None, limit=400):
             break
         i = advance(qs)
         cid, slot, hp, guard, broken, dead, nm = cs[i]
-        guard = min(CREATURES[cid]["max_guard"], guard + 1)
+        guard = min(CREATURES[cid]["max_guard"], guard + GUARD_REGEN)
         cs[i] = (cid, slot, hp, guard, broken, dead, nm)
         if dead or taken[i]:
             continue
@@ -575,6 +577,51 @@ def tolerance():
     return rows
 
 
+def discriminates():
+    """The three assertions that define a pillar-2 encounter, per
+    design/encounters.md's checklist: naive must lose, correct play must win,
+    and correct play that hoards its Charges must lose — that last one being
+    what separates "the Break/Charge economy matters" from "it exists"."""
+    return (play(naive)[0] == "enemy"
+            and play(typed)[0] == "player"
+            and play(typed_hoard)[0] == "enemy")
+
+
+# Every constant the resolver and turn loop read, with values to try. The
+# question each row answers is: if this number were different, would the
+# encounter still discriminate skill? A constant that survives every value in
+# its row is a free knob; one that breaks is a load-bearing wall, and changing
+# it invalidates the balance numbers in first_blood_balance.md, capture.md and
+# progression.md, all of which were measured on top of it.
+SWEEP = [
+    ("FRONT_DAMAGE_BONUS",       [0.0, 1.0, 2.0, 4.0]),
+    ("BACK_TARGET_MULTIPLIER",   [0.5, 0.75, 1.0]),
+    ("CHARGE_MULTIPLIER",        [1.0, 1.25, 1.5, 2.0]),
+    ("BROKEN_TAKES_MORE_DAMAGE", [1.0, 1.25, 1.5, 2.0]),
+    ("RESIST_HEAL",              [0, 2, 4]),
+    ("GUARD_REGEN",              [0, 1, 2]),
+    ("MELEE_REACH",              ["front", "any"]),
+    ("SWAP_MODE",                ["full", "guard"]),
+]
+
+
+def sweep_constants():
+    g = globals()
+    rows = []
+    for name, values in SWEEP:
+        original = g[name]
+        results = []
+        for v in values:
+            g[name] = v
+            try:
+                results.append((v, discriminates()))
+            except Exception:
+                results.append((v, False))
+        g[name] = original
+        rows.append((name, original, results))
+    return rows
+
+
 # ---------------------------------------------------------------- self-check
 
 # Tick 9 committed this outcome, and a capture of it was published. If the port
@@ -616,7 +663,8 @@ def set_encounter(name):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("command", nargs="?", default="lines",
-                    choices=["lines", "trace", "search", "tolerance", "capture"])
+                    choices=["lines", "trace", "search", "tolerance", "capture",
+                             "constants"])
     ap.add_argument("policy", nargs="?", default="typed")
     ap.add_argument("--encounter", default="repaired", choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
@@ -677,6 +725,35 @@ def main():
         for label, wn, wt in tolerance():
             flag = "" if (wn == "enemy" and wt == "player") else "   <-- no longer discriminates"
             print("  %-22s %-8s %-8s%s" % (label, wn, wt, flag))
+
+    elif args.command == "constants":
+        print("  Does the encounter still discriminate skill at each value?")
+        print("  (naive loses AND correct play wins AND hoarding Charges loses)")
+        print()
+        buckets = {"free": [], "bounded": [], "fixed": []}
+        for name, current, results in sweep_constants():
+            cells = "  ".join("%s%s\033[0m" % ("\033[32m" if ok else "\033[31m",
+                                               "%s=%s" % ("ok" if ok else "NO", v))
+                              for v, ok in results)
+            good = [v for v, ok in results if ok]
+            # A binary "load-bearing" verdict lumps a constant with a working
+            # range together with one that cannot move at all, which is how the
+            # first version of this table misread FRONT_DAMAGE_BONUS.
+            kind = "free" if len(good) == len(results) else ("fixed" if len(good) <= 1 else "bounded")
+            buckets[kind].append((name, good))
+            print("  %-26s now %-6s  %s" % (name, current, cells))
+        print()
+        for kind, blurb in (("fixed", "FIXED — only one tested value works; treat as structural"),
+                            ("bounded", "BOUNDED — works over a range; staying inside it is safe"),
+                            ("free", "FREE — every tested value works; reach for these first")):
+            if buckets[kind]:
+                print("  %s" % blurb)
+                for name, good in buckets[kind]:
+                    print("     %-26s %s" % (name, ", ".join(str(v) for v in good)))
+        print()
+        print("  Leaving a bounded range or changing a fixed value invalidates the numbers")
+        print("  in first_blood_balance.md, capture.md and progression.md, all of which")
+        print("  were measured on top of them.")
 
     elif args.command == "capture":
         for ti in (2, 3):
