@@ -126,6 +126,38 @@ not worth the declaration, correct play collapses into hoarding, and hoarding
 already loses. `GUARD_REGEN ≥ 1` likewise — with no regeneration nothing ever
 recovers its composure and the fight stops being about pressure at all.
 
+## Second correction: the resist heal is not decorative either
+
+The tool now takes `--all-encounters`, which counts a value as safe only if it
+holds on **every** balanced encounter. That change was made to stop the
+Front-bonus mistake happening again, and it immediately found the same mistake
+somewhere else:
+
+```
+python3 design/proto/combat_solver.py constants --all-encounters
+```
+
+| | measured on the proof battle | measured on both |
+|---|---|---|
+| `RESIST_HEAL` | **free at 0** — "can be deleted" | **fixed at 2** — 0 breaks The Ridge |
+| `FRONT_DAMAGE_BONUS` | bounded 0–2, best at 0 | bounded **1–2** |
+| `BROKEN_TAKES_MORE_DAMAGE` | free | free — genuinely, so far |
+
+So of the two rules the section above calls decorative, **one is not**. The
+"small heal-back in spite" that a resisted hit grants — which `creatures.md`
+reads as the defender being *more sure of itself* after an attack that confirmed
+its performance — is holding The Ridge up. Remove it and that fight stops
+discriminating skill.
+
+That leaves exactly one rule in the game measured as genuinely inert across both
+encounters: the 50%-more-damage half of Broken. One out of two, which is a
+better hit rate for the phrase "this does nothing" than the previous sections of
+this document imply.
+
+**Everything above this line was measured on one encounter and should be read
+that way.** The current, conservative classification is whatever
+`--all-encounters` prints today, not the tables higher up.
+
 ## Correction: the Front bonus is not slack, and one encounter said it was
 
 Three ticks in a row narrowed the reading of `FRONT_DAMAGE_BONUS` and every one

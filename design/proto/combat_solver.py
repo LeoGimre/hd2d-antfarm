@@ -667,22 +667,54 @@ def band():
         CREATURES = base
 
 
-def sweep_constants(with_band=False):
+def sweep_constants(with_band=False, encounters=None):
+    """Classify each constant. With `encounters`, a value counts as safe only if
+    it holds on *every* one of them.
+
+    That intersection is the whole point. Measured on the proof battle alone,
+    FRONT_DAMAGE_BONUS=0 looks like the best setting available; on The Ridge the
+    fight does not work at all without a Front bonus. A single-encounter sweep
+    is wrong in one specific direction — concluding a rule does nothing — and
+    the fix is to make the tool conservative rather than to remember."""
     g = globals()
+    if encounters is None:
+        encounters = [None]                      # whatever is currently loaded
     rows = []
     for name, values in SWEEP:
         original = g[name]
         results = []
         for v in values:
             g[name] = v
-            try:
-                ok = discriminates()
-                results.append((v, ok, band() if (ok and with_band) else None))
-            except Exception:
-                results.append((v, False, None))
+            per_enc, bands = {}, {}
+            for enc in encounters:
+                if enc is not None:
+                    set_encounter(enc)
+                try:
+                    ok = discriminates()
+                    per_enc[enc] = ok
+                    if ok and with_band:
+                        bands[enc] = band()
+                except Exception:
+                    per_enc[enc] = False
+            results.append((v, all(per_enc.values()), per_enc, bands))
         g[name] = original
         rows.append((name, original, results))
     return rows
+
+
+def balanced_encounters():
+    """Every named encounter that discriminates skill as shipped. The 'current'
+    entry deliberately does not — it is the pre-repair roster — so it excludes
+    itself rather than needing a special case."""
+    keep = []
+    for name in sorted(ENCOUNTERS):
+        set_encounter(name)
+        try:
+            if discriminates():
+                keep.append(name)
+        except Exception:
+            pass
+    return keep
 
 
 # ---------------------------------------------------------------- self-check
@@ -734,6 +766,8 @@ def main():
     ap.add_argument("--no-capture", action="store_true",
                     help="disable the Offer action (the rule set before capture existed)")
     ap.add_argument("--depth", type=int, default=18)
+    ap.add_argument("--all-encounters", action="store_true",
+                    help="constants: require each value to hold on every balanced encounter")
     ap.add_argument("--band", action="store_true",
                     help="constants: also report each value's tolerance band, which is a "
                          "strictly finer measure than the pass/fail classification")
@@ -793,35 +827,43 @@ def main():
             print("  %-22s %-8s %-8s%s" % (label, wn, wt, flag))
 
     elif args.command == "constants":
+        encs = balanced_encounters() if args.all_encounters else [args.encounter]
         print("  Does the encounter still discriminate skill at each value?")
         print("  (naive loses AND correct play wins AND hoarding Charges loses)")
+        print("  across: %s" % ", ".join(encs))
         print()
         buckets = {"free": [], "bounded": [], "fixed": []}
-        for name, current, results in sweep_constants(with_band=args.band):
-            cells = "  ".join("%s%s\033[0m%s" % (
-                "\033[32m" if ok else "\033[31m",
-                "%s=%s" % ("ok" if ok else "NO", v),
-                "" if b is None else "(%+.0f/%+.0f)" % (b[0] * 100, b[1] * 100))
-                for v, ok, b in results)
-            good = [v for v, ok, _b in results if ok]
-            # A binary "load-bearing" verdict lumps a constant with a working
-            # range together with one that cannot move at all, which is how the
-            # first version of this table misread FRONT_DAMAGE_BONUS.
+        for name, current, results in sweep_constants(with_band=args.band, encounters=encs):
+            cells = []
+            for v, ok, per_enc, bands in results:
+                note = ""
+                if not ok and len(encs) > 1:
+                    bad = [e for e, o in per_enc.items() if not o]
+                    note = "[%s]" % ",".join(b[:4] for b in bad)
+                elif args.band and bands:
+                    note = "(" + "/".join("%+.0f%+.0f" % (b[0]*100, b[1]*100)
+                                          for b in bands.values()) + ")"
+                cells.append("%s%s\033[0m%s" % ("\033[32m" if ok else "\033[31m",
+                                                "%s=%s" % ("ok" if ok else "NO", v), note))
+            good = [v for v, ok, _p, _b in results if ok]
             kind = "free" if len(good) == len(results) else ("fixed" if len(good) <= 1 else "bounded")
             buckets[kind].append((name, good))
-            print("  %-26s now %-6s  %s" % (name, current, cells))
+            print("  %-26s now %-6s  %s" % (name, current, "  ".join(cells)))
         print()
-        for kind, blurb in (("fixed", "FIXED — only one tested value works; treat as structural"),
-                            ("bounded", "BOUNDED — works over a range; staying inside it is safe"),
-                            ("free", "FREE — every tested value works; reach for these first")):
+        for kind, blurb in (("fixed", "FIXED — one working value; treat as structural"),
+                            ("bounded", "BOUNDED — safe inside this range"),
+                            ("free", "FREE — every tested value works")):
             if buckets[kind]:
                 print("  %s" % blurb)
                 for name, good in buckets[kind]:
-                    print("     %-26s %s" % (name, ", ".join(str(v) for v in good)))
+                    print("     %-26s %s" % (name, ", ".join(str(v) for v in good) or "(none)"))
         print()
-        print("  Leaving a bounded range or changing a fixed value invalidates the numbers")
-        print("  in first_blood_balance.md, capture.md and progression.md, all of which")
-        print("  were measured on top of them.")
+        if len(encs) > 1:
+            print("  A value is listed as working only if it holds on every encounter above.")
+            print("  Brackets name the encounters a value fails on.")
+        else:
+            print("  Measured on ONE encounter. Add --all-encounters: a rule that looks like")
+            print("  slack here may be holding another fight up (see design/position.md).")
 
     elif args.command == "capture":
         for ti in (2, 3):
