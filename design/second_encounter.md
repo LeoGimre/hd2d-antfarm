@@ -111,8 +111,16 @@ exactly what a roster heading for sixty creatures needs.
 ## What is still caveated
 
 Two encounters is not many, and both use the same player pair. The next thing
-worth measuring is a fight where the *player's* side varies — which needs party
-management, and therefore capture, and therefore an engine.
+worth measuring is a fight where the *player's* side varies.
+
+~~which needs party management, and therefore capture, and therefore an
+engine.~~ **That was wrong**, and it was wrong in a way worth noticing: measuring
+a varying party does not need party *management*, it needs a different pair
+handed to the solver, which is one line. `design/progression.md` now carries the
+result — two of twelve pairs can win The Ridge, it is the types rather than the
+stats, and no simple rule predicts which. I had talked myself out of a cheap
+measurement by reasoning about what the *game* would need rather than what the
+*question* needed.
 
 The Front damage bonus question from `position.md` is still open and now has a
 second data point available; it was not resolved here because resolving it means

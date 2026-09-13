@@ -114,6 +114,46 @@ That is as far as this document goes. Party size, where reserves live, what
 happens when the party is full and a capture lands — those need a UI and a save
 system to exist, and neither does yet.
 
+### Measured: party choice is decisive, and not predictable
+
+The claim above — that the party screen is where accumulated coverage becomes a
+plan — was an argument. It is now a measurement. Twelve player pairs, drawn from
+the six statted creatures, against The Ridge's enemy line:
+
+**Two of twelve can win at all.** Not "win more comfortably" — the other ten
+cannot beat the encounter with correct play. Party choice is not a flavour
+decision here, it is most of the fight.
+
+**It is the type composition, not the stats.** Rootshell is in both working
+pairs, and it is not because it is the tank. Transplanting its 36 HP, 3 Guard
+and 7 speed onto Emberling or Galewing in the Front slot does not save either of
+them; both still lose, and by about the same margin. HP does not substitute for
+a matchup, which follows from `progression.md`'s own finding that Guard is a
+discrete gate rather than a stat — being Broken repeatedly costs you *turns*, and
+no amount of HP buys a turn back.
+
+**And no simple type rule predicts which pairs work.** Four were tried against
+the ground truth:
+
+| candidate rule | misses a working pair | admits a failing pair |
+|---|---|---|
+| the Front creature resists an enemy | 0 | 4 |
+| both creatures can break something | 0 | 10 |
+| the Front creature is weak to nothing | 2 | 6 |
+| resists something *and* is weak to nothing | 2 | 0 |
+
+The first two are **necessary but not sufficient** — useful as filters, useless
+as predictions. The others are simply wrong. Viability is an interaction of
+matchup, slot, speed and Guard size, and it has to be measured.
+
+That has a direct consequence for whatever party UI eventually exists: **it must
+not show a coverage score.** Any single number claiming to say how well a party
+matches an encounter would be a confident lie, because the four most plausible
+formulas for one are all wrong. What a screen can honestly show is the matchup
+grid — who hits whom for how much Guard damage, who resists what — and let the
+player work it out. Which is more interesting, and is what pillar 2 is asking
+for anyway.
+
 ## Rejected
 
 - **Levels and XP.** The default, and measurably incompatible: the growth curve
