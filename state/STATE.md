@@ -40,7 +40,8 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    fourth box.
 3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
-   generate, **`godot --headless --import`**, look at the frames. M4's second box.
+   generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
+   now carries six body plans and twenty placeholder entries, validated at roster scale.
 
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
@@ -51,6 +52,12 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Only the silhouette reads** (tick 16): the one rule the sprite technique turns on. Anything
+  drawn *inside* another part's outline is invisible — it must be drawn a pixel fatter in the
+  outline colour first (`taper_edged`). Rootshell's vanishing shell and the brawler plan rendering
+  three creatures as identical beans are the same bug. Limit: a part nearly as wide as what it
+  sits on cannot be saved by an edge; those proportions are just wrong. Roster variety comes from
+  **plan count**, not entry count — six plans carry twenty; sixty wants ten to twelve.
 - **Creature sprites are (body plan, proportions, palette, features)** (tick 15):
   `design/creature_sprites.md`, proven by `design/proto/creature_forge.py` (runs here — it is
   Python; `python3 design/proto/creature_forge.py --sheet`). A body plan is a *function* of
@@ -144,4 +151,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-15
+16
