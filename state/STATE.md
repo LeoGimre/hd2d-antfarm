@@ -139,6 +139,16 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Every enemy line must give each player creature something it can break** (tick 38):
+  `design/second_encounter.md`. A one-type enemy line **cannot** make a pillar-2 encounter — 0 of
+  192 stat settings — because a creature whose attacks are all resisted does 0 Guard damage,
+  never banks a Charge, and is absent from the economy the fight is about. Constrains
+  `regions.md`, which pushes toward one type per region: a region may be predominantly one type,
+  but an *encounter* must be mixed, deliberately.
+- **The diagonal requirement is structural** (tick 38): confirmed on a second encounter with
+  different creatures and stats — straight arrangement 0 of 180, diagonal 7 of 180. And the tick-37
+  retune **generalises**: 7→12 workable settings, band +0/+75 → +75/+75, random 15.6% → 6.3%.
+  Second encounter reproducible: `combat_solver.py lines --encounter ridge`.
 - **Use `constants --band`, not the pass/fail classification** (tick 37): the binary says
   `BROKEN_TAKES_MORE_DAMAGE` is "free"; the band says it moves the fight from +20% to +75%. **A
   constant can be free by the binary and still be the most important dial in the file.** Mechanism
@@ -315,4 +325,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-37
+38
