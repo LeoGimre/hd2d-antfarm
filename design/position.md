@@ -126,6 +126,39 @@ not worth the declaration, correct play collapses into hoarding, and hoarding
 already loses. `GUARD_REGEN ≥ 1` likewise — with no regeneration nothing ever
 recovers its composure and the fight stops being about pressure at all.
 
+## Correction: the Front bonus is not slack, and one encounter said it was
+
+Three ticks in a row narrowed the reading of `FRONT_DAMAGE_BONUS` and every one
+of them was pointing the wrong way. It was called *not load-bearing* (zero
+changed no outcome), then refined to *bounded 0–2*, then noted as giving the
+widest band of all at zero — with the recommendation held back only on the
+grounds that deleting a rule `combat.md` argues for is a design decision rather
+than a tuning one.
+
+That caution was right, and `design/second_encounter.md` shows why.
+
+Measured on **both** encounters, at the retuned constants:
+
+| Front bonus | proof battle | The Ridge |
+|---|---|---|
+| **+0** | band +100%/+40%, random 9.1% | **does not discriminate at all** |
+| **+1** | band +75%/+40%, random 9.9% | band +75%/+50%, random 5.0% |
+| **+2** (shipped) | band +75%/+50%, random 12.3% | band +75%/+75%, random 6.5% |
+| **+3** | band +75%/+75%, random 14.1% | lazy `melee_charge` line wins again |
+
+Zero does not merely do less on the Ridge. It breaks it. The rule that looked
+like slack in one fight is holding a different fight up, and **+1 is the best
+value across both** — it works everywhere, and it has the lowest random-play
+floor of any working setting on either encounter.
+
+The general lesson is worth more than the number. **A single-encounter
+measurement can be confidently wrong in one specific direction: concluding that
+a rule does nothing.** Slack in one fight is not slack everywhere, and a rule
+only shows its load when something leans on it. Every classification in the
+table above should be re-run per encounter — the tool takes `--encounter`, and
+from now on this section's numbers should be read as "on the proof battle" and
+not as properties of the game.
+
 **Caveat:** one encounter, the off-engine model, `--self-check` passing. The
 melee-reach result is so large it is unlikely to be an artifact of these
 numbers. The Front-bonus result is the one most likely to change on a different

@@ -248,6 +248,7 @@ python3 design/proto/combat_solver.py constants --band
 |---|---|---|
 | `CHARGE_MULTIPLIER` | 1.5 | **2.0** |
 | `BROKEN_TAKES_MORE_DAMAGE` | 1.5 | **1.0** (the clause deleted) |
+| `FRONT_DAMAGE_BONUS` | 2.0 | **1.0** — added after `second_encounter.md`; see below |
 | player headroom before naive wins | +0% | **+75%** |
 | enemy headroom while correct play still wins | +15% | **+50%** |
 | random play wins | 12.9% | **10.8%** |
@@ -280,14 +281,28 @@ spend Charges when you have them" is a lazy half-correct line that currently
 **wins**, and under the retune it loses. The encounter goes from separating two
 strategies to separating three.
 
-### Why not go further
+### The third constant, decided on two encounters
 
-`FRONT_DAMAGE_BONUS = 0` on top of these gives an even wider band (+100% / +40%)
-and a lower random floor still (8.7%). It is not recommended here, because
-setting it to zero is *deleting* a rule `combat.md` argues for at length, and
-that is a design decision rather than a tuning one — it should not be made on
-the evidence of a single encounter. The measurement is recorded so a later tick
-with a second encounter can decide it properly.
+An earlier version of this section noted that `FRONT_DAMAGE_BONUS = 0` gives a
+wider band still on this fight, and declined to recommend it because deleting a
+rule `combat.md` argues for should not be decided on one encounter. That was the
+right call: measured on **The Ridge**, a Front bonus of zero does not
+discriminate skill *at all*. The rule that looked like slack here is holding a
+different fight up.
+
+**+1 is the best value across both encounters** — it works everywhere zero does
+not, and it has the lowest random-play floor of any working setting on either.
+So the recommendation is 2.0 → 1.0 rather than 2.0 → 0.
+
+With all three applied, on both encounters, **exactly one of the seven scripted
+lines wins, and it is the correct one**:
+
+| | proof battle | The Ridge |
+|---|---|---|
+| band | +75% / +40% | +75% / +50% |
+| random play | 9.2% | 4.8% |
+| lines that win | correct targeting only | correct targeting only |
+| capture, and still win | 5 decisions | 5 decisions |
 
 **Caveat:** one encounter, off-engine model, `--self-check` passing. The solver's
 own constants are deliberately **not** changed — `farm/agreements.py` checks them
