@@ -432,7 +432,19 @@ function pageDesignIndex(docs, intro, slugs) {
   });
 }
 
-function pageDesignDoc(doc, slugs) {
+/** Creature sprites ship as two frames — see design/creature_sprites.md's
+ *  animation section. Markdown can only emit one <img>, so the frame-A image is
+ *  wrapped with its frame-B partner layered over it and a single CSS animation
+ *  cross-cuts between them. One rule for the whole roster, no per-sprite CSS,
+ *  and it degrades to a static frame A if the B file is missing. */
+function animateSprites(html, haveFrameB) {
+  return html.replace(/<img src="\/sprites\/([a-z0-9_]+)\.png" alt="([^"]*)">/g,
+    (m, id, alt) => haveFrameB.has(id)
+      ? `<span class="sprite">${m}<img src="/sprites/${id}_b.png" alt="" aria-hidden="true"></span>`
+      : m);
+}
+
+function pageDesignDoc(doc, slugs, haveFrameB = new Set()) {
   // Relative links between design documents resolve to their published paths.
   const src = doc.body.replace(/\]\((?:design\/)?([a-z0-9_]+)\.md\)/g, "](/design/$1)");
   return layout({
@@ -441,7 +453,7 @@ function pageDesignDoc(doc, slugs) {
     description: doc.summary,
     body: `<article class="post">
   <div class="meta"><span>design/${esc(doc.file)}</span></div>
-  ${linkDesignRefs(renderMarkdown(src), slugs)}
+  ${animateSprites(linkDesignRefs(renderMarkdown(src), slugs), haveFrameB)}
   <hr>
   <p><a href="/design">← all design documents</a></p>
 </article>`,
@@ -505,7 +517,13 @@ function main() {
   const slugs = new Set(allDocs.map((d) => d.slug));
   mkdirSync(join(OUT, "design"), { recursive: true });
   writeFileSync(join(OUT, "design.html"), pageDesignIndex(docs, intro, slugs));
-  for (const d of allDocs) writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs));
+  const spriteDir = join(ROOT, "design", "proto", "sprites");
+  const haveFrameB = new Set(
+    existsSync(spriteDir)
+      ? readdirSync(spriteDir).filter((f) => f.endsWith("_b.png")).map((f) => f.slice(0, -6))
+      : []);
+  for (const d of allDocs)
+    writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs, haveFrameB));
 
   for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e, slugs));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));

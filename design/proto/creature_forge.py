@@ -437,6 +437,43 @@ def groove(g, cx, cy, rx, ry):
         if 0 <= int(y) < H and 0 <= int(x) < W and g[int(y)][int(x)] not in (EMPTY, "K"):
             g[int(y)][int(x)] = "K"
 
+# ---------------------------------------------------------------- animation
+#
+# Frame B is frame A with everything above the silhouette's vertical midpoint
+# shifted down one row: the creature settles onto its legs and breathes.
+#
+# The obvious approach was to animate *parametrically* — a body plan is a
+# function of proportions, so a frame is the same function with the proportions
+# nudged, which needs no per-plan authoring and composes with plans that do not
+# exist yet. It was tried and it does not work, for a reason specific to this
+# generator: shading is a global pass. Nudging one proportion re-runs the
+# outline, the distance field and the normals over the whole sprite, so a
+# one-pixel intention comes out as a scatter of changed pixels across the
+# creature. That reads as shimmer, not as motion.
+#
+# Doing it after shading moves more pixels and looks far better, because the
+# ones it moves move together. pixelforge.py reached the same conclusion for the
+# traveler by shifting a band of rows; this needs no knowledge of which rows are
+# legs, so it generalises to every plan including future ones.
+
+def settle(grid):
+    """Frame B: the body drops one row onto the legs. Applied to the finished
+    frame, never to the proportions."""
+    filled = [y for y in range(H) for x in range(W) if grid[y][x] != EMPTY]
+    if not filled:
+        return grid
+    top, bot = min(filled), max(filled)
+    seam = (top + bot) // 2
+    out = [r[:] for r in grid]
+    for y in range(seam, top, -1):
+        out[y] = grid[y - 1][:]
+    out[top] = [EMPTY] * W
+    return out
+
+
+IDLE_FRAMES = ("a", "b")
+
+
 # ---------------------------------------------------------------- roster
 
 # Hue per type. One number per type is the whole of "type-coded palette".
@@ -533,7 +570,7 @@ ROSTER = [
 PLANS = dict(quadruped=quadruped, serpent=serpent, avian=avian,
              blob=blob, insectoid=insectoid, brawler=brawler)
 
-def build(cid, plan, ctype, feats, p, outdir):
+def build(cid, plan, ctype, feats, p, outdir, frame="a"):
     g, anchor = PLANS[plan](p)
     shells = []
     for f in feats:
@@ -550,7 +587,11 @@ def build(cid, plan, ctype, feats, p, outdir):
         groove(g, *sh)
     eye(g, anchor, 1, 0, big=p.get("head_r", 3) >= 3.2)
     g = outline(g)
-    return render(g, ramp(HUE[ctype], SAT[ctype]), os.path.join(outdir, cid + ".png"))
+    if frame == "b":
+        g = settle(g)
+    suffix = "" if frame == "a" else "_" + frame
+    return render(g, ramp(HUE[ctype], SAT[ctype]),
+                  os.path.join(outdir, cid + suffix + ".png"))
 
 
 # ------------------------------------------------- looking at the result
@@ -626,7 +667,10 @@ OUT = os.environ.get("FORGE_OUT", "/tmp/creature_forge")
 def main():
     made = []
     for (cid, plan, ctype, feats, p) in ROSTER:
-        made.append(build(cid, plan, ctype, feats, p, OUT))
+        for frame in IDLE_FRAMES:
+            path = build(cid, plan, ctype, feats, p, OUT, frame)
+            if frame == "a":
+                made.append(path)
         print(made[-1])
     if "--sheet" in sys.argv:
         w, h, px = sheet(made, cols=5)

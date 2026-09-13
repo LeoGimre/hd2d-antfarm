@@ -186,6 +186,55 @@ plans, not to propose a roster. What these creatures actually *are* — the
 fiction, the naming, why a player would want one — is its own design tick and
 has not happened.
 
+## Idle animation
+
+A static sprite in a turn-based battle is a cardboard cut-out, and
+`build_battle.gd`'s own comments warn against the scene reading as "a flat UI
+screen with 3D props glued on." So each creature now has two frames.
+
+**Frame B is frame A with everything above the silhouette's vertical midpoint
+shifted down one row.** The body settles onto the legs; the creature breathes.
+It needs no per-plan authoring and no knowledge of which rows are legs, so it
+works for the six plans that exist and for the seventh.
+
+### The obvious approach does not work, for an interesting reason
+
+A body plan is a *function* of proportions, so the elegant way to animate is to
+evaluate it again with the proportions nudged — shorter legs, a rounder body.
+No new machinery at all. That was built first, and it fails.
+
+**Shading is a global pass.** Nudging one proportion re-runs the auto-outline,
+the distance field and the surface normals across the whole sprite, so a
+one-pixel intention comes out as a scatter of changed pixels all over the
+creature. Measured at three delta sizes, every creature changed at every size,
+between 3 and 61 pixels — and the changes are distributed rather than local. It
+reads as shimmer, not as motion. Galewing came out looking like a different pose
+rather than the same bird breathing.
+
+Doing it after shading changes **more** pixels — median 98 against 21 — and
+looks far better, because the pixels it moves move *together*.
+
+That is worth stating as a rule, because the measurement actively misled me:
+**pixel-diff count measures change, not coherence.** The version that altered
+fewer pixels was the one that looked wrong. There is no substitute for putting
+the two frames side by side and looking.
+
+### On the site
+
+`site/build.mjs` wraps each sprite image with its frame-B partner layered over
+it, cross-cut by a single CSS animation — one rule for the whole roster, no
+per-sprite CSS. The B frame's base state is `opacity: 0`, so anywhere the
+animation does not run (reduced motion, an old browser, a screenshot tool that
+does not advance the animation clock) the sprite falls back to frame A, the
+canonical one, rather than to a creature frozen mid-breath.
+
+**Verified: the layering.** Forcing frame B visible demonstrably changes the
+rendered page. **Not verified: the animation itself** — the headless browser
+available here does not advance CSS animation time under a virtual-time budget,
+so no capture can show the cycle. The failure modes are benign in both
+directions, which is why it shipped unverified, but it is unverified and should
+be looked at in a real browser.
+
 ## Rejected alternatives
 
 - **One hand-authored character map per creature**, as the traveler is done

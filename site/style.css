@@ -200,6 +200,30 @@ article.post img[src^="/sprites/"] {
 }
 .spritestrip { margin: 14px 0 4px; line-height: 0; }
 
+/* Two-frame idle. The B frame is layered over A and cross-cut with one
+   animation for the whole roster — no per-sprite CSS. Held still for anyone who
+   has asked their system not to animate things. */
+.sprite { position: relative; display: inline-block; line-height: 0; }
+.sprite img:last-child {
+  position: absolute; inset: 0; margin: 0;
+  /* Base state is hidden so that anywhere the animation does not run — reduced
+     motion, an old browser, a screenshot tool that does not advance the
+     animation clock — the sprite falls back to frame A, the canonical one,
+     rather than to a creature permanently mid-breath. */
+  opacity: 0;
+  /* No steps() — with only two discrete keyframe stops it holds the whole
+     animation at its start value, which is a silent no-op. The 55%-to-56%
+     window is 16ms of a 1.6s cycle, so linear is already a hard cut. */
+  animation: creature-idle 1.6s linear infinite;
+}
+@keyframes creature-idle {
+  0%, 55% { opacity: 0; }
+  56%, 100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sprite img:last-child { animation: none; opacity: 0; }
+}
+
 /* ---------------------------------------------------------------- bestiary */
 .beasts {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
