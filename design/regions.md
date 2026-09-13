@@ -104,6 +104,22 @@ Reciprocity is the thing that rots, so it belongs in `farm/agreements.py`:
 **every exit's destination must exist, and must have an exit back.** A one-way
 door is then a deliberate thing somebody wrote down rather than a typo.
 
+**Both are checked now.** `design/proto/regions.json` holds the three regions
+below in this format, and `agreements.py` validates it: unique ids, every
+referenced encounter exists, every exit's destination exists and has a way back
+unless the exit is marked `"one_way": true` — and, the one that matters most,
+**a region's `look` may only set the knobs `hd2d_look.md` permits.** Sky, ambient
+energy, key colour, key energy, fog. Anything else, and above all the key light
+*angle*, is house style and is rejected by name, because the angle is baked into
+every creature sprite and a region that moved it would light the whole roster
+wrong. That was a rule in a document; it is now a rule that argues back.
+
+One detail in the data worth pointing at: The Ridge's `quiet` encounter list is
+**empty**. That is not a placeholder. `narrative.md`'s escalation is a place
+doing less of what it does when watched, and a region's creatures *are* that —
+so a Ridge the practice has been through produces nothing to meet, and showing
+it needs no new content at all.
+
 ## Three regions, sketched
 
 Concrete enough to build against, drawn from the places the roster already

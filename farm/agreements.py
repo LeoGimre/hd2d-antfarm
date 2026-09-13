@@ -211,6 +211,55 @@ def _():
     return out
 
 
+# design/hd2d_look.md: a region may vary its sky, ambient energy, key colour and
+# energy, and fog. Everything else — tonemap, glow, SSAO, FOV and above all the
+# key light ANGLE — is house style. The angle is baked into every creature
+# sprite, so a region that moved it would light the whole roster wrong.
+PERMITTED_LOOK_KEYS = {"sky", "ambient_energy", "key_color", "key_energy", "fog"}
+
+
+@check("proposed regions are well formed, reciprocal, and inside the house style")
+def _():
+    path = os.path.join(ROOT, "design", "proto", "regions.json")
+    if not os.path.exists(path):
+        return []
+    regions = json.load(open(path))["regions"]
+    by_id = {}
+    out = []
+    for r in regions:
+        if r["id"] in by_id:
+            out.append("duplicate region id %r" % r["id"])
+        by_id[r["id"]] = r
+
+    enc_path = os.path.join(ROOT, "design", "proto", "encounters.json")
+    known_encounters = set()
+    if os.path.exists(enc_path):
+        known_encounters = {e["id"] for e in json.load(open(enc_path))["encounters"]}
+
+    for r in regions:
+        rid = r["id"]
+        for k in sorted(set(r.get("look", {})) - PERMITTED_LOOK_KEYS):
+            out.append("%s: look sets %r, which is house style and not per-region "
+                       "(design/hd2d_look.md)" % (rid, k))
+        for state, ids in r.get("encounters", {}).items():
+            for e in ids:
+                if e not in known_encounters:
+                    out.append("%s: %s state names unknown encounter %r" % (rid, state, e))
+        for x in r.get("exits", []):
+            dest = x.get("to")
+            if dest not in by_id:
+                out.append("%s: exit leads to unknown region %r" % (rid, dest))
+                continue
+            # design/regions.md: reciprocity is the thing that rots, so a
+            # one-way door has to be written down rather than left as a typo.
+            if x.get("one_way"):
+                continue
+            if not any(b.get("to") == rid for b in by_id[dest].get("exits", [])):
+                out.append("%s -> %s has no way back; if that is deliberate, mark the exit "
+                           "\"one_way\": true" % (rid, dest))
+    return out
+
+
 @check("proposed encounters are well formed and can produce a tactical fight")
 def _():
     path = os.path.join(ROOT, "design", "proto", "encounters.json")

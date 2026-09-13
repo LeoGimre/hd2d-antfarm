@@ -1,0 +1,54 @@
+{
+  "_comment": "Proposed content for game/data/regions.json, in the format design/regions.md decides. Kept in design/proto because no engine has seen it. Geometry is NOT here — a region's layout is a hand-authored build_region_<id>.gd, per that document. Only the look knobs design/hd2d_look.md permits may vary per region; the key light ANGLE is house style and is deliberately not expressible.",
+  "regions": [
+    {
+      "id": "kiln_yards",
+      "display_name": "The Kiln Yards",
+      "brief": {
+        "ground": "fired brick and ash, low warm light, everything slightly too orange",
+        "work": "people fired pots here; two of five kilns still run",
+        "attention": "it holds heat it no longer needs — things here sit on warmth and pretend it is coming back"
+      },
+      "look": { "sky": "dusk_ash", "ambient_energy": 1.05,
+                "key_color": [1.0, 0.86, 0.66], "key_energy": 1.2, "fog": 0.010 },
+      "encounters": { "default": [], "quiet": [] },
+      "conversations": ["kiln_yard_woman", "the_stoker"],
+      "exits": [ { "to": "the_ridge", "from_marker": "NorthGate" } ]
+    },
+    {
+      "id": "the_ridge",
+      "display_name": "The Ridge",
+      "brief": {
+        "ground": "bare rock, thin cold light, nothing between you and the sky",
+        "work": "the fastest way between two valleys, and nobody stops",
+        "attention": "it refuses to be arrived at — things here perform being out of reach"
+      },
+      "look": { "sky": "high_cold", "ambient_energy": 0.9,
+                "key_color": [0.88, 0.92, 1.0], "key_energy": 1.15, "fog": 0.006 },
+      "encounters": {
+        "default": ["the_ridge"],
+        "quiet": []
+      },
+      "quiet_note": "An empty list is the point. narrative.md's escalation is a place doing less of what it does when watched, and a region's creatures ARE that — so a Ridge the practice has been through produces nothing to meet. No new content is needed to show it.",
+      "conversations": ["the_surveyor"],
+      "exits": [
+        { "to": "kiln_yards", "from_marker": "SouthPath" },
+        { "to": "the_undercroft", "from_marker": "Shaft" }
+      ]
+    },
+    {
+      "id": "the_undercroft",
+      "display_name": "The Undercroft",
+      "brief": {
+        "ground": "wet stone under a town that grew over it, lit by what falls through gratings",
+        "work": "it was foundations, then storage, then forgotten",
+        "attention": "it keeps holding up something that is no longer there"
+      },
+      "look": { "sky": "grating_dark", "ambient_energy": 0.7,
+                "key_color": [0.72, 0.86, 0.80], "key_energy": 0.9, "fog": 0.016 },
+      "encounters": { "default": [], "quiet": [] },
+      "conversations": [],
+      "exits": [ { "to": "the_ridge", "from_marker": "Ladder" } ]
+    }
+  ]
+}
