@@ -194,6 +194,30 @@ def _():
     return out
 
 
+@check("proposed creature stats name creatures that exist in the roster")
+def _():
+    path = os.path.join(ROOT, "design", "proto", "proposed_creatures.json")
+    if not os.path.exists(path):
+        return []
+    proposed = json.load(open(path))["creatures"]
+    roster = read("design", "roster.md")
+    types = set(json.loads(read("game", "data", "types.json"))["types"])
+    moves = {m["id"] for m in json.loads(read("game", "data", "moves.json"))["moves"]}
+    live = {c["id"] for c in json.loads(read("game", "data", "creatures.json"))["creatures"]}
+    out = []
+    for c in proposed:
+        if ("**%s**" % c["display_name"]) not in roster:
+            out.append("%r is statted but not in design/roster.md" % c["id"])
+        if c["id"] in live:
+            out.append("%r is in game/data now — remove it from the proposal" % c["id"])
+        if c["type"] not in types:
+            out.append("%r has unknown type %r" % (c["id"], c["type"]))
+        for m in c["moves"]:
+            if m not in moves:
+                out.append("%r references missing move %r" % (c["id"], m))
+    return out
+
+
 @check("the committed sprite PNGs still match what the generator produces")
 def _():
     import shutil, tempfile

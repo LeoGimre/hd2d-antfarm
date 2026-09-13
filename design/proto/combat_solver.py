@@ -40,6 +40,16 @@ def _load(name, key):
 BASE_CREATURES = {c["id"]: c for c in _load("creatures.json", "creatures")}
 MOVES = {m["id"]: m for m in _load("moves.json", "moves")}
 TYPES = _load("types.json", "types")
+# Stats for creatures that exist in design/roster.md but have not reached
+# game/data yet. Merged over the real data so a proposed encounter is
+# reproducible; see design/second_encounter.md for how they were arrived at.
+PROPOSED_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "proposed_creatures.json")
+if os.path.exists(PROPOSED_PATH):
+    with open(PROPOSED_PATH) as _f:
+        for _c in json.load(_f)["creatures"]:
+            BASE_CREATURES.setdefault(_c["id"], _c)
+
 CREATURES = copy.deepcopy(BASE_CREATURES)
 
 # CombatResolver's constants, mirrored.
@@ -74,6 +84,11 @@ ENCOUNTERS = {
     # The re-pairing that document prescribes. Every correct target is diagonal.
     "repaired": [("rootshell", "player", "front"), ("tidalpup", "player", "back"),
                  ("emberling", "enemy", "front"), ("galewing", "enemy", "back")],
+    # The Ridge, proposed in design/second_encounter.md. Diagonal like the one
+    # above, and deliberately built from different creatures at different stats
+    # to test whether that requirement is structural or a quirk of the first four.
+    "ridge": [("rootshell", "player", "front"), ("tidalpup", "player", "back"),
+              ("ashmoth", "enemy", "front"), ("ridgewalk", "enemy", "back")],
 }
 TEAM = ENCOUNTERS["repaired"]
 
