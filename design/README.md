@@ -86,6 +86,10 @@ agree on.
 **[`town_square.md`](town_square.md)** — the M2 location, written before any of
 the above. Kept as-is.
 
+**[`save.md`](save.md)** — one save, written by the game, because a story about
+consequence that can be reloaded has no consequence. Small, because
+`progression.md` deleted most of what a save normally holds.
+
 ## The tools
 
 Not documents, but where most of the recent findings came from.
