@@ -23,9 +23,15 @@ Three ways out, in order of how much they were considered:
   exists to produce.
 - **Write tests and simply not run them automatically.** Rejected. A test suite
   nobody runs is worse than none, because it reports safety it is not providing.
-- **`farm/test.sh`, owned and invoked by the loop.** Taken. `farm/` is the loop's
-  own directory. The script runs the suite, exits non-zero on failure, and the
+- **A runner in `farm/`, owned and invoked by the loop.** Taken. `farm/` is the
+  loop's own directory. It runs the suite, exits non-zero on failure, and the
   tick ritual runs it alongside `verify.sh` before any commit touching `game/`.
+
+  **Built as `farm/test.py`, not the `test.sh` this document originally named**,
+  for a dull reason worth recording: the loop cannot `chmod`, so a shell script
+  it creates is not executable, and it has no allowlisted way to invoke one
+  anyway — `python3 x.py` runs where `./x.sh` does not. A runner nobody can run
+  is worse than no runner.
 
 That is weaker than a gate — the loop could forget — and it should be recorded
 plainly rather than dressed up. **Only Leo can make it a gate**, by adding one
@@ -36,6 +42,23 @@ One consolation worth noting: `verify.sh`'s parse stage already `--check-only`s
 every `.gd` in the project, so test files that stop compiling *will* fail the
 real gate. Compilation is not correctness, but it means a rotted test file
 cannot sit there unnoticed.
+
+### What it does today
+
+`python3 farm/test.py` currently runs two stages and skips one:
+
+1. **The combat model still matches the engine result it was validated against**
+   — `combat_solver.py --self-check`. Everything downstream of the model is
+   worthless if this fails, so it runs first.
+2. **Cross-file agreements** — `farm/agreements.py`, fifteen checks.
+3. **Combat logic under unit test** — *skipped*, because `game/tests/run_tests.gd`
+   does not exist and there is no engine here to run it in.
+
+Stages **skip loudly**. The summary lists what was skipped under a heading
+saying these are not passing, they are not happening — because the failure this
+runner is most likely to cause is somebody reading a green line and believing a
+check ran. When the GDScript suite exists, the third stage stops skipping with
+no change to the runner.
 
 ## Shape
 
