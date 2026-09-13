@@ -65,13 +65,31 @@ function loadJournal() {
     .reverse();
 }
 
-function loadCreatures() {
-  const dir = join(ROOT, "game", "data", "creatures");
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => { try { return JSON.parse(read(join(dir, f))); } catch { return null; } })
-    .filter(Boolean);
+/** The game keeps its content in three flat files under game/data/, each an
+ *  object wrapping one named array. This page was written before any of them
+ *  existed and guessed a one-file-per-creature directory instead, so from the
+ *  moment creatures actually landed it quietly reported an empty roster while
+ *  the build shipped four. Read what is really there. */
+function loadGameData(file, key) {
+  const path = join(ROOT, "game", "data", file);
+  if (!existsSync(path)) return [];
+  try {
+    const parsed = JSON.parse(read(path));
+    return Array.isArray(parsed[key]) ? parsed[key] : [];
+  } catch {
+    return [];
+  }
+}
+
+const loadCreatures = () => loadGameData("creatures.json", "creatures");
+const loadMoves = () => loadGameData("moves.json", "moves");
+
+/** types.json keys its chart by type name instead of listing it, so it does not
+ *  go through loadGameData. */
+function loadTypes() {
+  const path = join(ROOT, "game", "data", "types.json");
+  if (!existsSync(path)) return {};
+  try { return JSON.parse(read(path)).types || {}; } catch { return {}; }
 }
 
 /** STATE.md is prose for the loop, but a few fields are worth surfacing. */
@@ -224,18 +242,73 @@ function pageRoadmap() {
   });
 }
 
-function pageBestiary(creatures) {
+/** Type accents are cosmetic, keyed by name with a neutral fallback, so a fifth
+ *  type appearing in game/data/types.json renders correctly — just in grey —
+ *  without anyone editing this file. The pillar that content must stay cheap to
+ *  add applies to the page that shows it off too. */
+const TYPE_ACCENT = { Ember: "rust", Tide: "blue", Gale: "ink", Root: "green" };
+const accent = (t) => TYPE_ACCENT[t] || "grey";
+const typeTag = (t) => (t ? `<span class="t ${accent(t)}">${esc(t)}</span>` : "—");
+
+/** Rendered as a table rather than the cycle it happens to be today: the chart
+ *  is data, and the next one may not be a cycle. */
+function typeChart(types) {
+  const rows = Object.entries(types).map(([name, e]) => {
+    const beats = Object.entries(types)
+      .filter(([, other]) => other.weak_to === name)
+      .map(([n]) => typeTag(n))
+      .join(" ");
+    return `<tr><td>${typeTag(name)}</td><td>${beats || "—"}</td><td>${typeTag(e.weak_to)}</td></tr>`;
+  });
+  if (!rows.length) return "";
+  return `<h2>Type chart</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Type</th><th>Strong against</th><th>Weak to</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table></div>`;
+}
+
+function beastCard(c, moveById, types) {
+  const moves = (c.moves || [])
+    .map((id) => moveById.get(id))
+    .filter(Boolean)
+    .map((m) => `<li>
+        <span class="mv">${esc(m.display_name || m.id)}</span>
+        <span class="cat">${esc(m.category || "—")}</span>
+        <span class="pw">${esc(m.power ?? "—")}</span>
+      </li>`)
+    .join("");
+
+  const strong = Object.entries(types)
+    .filter(([, e]) => e.weak_to === c.type)
+    .map(([n]) => n);
+  const weak = (types[c.type] || {}).weak_to;
+
+  return `<article class="beast">
+    <header><h2>${esc(c.display_name || c.id)}</h2>${typeTag(c.type)}</header>
+    <dl class="vitals">
+      <div><dt>HP</dt><dd>${esc(c.max_hp ?? "—")}</dd></div>
+      <div><dt>Guard</dt><dd>${esc(c.max_guard ?? "—")}</dd></div>
+      <div><dt>Speed</dt><dd>${esc(c.speed ?? "—")}</dd></div>
+    </dl>
+    ${moves ? `<ul class="moves">${moves}</ul>` : ""}
+    <p class="match">Strong vs ${strong.length ? strong.map(esc).join(", ") : "nothing yet"}
+      · Weak to ${weak ? esc(weak) : "nothing yet"}</p>
+  </article>`;
+}
+
+function pageBestiary(creatures, moves, types) {
+  const moveById = new Map(moves.map((m) => [m.id, m]));
   const body = creatures.length
-    ? `<div class="status">${creatures
-        .map((c) => `<div><dt>${esc(c.name || c.id)}</dt><dd>${esc(c.type || c.types || "—")}</dd></div>`)
-        .join("")}</div>`
+    ? `<div class="beasts">${creatures.map((c) => beastCard(c, moveById, types)).join("")}</div>
+       ${typeChart(types)}`
     : `<div class="empty-note">No creatures yet. The roster starts filling at milestone M4, when creatures become data rather than code.</div>`;
   return layout({
     title: "Bestiary — hd2d-antfarm",
     page: "bestiary",
     description: "Every creature the loop has designed.",
     body: `<article class="post"><h1>Bestiary</h1>
-    <p>Generated from the same data files the game reads, so this page is never out of date with what is actually in the build.</p>
+    <p>Generated from the same data files the game reads, so this page is never out of date with what is actually in the build. ${creatures.length} creature${creatures.length === 1 ? "" : "s"} so far.</p>
     ${body}</article>`,
   });
 }
@@ -270,7 +343,7 @@ function main() {
 
   writeFileSync(join(OUT, "index.html"), pageIndex(entries, state, progress));
   writeFileSync(join(OUT, "roadmap.html"), pageRoadmap());
-  writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures()));
+  writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures(), loadMoves(), loadTypes()));
   writeFileSync(join(OUT, "glass.html"), pageGlass(loadJournal()));
   for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));

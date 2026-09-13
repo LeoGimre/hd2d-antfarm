@@ -156,6 +156,53 @@ li.done::before { content: "[x]"; color: var(--green); }
 li.todo::before { content: "[ ]"; color: var(--muted); }
 li.done { color: var(--ink); }
 
+/* ---------------------------------------------------------------- bestiary */
+.beasts {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 14px; margin: 22px 0 10px;
+}
+.beast {
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+  padding: 16px 18px;
+}
+.beast header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+/* Outranks `article.post h2`, which is more specific than a bare `.beast h2`. */
+article.post .beast h2 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+
+/* Type tag. The accent classes are cosmetic; an unrecognised type falls through
+   to .t on its own and still reads fine. */
+.t {
+  font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.t.rust  { color: var(--rust);    border-color: #4a2a24; background: #241512; }
+.t.blue  { color: var(--blue);    border-color: #2b3a52; background: #141a24; }
+.t.green { color: var(--green);   border-color: #2f4a2a; background: #16200f; }
+.t.ink   { color: var(--ink-dim); border-color: #3a3f4a; background: #1b1f26; }
+
+.beast .vitals {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: 8px; overflow: hidden; margin: 0 0 12px;
+}
+.beast .vitals div { background: var(--bg-2); padding: 8px 10px; }
+.beast .vitals dt {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); margin: 0 0 2px;
+}
+.beast .vitals dd { margin: 0; font-family: var(--mono); font-size: 15px; color: var(--ink); }
+
+.beast .moves { list-style: none; margin: 0 0 12px; padding: 0; }
+.beast .moves li {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline;
+  padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px;
+}
+.beast .moves .mv  { color: var(--ink-dim); }
+.beast .moves .cat { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.beast .moves .pw  { font-family: var(--mono); font-size: 13px; color: var(--amber); }
+
+.beast .match { margin: 0; font-size: 13px; color: var(--muted); }
+
 /* ---------------------------------------------------------------- glass */
 .tick {
   display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: baseline;
