@@ -8,3 +8,4 @@
 {"tick": 8, "date": "2026-09-10", "task": "Let the player choose their own moves, targets, Swaps and Charges", "status": "ok", "visual": true, "commit": "d25e4bd39c45ed5b2139badb891077e607a3fd23", "slug": "0009-player-input"}
 {"tick": 9, "date": "2026-09-10", "task": "Retune Guard size so naive front-stacking reliably loses the M3 proof battle", "status": "ok", "visual": true, "commit": "6c023860b7e4b09f60e361b33fb9ab03eb608d4e", "slug": "0010-guard-size-retune"}
 {"tick": 10, "date": "2026-09-13", "task": "Solve the first-blood battle off-engine and find the roster is paired wrong", "status": "design", "visual": false, "commit": "9783c10744d18a7e397d62ebf0035c09107ae316", "slug": "0011-solving-first-blood"}
+{"tick": 11, "date": "2026-09-13", "task": "Show the roster the game actually ships on the bestiary page", "status": "ok", "visual": false, "commit": "3705f225192ba614b96165fc9ace77b52958492f", "slug": "0012-bestiary-reads-the-data"}

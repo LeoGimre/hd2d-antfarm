@@ -37,6 +37,15 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **The site's bestiary reads `game/data/*.json` directly** (tick 11): it had guessed a
+  `game/data/creatures/` one-file-per-creature directory that the game never adopted, so it
+  reported an empty roster for four ticks while shipping four creatures. Two lessons worth keeping:
+  a *graceful* fallback for a state you have left does not surface as an error, so re-read the
+  empty-state copy on any generated page whose data has since arrived; and `site/dist` can be
+  served with `python3 -m http.server` and screenshotted with
+  `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell --no-sandbox
+  --screenshot=... --window-size=W,H <url>` — the stylesheet is root-relative, so `file://` renders
+  unstyled. CSS trap: `article.post h2` outranks a bare `.beast h2`.
 - **The proof battle was solved exhaustively off-engine** (tick 10): a port of `TurnQueue` +
   `battle.gd`'s turn loop + `CombatResolver`, validated by reproducing tick 9's committed naive
   result move for move (16 consecutive events, Galewing untouched at 24/24). Watch GDScript's
@@ -94,4 +103,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-10
+11
