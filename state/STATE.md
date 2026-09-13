@@ -32,6 +32,16 @@ pairing;
 `farm/verify.sh`**, so tests go in `game/tests/`, run via a loop-owned `farm/test.sh`, and are a
 tick-ritual discipline rather than a gate until Leo wires them in.
 
+## Queued for the next engine tick
+Four design documents are waiting, in this order. None needs re-deciding; all need building.
+1. `design/encounters.md` — move the roster to `game/data/encounters.json`, delete
+   `build_battle.gd`'s `TEAM` copy outright.
+2. `design/first_blood_balance.md` — apply the re-pairing, confirm both scripted lines, tick M3's
+   fourth box.
+3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
+4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
+   generate, **`godot --headless --import`**, look at the frames. M4's second box.
+
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
 `/Applications/Godot.app/...` does not exist here and `curl`/`wget` are denied, so it cannot be
@@ -41,6 +51,13 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Creature sprites are (body plan, proportions, palette, features)** (tick 15):
+  `design/creature_sprites.md`, proven by `design/proto/creature_forge.py` (runs here — it is
+  Python; `python3 design/proto/creature_forge.py --sheet`). A body plan is a *function* of
+  proportions, never a stored map. Three mechanical passes do the art: auto-outline,
+  distance-field shading under **one** global light (must match `build_battle.gd`'s `Key` at
+  `(-50, -140, 0)`), and drawing order as depth via a flat-dark `FAR` channel. Known unsolved: a
+  thin part has no interior, so edge-based shading swallows it — Emberling's legs.
 - **Combat tests are a discipline, not a gate** (tick 14): `farm/verify.sh` is on the loop's deny
   list, so the loop can write tests but cannot make them block a commit. Plan in
   `design/combat_tests.md`: `game/tests/run_tests.gd` (a `SceneTree` script, no framework), run by
@@ -127,4 +144,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-14
+15
