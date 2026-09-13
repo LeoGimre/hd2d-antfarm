@@ -75,6 +75,16 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **Progression adds options, never magnitude** (tick 21): `design/progression.md`, measured.
+  Scaling *both* sides changes nothing up to x3 — magnitude is free — but relative advantage has a
+  tolerance of only about **-15% to +5%**: +5% player HP, +3 move power, or **+1 Guard** each flip
+  the proof battle to a naive win. So: creatures learn moves, the roster is the progression, bonds
+  give conditional traits and never percentages, **Guard never grows**, and difficulty comes from
+  enemy composition rather than enemy stats.
+- **HP-remaining is a bad closeness metric** (tick 21): naive loses the proof battle with the enemy
+  on 24 of 52 HP, and +5% player HP reverses it — surviving one more hit buys a turn, and turns
+  compound. Ticks 9 and 10 both used HP margin and were both misled. Measure an encounter's
+  **stat-tolerance band** instead.
 - **Capture: Seen + a two-Charge Offer** (tick 20): `design/capture.md`. Breaking a creature's
   Guard makes it *Seen* for the rest of the battle (persistent, not a window); Offer replaces an
   attack, costs **two** banked Charges, reaches either slot, and lands on anything Seen and alive.
@@ -187,4 +197,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-20
+21
