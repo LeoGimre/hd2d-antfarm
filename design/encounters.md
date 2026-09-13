@@ -145,6 +145,87 @@ caller:
   plausible later evolution. If it happens, it is a new board shape with its own
   slot names, not a variable-length array smuggled into this one.
 
+## Requirements added after this format was written
+
+This document was written at tick 13. Three documents since have imposed things
+on it, and one of them looked like a format change. Reconciled here so the tick
+that builds this is not implementing a format that three other decisions have
+already invalidated.
+
+### An encounter must be able to differ between visits — but not here
+
+`design/narrative.md` makes region state the primary storytelling device: a
+place the antagonist's practice has been through is quieter, and that is visible
+in what the player meets there. It calls this "a direct requirement on
+`design/encounters.md`'s format."
+
+On inspection it is not, and this is worth getting right rather than bolting a
+`when:` field onto the entries above. **An encounter is atomic: who fights
+whom.** *Which* encounter occurs, in a given place, at a given point in the
+story, is a different question with a different owner — a region layer that does
+not exist yet. Putting world-state conditions inside encounter entries would put
+narrative logic in the combat content file, and every later region feature would
+have to grow a matching field here.
+
+So: the requirement is satisfied by a region owning a list of encounter ids per
+state, and this file stays a flat list of atomic encounters. **Do not add a
+condition field to an encounter.** If a region needs a quieter version of a
+fight, that is a second encounter with its own id, which is also easier to
+balance, because it can be measured independently.
+
+One consequence for the "which encounter is this scene" decision above: baking
+`encounter_id` into the generated scene is right for M3, where there is one
+battle, and wrong the moment a region picks encounters at runtime. `battle.gd`
+will need to accept an encounter id at load time as well as from the scene. That
+is a small change and it is not needed yet; it is recorded so it is not a
+surprise.
+
+### Every creature must be capturable by a party the player can plausibly have
+
+From `design/capture.md`. Capturability is a property of the encounter and the
+party, not of the creature — a party with the wrong types cannot break a
+creature, and a creature that cannot be broken cannot be taken. Across forty
+encounters that is invisible; while authoring one it is obvious.
+
+It is also checkable, which turns it from a good intention into a step:
+
+```
+python3 design/proto/combat_solver.py capture --encounter <id>
+```
+
+### Balance is a tolerance band, not an HP margin
+
+From `design/progression.md`. An encounter that satisfies pillar 2 sits near a
+boundary, and how far each side can move before the outcome flips is the number
+that describes it. HP remaining is not that number and has misled two ticks: the
+proof battle's naive line loses with the enemy holding 24 of 52 HP, and five
+percent more player HP reverses it.
+
+```
+python3 design/proto/combat_solver.py tolerance --encounter <id>
+```
+
+### The solver should read this file
+
+`design/proto/combat_solver.py` currently carries its own hardcoded `ENCOUNTERS`
+dict, duplicating exactly the table this document exists to delete — acceptable
+only because the file it should read does not exist yet. When it does, the
+solver reads it, and the balance tool and the game are checking the same bytes.
+
+### The checklist, then
+
+Before an encounter ships:
+
+1. `python3 design/proto/combat_solver.py --self-check` — the model still
+   matches the engine; nothing below counts otherwise.
+2. `lines` — naive loses, correct play wins, and correct play that hoards its
+   Charges loses. That third one is what makes the Break/Charge economy
+   load-bearing rather than ornamental.
+3. `tolerance` — where the encounter sits in its band, and ideally near the
+   middle of it rather than at one edge.
+4. `capture` — every creature in it is capturable by a party the player could
+   have.
+
 ## Rejected alternatives
 
 - **One file per encounter, in a `game/data/encounters/` directory.** Tempting for
