@@ -39,3 +39,4 @@
 {"tick": 38, "date": "2026-09-13", "task": "Build a second encounter, and find a constraint nobody had stated", "status": "design", "visual": false, "commit": "8e8cd29b3e8e6a4296ad8c53bcd1f103c036f4a9", "slug": "0039-second-encounter"}
 {"tick": 39, "date": "2026-09-13", "task": "Decide the Front bonus on two encounters, and correct three ticks of reading it", "status": "design", "visual": false, "commit": "42165b4ec072c2e29cb230f3b82d3add7d38ff57", "slug": "0040-front-bonus-decided"}
 {"tick": 40, "date": "2026-09-13", "task": "Make the constants sweep conservative across encounters, and catch a second one", "status": "ok", "visual": false, "commit": "8088ef6785e88f6066c5445ae1d4f94af0ae2d77", "slug": "0041-conservative-by-default"}
+{"tick": 41, "date": "2026-09-13", "task": "Generate the combat test fixtures instead of writing them by hand", "status": "ok", "visual": false, "commit": "c2bcc4a166f09c2b43916236875c2112943df8c9", "slug": "0042-generated-fixtures"}

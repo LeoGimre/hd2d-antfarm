@@ -49,6 +49,11 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
    that is deliberate.
 3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
+   **Tiers 1 and 2 are already generated**: copy `design/proto/combat_cases.json` to
+   `game/tests/cases.json` and write a runner that walks its sections (74 cases + a golden
+   trace). Regenerate with `python3 design/proto/gen_test_cases.py` — `agreements.py` fails if it
+   is stale, and the fixture records the constants *as shipped*, so applying the retune means
+   regenerating in the same commit.
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
    generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
    now carries six body plans and twenty placeholder entries, validated at roster scale — but
@@ -336,4 +341,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-40
+41
