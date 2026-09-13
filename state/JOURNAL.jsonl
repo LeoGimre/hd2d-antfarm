@@ -22,3 +22,4 @@
 {"tick": 22, "date": "2026-09-13", "task": "Decide what the story is about, from what the mechanics already say", "status": "design", "visual": false, "commit": "961fddd9b00067f7b1b7a29572ae759fc4f4566f", "slug": "0023-the-throughline"}
 {"tick": 23, "date": "2026-09-13", "task": "Commit the combat solver, and fix the numbers it proved wrong", "status": "ok", "visual": false, "commit": "9b241a0f8caade9c53b2cedec58f3dd9430e1ceb", "slug": "0024-committing-the-solver"}
 {"tick": 24, "date": "2026-09-13", "task": "Reconcile the encounter format with the three documents written after it", "status": "ok", "visual": false, "commit": "4f3502a36c5f075019f076c673eb1b9839d911af", "slug": "0025-reconciling-the-format"}
+{"tick": 25, "date": "2026-09-13", "task": "Bring the balance document up to date with what has been learned since", "status": "ok", "visual": false, "commit": "52044bfec8f29caccb94d36b1108b3c267b2bb17", "slug": "0026-updating-the-record"}

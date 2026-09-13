@@ -75,6 +75,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **Correct a stale document by addendum, not by editing** (tick 25): half a design document's
+  value is the record of what was believed when the decision was made, and one silently updated
+  to match today has never been wrong — the same fiction the standing rules forbid in devlogs.
+  Also: **a random-play figure is meaningless without its rule set** (`--no-capture` reproduces
+  the pre-capture rules). And the re-paired encounter is *not* centred in its tolerance band — it
+  takes a 15% weaker player but only a 5% stronger one.
 - **An encounter is atomic; region state is a region's problem** (tick 24): `encounters.md` now
   reconciles the requirements `capture.md`, `progression.md` and `narrative.md` put on it. **Do
   not add a condition field to an encounter entry** — a quieter version of a fight is a second
@@ -222,4 +228,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-24
+25
