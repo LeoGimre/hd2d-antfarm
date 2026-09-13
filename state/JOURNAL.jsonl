@@ -1,3 +1,4 @@
+{"tick": 0, "date": "2026-09-10", "task": "Seeding the terrarium", "status": "ok", "visual": true, "commit": "91028c1548ccc40435e09fff47f746f5843689e6", "slug": "0001-diorama-seed"}
 {"tick": 1, "date": "2026-09-10", "task": "Give the traveler a character controller and 8-direction walk animation", "status": "ok", "visual": true, "commit": "488980f1dfa438afd4e6b5027bf19e294bb1db3c", "slug": "0002-traveler-controller"}
 {"tick": 2, "date": "2026-09-10", "task": "Collision against 3D level geometry for set dressing props", "status": "ok", "visual": true, "commit": "28b94d123b26e2962b64a8b7756b1309d4443cad", "slug": "0003-set-dressing-collision"}
 {"tick": 3, "date": "2026-09-10", "task": "Make the camera follow the traveler, so framing survives leaving the origin", "status": "ok", "visual": true, "commit": "c248389102f53d095ac60b7616ca8df0aebbddc2", "slug": "0004-camera-follow"}
