@@ -129,6 +129,11 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Screenshot the furniture, not just the thing you built** (tick 30): tick 19 added a fifth nav
+  item, screenshotted the page body at 420px, and left "Glass" falling off the right edge for
+  eleven ticks. The habit has caught four real bugs, all invisible in source and obvious on
+  screen — it only works if the shot includes what you were not thinking about. Also: the front
+  page hero now leads with the newest *tick*, not the newest *clip*.
 - **`farm/agreements.py` checks cross-file consistency** (tick 29): eleven agreements — data
   integrity, the two hand-synced `TEAM` tables, input actions vs the autoload, solver constants vs
   `combat_resolver.gd`, and the published record (every devlog commit sha resolves; devlog and
@@ -253,4 +258,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-29
+30
