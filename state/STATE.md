@@ -124,6 +124,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   **Use iterative deepening, never plain depth-first, for any decision count** — a depth-first
   search returns *a* line, not the shortest, and its length depends on the order `legal_choices()`
   lists moves in. That error put two wrong numbers into `design/capture.md`.
+- **One save, written by the game** (tick 45): `design/save.md`. No slots, no manual save —
+  autosaves on region transitions, after battles, after any dialogue that sets a flag. A story
+  whose consequences do not reverse cannot ship a load button. The deal that makes it fair: **never
+  ask for an irreversible decision under time pressure or without information** (the game already
+  has no hidden rolls anywhere). Two open consequences: losing a battle must mean something in the
+  fiction, and the autosave decision changes how party/regions/dialogue are *built*, not just
+  stored.
 - **The story is about attention** (tick 22): `design/narrative.md`. Derived from the mechanics,
   not pasted on — combat cracks a performance, Charge is banked understanding, capture is seeing
   and sparing. Antagonist is an institution with a method for taking creatures *without* breaking
@@ -359,4 +366,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-44
+45
