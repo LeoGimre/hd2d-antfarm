@@ -128,3 +128,10 @@ penalty, Charge's power bonus) are the ones to retune, not the shape of the syst
 > battle exhaustively and finds the paragraph above was right to expect a retune — but wrong about
 > which number. Nothing in this design needed changing; the four creatures were paired onto the
 > wrong sides, which aimed the player's only type advantage at the enemy it least needed to kill.
+
+> **Swap's price is revised in [`swap.md`](swap.md).** Measured, the full-action
+> Swap specified above is a trap: it never appears on an optimal line and it
+> makes random play *worse*. The cause is not its price — it is that Front is
+> where every melee attack lands, so Swap moves a creature into danger
+> uncomposed. A swapped-in creature now arrives with full Guard, which is what
+> Guard already meant.

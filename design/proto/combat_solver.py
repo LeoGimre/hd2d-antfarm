@@ -284,6 +284,10 @@ def apply_choice(s, i, choice, log=None):
         # TurnQueue.rename: the slot keeps its schedule, inherits the new speed.
         qs[i] = (float(CREATURES[b2[0]]["speed"]), qs[i][1])
         qs[partner] = (float(CREATURES[a2[0]]["speed"]), qs[partner][1])
+        if SWAP_MODE == "guard":
+            # The swapped-in creature arrives composed.
+            cid, slot, hp, guard, broken, dead, nm = cs[i]
+            cs[i] = (cid, slot, hp, CREATURES[cid]["max_guard"], broken, dead, nm)
         if log is not None:
             log.append("%s swaps to %s, %s steps up to %s." % (
                 CREATURES[a2[0]]["display_name"], a2[1],
@@ -314,6 +318,14 @@ def apply_choice(s, i, choice, log=None):
 # what random play can stumble into. --no-capture reproduces the earlier rule
 # set so the two sets of numbers can be compared honestly.
 NO_OFFERS = os.environ.get("NO_OFFERS") == "1"
+# design/combat.md prices Swap at a full turn, and no search has ever used one.
+# NO_SWAP removes the action so its contribution can be measured; SWAP_MODE
+# tries the repricings that document says are the ones to retune.
+#   "full"   -- a whole action, as specified
+#   "guard"  -- a whole action that also restores the swapped-in creature's Guard
+#   "free"   -- costs no turn: the creature swaps and still acts
+NO_SWAP = os.environ.get("NO_SWAP") == "1"
+SWAP_MODE = os.environ.get("SWAP_MODE", "full")
 
 
 def legal_choices(s, i):
@@ -327,7 +339,8 @@ def legal_choices(s, i):
         for tag, ti in (("front", 2), ("back", 3)):
             if not cs[ti][5] and not taken[ti]:
                 out.append(("ranged", tag, ch))
-    out.append(("swap",))
+    if not NO_SWAP:
+        out.append(("swap",))
     return out
 
 
@@ -388,6 +401,18 @@ def typed_hoard(s, i, n):
     return (c[0], False) if len(c) == 2 else (c[0], c[1], False)
 
 
+def typed_swap(s, i, n):
+    """typed, but open by swapping the player's pair.
+
+    Exists because "is Swap on the shortest winning line" is the wrong question:
+    the search minimises decisions, so it will never pay a turn for durability
+    it does not strictly need. This measures the other thing — whether Swap buys
+    margin — by spending the turn up front and then playing correctly."""
+    if n == 0:
+        return ("swap",)
+    return typed(s, i, n - 1)
+
+
 POLICIES = {
     "naive": (naive, "always melee, never Charge"),
     "melee_charge": (melee_charge, "always melee, always spend Charge"),
@@ -395,6 +420,7 @@ POLICIES = {
     "anti_typed": (anti_typed, "attack whoever resists you"),
     "typed": (typed, "attack whoever you are strong against, spend Charge"),
     "typed_hoard": (typed_hoard, "correct targeting, never spends a Charge"),
+    "typed_swap": (typed_swap, "open with a Swap, then correct targeting"),
 }
 
 
