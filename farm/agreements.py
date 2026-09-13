@@ -194,6 +194,23 @@ def _():
     return out
 
 
+@check("design/README.md mentions every design document")
+def _():
+    d = os.path.join(ROOT, "design")
+    readme = os.path.join(d, "README.md")
+    if not os.path.exists(readme):
+        return []
+    guide = read("design", "README.md")
+    out = []
+    for f in sorted(os.listdir(d)):
+        if not f.endswith(".md") or f == "README.md":
+            continue
+        if f not in guide:
+            out.append("%s is not in the reading guide — a design index that silently "
+                       "omits documents is worse than an alphabetical one" % f)
+    return out
+
+
 @check("the generated combat test fixtures are current")
 def _():
     gen = os.path.join(ROOT, "design", "proto", "gen_test_cases.py")

@@ -404,7 +404,15 @@ function beastCard(c, moveById, types) {
 }
 
 
-function pageDesignIndex(docs) {
+/** The index leads with design/README.md when it exists — seventeen documents
+ *  listed alphabetically is not navigable, and the alphabet says nothing about
+ *  which ones overturn which. Its own H1 is dropped so it does not compete with
+ *  the page's. */
+function stripFirstHeading(md) {
+  return md.replace(/^#\s+.*\n+/, "");
+}
+
+function pageDesignIndex(docs, intro, slugs) {
   const rows = docs.length
     ? docs.map((d) => `<div class="entry">
         <h3><a href="/design/${d.slug}">${esc(d.title)}</a></h3>
@@ -418,6 +426,8 @@ function pageDesignIndex(docs) {
     description: "The loop's design documents: what it decided and what it rejected.",
     body: `<article class="post"><h1>Design</h1>
     <p>Where the loop is allowed to invent. These are the decisions behind the build — including the alternatives that were rejected, which is usually the more useful half. The devlog is what happened; this is what it was trying to do.</p>
+    ${intro ? linkDesignRefs(renderMarkdown(stripFirstHeading(intro.body)), slugs) : ""}
+    <hr><h2>Every document</h2>
     </article>${rows}`,
   });
 }
@@ -487,11 +497,15 @@ function main() {
   writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures(), loadMoves(), loadTypes()));
   writeFileSync(join(OUT, "glass.html"), pageGlass(loadJournal()));
 
-  const docs = loadDesignDocs();
-  const slugs = new Set(docs.map((d) => d.slug));
+  // design/README.md is the reading guide, not an entry in the list: it leads
+  // the index page and is excluded from the cards below it.
+  const allDocs = loadDesignDocs();
+  const intro = allDocs.find((d) => d.slug.toLowerCase() === "readme");
+  const docs = allDocs.filter((d) => d !== intro);
+  const slugs = new Set(allDocs.map((d) => d.slug));
   mkdirSync(join(OUT, "design"), { recursive: true });
-  writeFileSync(join(OUT, "design.html"), pageDesignIndex(docs));
-  for (const d of docs) writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs));
+  writeFileSync(join(OUT, "design.html"), pageDesignIndex(docs, intro, slugs));
+  for (const d of allDocs) writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs));
 
   for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e, slugs));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));
