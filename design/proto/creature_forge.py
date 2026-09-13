@@ -405,53 +405,89 @@ SAT = {"Ember": 0.85, "Tide": 0.72, "Gale": 0.40, "Root": 0.62}
 
 Q, S, A, B, I, R = "quadruped", "serpent", "avian", "blob", "insectoid", "brawler"
 
+
 def q(**kw):
     base = dict(body_rx=7.0, body_ry=4.6, leg=5, leg_w=1.7, neck=5, neck_w=1.9,
                 head_r=3.2, snout=1.8, tail=6, tail_w=1.6, tail_lift=4, splay=0.6)
     base.update(kw); return base
 
+
+def sp(**kw):
+    base = dict(length=21, amp=4.0, rise=11, body_w=3.6, head_r=3.6, waves=1.2, coils=24)
+    base.update(kw); return base
+
+
+def av(**kw):
+    base = dict(body_rx=5.4, body_ry=4.4, leg=6, leg_w=1.2, wing=13, wing_w=2.6,
+                neck_w=1.6, head_r=2.8, beak=2.0)
+    base.update(kw); return base
+
+
+def bl(**kw):
+    base = dict(hover=13, rx=6.0, ry=5.2, lobes=3, lobe_r=2.6, tendrils=3, tendril_len=6)
+    base.update(kw); return base
+
+
+def ins(**kw):
+    base = dict(body_rx=7.0, body_ry=3.4, leg=4, leg_w=1.4, legs=3, splay=1.8,
+                head_r=2.6, ant=5)
+    base.update(kw); return base
+
+
+def br(**kw):
+    base = dict(leg=8, leg_w=2.2, torso=10, torso_w=4.6, arm=7, arm_w=2.4, head_r=3.2)
+    base.update(kw); return base
+
+
+# The roster, authored from design/creatures.md's place / habit / tell template.
+# Fiction for each entry lives in design/roster.md; this file only needs the
+# four things the renderer reads. The first four keep their old element-suffix
+# names on purpose -- four design documents reference those ids, and
+# design/creatures.md says not to churn them until M3's fourth box is ticked.
 ROSTER = [
- ("emberling", Q, "Ember", ["horns"], q()),
- ("ashmane",   Q, "Ember", ["crest"], q(body_rx=9.0, body_ry=5.6, leg=7, leg_w=2.2,
-                                        neck=7, neck_w=2.4, head_r=3.6, tail=8, tail_lift=6)),
- ("cinderpup", Q, "Ember", [],        q(body_rx=5.4, body_ry=3.8, leg=3, leg_w=1.6,
-                                        neck=3, neck_w=1.7, head_r=3.0, tail=4, tail_lift=2)),
- ("rootshell", Q, "Root",  ["shell"], q(body_rx=8.6, body_ry=5.6, leg=3, leg_w=2.4,
-                                        neck=3, neck_w=2.2, head_r=3.0, snout=1.6,
-                                        tail=3, tail_w=1.4, tail_lift=0, splay=1.2)),
- ("boughback", Q, "Root",  ["shell", "horns"], q(body_rx=10.0, body_ry=6.4, leg=4, leg_w=3.0,
-                                        neck=4, neck_w=2.8, head_r=3.4, tail=4, tail_lift=1,
-                                        splay=1.6)),
- ("tidalpup",  S, "Tide",  ["crest"], dict(length=21, amp=4.0, rise=11, body_w=3.6,
-                                           head_r=3.6, waves=1.2, coils=24)),
- ("brinecoil", S, "Tide",  [],        dict(length=25, amp=7.0, rise=6, body_w=2.6,
-                                           head_r=2.8, waves=2.1, coils=28)),
- ("deepmaw",   S, "Tide",  ["horns"], dict(length=17, amp=3.0, rise=15, body_w=4.6,
-                                           head_r=4.6, waves=0.9, coils=22)),
- ("mirecoil",  S, "Root",  ["crest"], dict(length=23, amp=5.5, rise=8, body_w=3.2,
-                                           head_r=3.2, waves=1.7, coils=26)),
- ("galewing",  A, "Gale",  ["crest"], dict(body_rx=5.4, body_ry=4.4, leg=6, leg_w=1.2,
-                                           wing=13, wing_w=2.6, neck_w=1.6, head_r=2.8, beak=2.0)),
- ("stormcrest",A, "Gale",  ["horns"], dict(body_rx=6.8, body_ry=5.2, leg=8, leg_w=1.5,
-                                           wing=17, wing_w=3.2, neck_w=2.0, head_r=3.2, beak=2.6)),
- ("emberkite", A, "Ember", [],        dict(body_rx=4.4, body_ry=3.6, leg=4, leg_w=1.0,
-                                           wing=15, wing_w=2.0, neck_w=1.3, head_r=2.4, beak=2.2)),
- ("mistmote",  B, "Gale",  [],        dict(hover=16, rx=6.0, ry=5.2, lobes=3, lobe_r=2.6,
-                                           tendrils=3, tendril_len=6)),
- ("bogbloom",  B, "Root",  ["crest"], dict(hover=9, rx=8.0, ry=6.0, lobes=4, lobe_r=3.2,
-                                           tendrils=4, tendril_len=4)),
- ("gloamdrift",B, "Tide",  [],        dict(hover=13, rx=5.0, ry=6.6, lobes=2, lobe_r=2.2,
-                                           tendrils=5, tendril_len=8)),
- ("chitterlin",I, "Root",  [],        dict(body_rx=7.0, body_ry=3.4, leg=4, leg_w=1.4,
-                                           legs=3, splay=1.8, head_r=2.6, ant=5)),
- ("emberjaw",  I, "Ember", ["horns"], dict(body_rx=8.4, body_ry=4.2, leg=3, leg_w=1.9,
-                                           legs=4, splay=2.4, head_r=3.2, ant=3)),
- ("thundercuff",R,"Gale",  ["horns"], dict(leg=9, leg_w=2.2, torso=11, torso_w=4.4,
-                                           arm=8, arm_w=2.2, head_r=3.4)),
- ("kelpfist",  R, "Tide",  ["crest"], dict(leg=7, leg_w=2.6, torso=9, torso_w=5.2,
-                                           arm=7, arm_w=2.8, head_r=3.0)),
- ("charbrute", R, "Ember", [],        dict(leg=6, leg_w=3.0, torso=8, torso_w=6.0,
+ # -- Ember: hearths, kilns, burnt ground -------------------------------------
+ ("emberling",   Q, "Ember", ["horns"], q()),
+ ("stokewake",   I, "Ember", ["horns"], ins(body_rx=6.4, legs=4, splay=2.2, ant=6, head_r=2.4)),
+ ("lastcoal",    B, "Ember", [],        bl(hover=8, rx=5.2, ry=4.4, lobes=3, lobe_r=2.2,
+                                           tendrils=0)),
+ ("bellowsback", R, "Ember", [],        br(leg=6, leg_w=3.0, torso=8, torso_w=6.0,
                                            arm=6, arm_w=3.2, head_r=2.8)),
+ ("ashmoth",     A, "Ember", [],        av(body_rx=4.4, body_ry=3.6, leg=4, leg_w=1.0,
+                                           wing=15, wing_w=2.0, head_r=2.4, beak=2.2)),
+ # -- Tide: tidelines, wells, gutters -----------------------------------------
+ ("tidalpup",    S, "Tide",  ["crest"], sp()),
+ ("wellmouth",   S, "Tide",  ["horns"], sp(length=17, amp=3.0, rise=15, body_w=4.6,
+                                           head_r=4.6, waves=0.9, coils=22)),
+ ("slackwater",  B, "Tide",  [],        bl(hover=11, rx=7.4, ry=4.6, lobes=4, lobe_r=2.8,
+                                           tendrils=5, tendril_len=5)),
+ ("riverbend",   Q, "Tide",  [],        q(body_rx=8.2, body_ry=4.2, leg=6, leg_w=1.6,
+                                          neck=7, neck_w=1.8, head_r=2.8, tail=9,
+                                          tail_lift=2, splay=0.9)),
+ ("downspout",   I, "Tide",  ["crest"], ins(body_rx=5.6, body_ry=3.0, leg=6, leg_w=1.1,
+                                            legs=3, splay=2.6, head_r=2.2, ant=6)),
+ # -- Gale: ridgelines, towers, thresholds ------------------------------------
+ ("galewing",    A, "Gale",  ["crest"], av()),
+ ("doorslam",    A, "Gale",  [],        av(body_rx=6.2, body_ry=4.0, leg=3, leg_w=1.4,
+                                           wing=17, wing_w=3.0, head_r=3.0, beak=2.8)),
+ ("bellhang",    I, "Gale",  ["horns"], ins(body_rx=6.0, body_ry=4.0, leg=7, leg_w=1.0,
+                                            legs=3, splay=1.2, head_r=2.6, ant=4)),
+ ("ridgewalk",   R, "Gale",  ["horns"], br(leg=10, leg_w=1.8, torso=11, torso_w=3.8,
+                                           arm=8, arm_w=2.0, head_r=3.0)),
+ ("draughtcatch",B, "Gale",  [],        bl(hover=5, rx=8.4, ry=3.6, lobes=5, lobe_r=2.4,
+                                           tendrils=6, tendril_len=3)),
+ # -- Root: old growth, foundations, orchards ---------------------------------
+ ("rootshell",   Q, "Root",  ["shell"], q(body_rx=8.6, body_ry=5.6, leg=3, leg_w=2.4,
+                                          neck=3, neck_w=2.2, head_r=3.0, snout=1.6,
+                                          tail=3, tail_w=1.4, tail_lift=0, splay=1.2)),
+ ("holdfast",    R, "Root",  [],        br(leg=5, leg_w=3.4, torso=9, torso_w=6.4,
+                                           arm=5, arm_w=3.4, head_r=2.6)),
+ ("windfall",    Q, "Root",  ["crest"], q(body_rx=5.4, body_ry=3.8, leg=3, leg_w=1.6,
+                                          neck=3, neck_w=1.7, head_r=3.0, tail=4,
+                                          tail_lift=2)),
+ ("gravebind",   S, "Root",  ["crest"], sp(length=25, amp=7.0, rise=6, body_w=2.6,
+                                           head_r=2.8, waves=2.1, coils=28)),
+ ("stumpsit",    R, "Root",  ["horns"], br(leg=4, leg_w=3.8, torso=7, torso_w=6.8,
+                                           arm=4, arm_w=3.0, head_r=2.4)),
 ]
 
 PLANS = dict(quadruped=quadruped, serpent=serpent, avian=avian,
