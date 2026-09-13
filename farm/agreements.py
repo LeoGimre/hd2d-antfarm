@@ -218,6 +218,71 @@ def _():
 PERMITTED_LOOK_KEYS = {"sky", "ambient_energy", "key_color", "key_energy", "fog"}
 
 
+@check("proposed conversations hold the rules design/dialogue.md sets")
+def _():
+    path = os.path.join(ROOT, "design", "proto", "conversations.json")
+    if not os.path.exists(path):
+        return []
+    convs = json.load(open(path))["conversations"]
+    creatures = {c["id"] for c in json.loads(read("game", "data", "creatures.json"))["creatures"]}
+    prop = os.path.join(ROOT, "design", "proto", "proposed_creatures.json")
+    if os.path.exists(prop):
+        creatures |= {c["id"] for c in json.load(open(prop))["creatures"]}
+    types = set(json.loads(read("game", "data", "types.json"))["types"])
+
+    CHANGE = ("flag", "not_flag", "party_has", "party_type")
+    out, ids = [], set()
+    for c in convs:
+        cid = c["id"]
+        if cid in ids:
+            out.append("duplicate conversation id %r" % cid)
+        ids.add(cid)
+        nodes = c.get("nodes", [])
+        if not nodes:
+            out.append("%s: has no nodes" % cid)
+            continue
+        # First match wins, so a conditional last node can dead-end.
+        if "when" in nodes[-1]:
+            out.append("%s: last node is conditional — a conversation must end with an "
+                       "unconditional line or it can dead-end" % cid)
+        # design/dialogue.md's bar for M5's "NPCs worth talking to twice": a
+        # visit count is not a change. Something the *player did* must show.
+        if not any(k in n.get("when", {}) for n in nodes for k in CHANGE):
+            out.append("%s: no line appears because of something the player did — a visit "
+                       "count is not a reaction (design/dialogue.md)" % cid)
+        node_ids = {n["id"] for n in nodes if "id" in n}
+        for n in nodes:
+            w = n.get("when", {})
+            if "party_has" in w and w["party_has"] not in creatures:
+                out.append("%s: party_has names unknown creature %r" % (cid, w["party_has"]))
+            if "party_type" in w and w["party_type"] not in types:
+                out.append("%s: party_type names unknown type %r" % (cid, w["party_type"]))
+            texts = [n.get("say", "")] + [r.get("text", "") for r in n.get("replies", [])]
+            for t in texts:
+                # "No templating. Ever." — a sentence assembled from a template is
+                # precisely what pillar 5 means by generated.
+                if "{" in t or "}" in t:
+                    out.append("%s: templated line %r — dialogue.md forbids it outright" % (cid, t[:40]))
+                # GAME.md names this exact failure: a signpost in human clothing.
+                if re.search(r"\b(%s)-type\b" % "|".join(types), t) or \
+                        re.search(r"\bweak to (%s)\b" % "|".join(types), t):
+                    out.append("%s: %r names a type instead of a tell — that is the "
+                               "signpost GAME.md calls a failure" % (cid, t[:40]))
+            for r in n.get("replies", []):
+                if "goto" in r and r["goto"] not in node_ids:
+                    out.append("%s: reply goto %r names no node in this conversation"
+                               % (cid, r["goto"]))
+
+    reg = os.path.join(ROOT, "design", "proto", "regions.json")
+    if os.path.exists(reg):
+        for r in json.load(open(reg))["regions"]:
+            for c in r.get("conversations", []):
+                if c not in ids:
+                    out.append("region %s names conversation %r, which does not exist"
+                               % (r["id"], c))
+    return out
+
+
 @check("proposed regions are well formed, reciprocal, and inside the house style")
 def _():
     path = os.path.join(ROOT, "design", "proto", "regions.json")

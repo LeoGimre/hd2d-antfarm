@@ -116,6 +116,38 @@ customers; the one who could once name every creature on a ridge, cannot now, an
 does not connect the two facts. An NPC without such a relationship will end up a
 signpost, because there is nothing else for them to be.
 
+## Written, and checked
+
+`design/proto/conversations.json` holds three NPCs in this format — the woman
+whose kiln has been cold since spring, the stoker who took the shortcut
+cheerfully and would recommend it, and the surveyor who could once name
+everything that crossed her pass and cannot now, and has not connected the two
+facts. All three are `narrative.md`'s rule in practice: everyone in this world
+has a relationship with attention.
+
+`farm/agreements.py` enforces the rules above rather than trusting them:
+
+- **The last node must be unconditional**, or first-match-wins can dead-end.
+- **At least one line must appear because of something the player did** — a
+  `flag`, a creature in the party, a type in the party. A visit count is not a
+  reaction, and this is M5's "worth talking to twice" box turned into a check.
+- **No templating.** A `{` in any line fails. This is the rule most likely to be
+  argued with later and the cheapest possible thing to enforce.
+- **No signposts.** A line matching `<Type>-type` or `weak to <Type>` fails and
+  quotes `GAME.md` at you, because that is the exact sentence it names as a
+  failure.
+- Plus the dull ones: unique ids, `goto` targets that exist, `party_type` naming
+  a real type, and every conversation a region references actually existing.
+
+One rule came out of writing the content rather than the design. **`party_has`
+may only name a creature that has stats** — not merely one that exists in
+`roster.md`. The first draft of the kiln yard woman's best line was about
+Lastcoal, which is in the roster with a sprite and a tell and *no stats*, so it
+can never be in a party and the condition could never fire. That is dialogue
+written for content which does not exist, and the check caught it on its first
+run. The line was rewritten for Emberling, whose tell is the same shape and who
+the player will actually have.
+
 ## What this needs that does not exist
 
 - **World flags with a lifetime.** `set` writes them and conditions read them,
