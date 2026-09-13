@@ -34,3 +34,4 @@
 {"tick": 33, "date": "2026-09-13", "task": "Show the prototype sprites on the site, and guard them against going stale", "status": "ok", "visual": false, "commit": "6c2564e5248e948d3655e1761ca91e8634f727e9", "slug": "0034-sprites-on-the-site"}
 {"tick": 34, "date": "2026-09-13", "task": "Find that Swap is a trap, and fix it with what Guard already meant", "status": "design", "visual": false, "commit": "3f7542dbc1415e66cabcf060c76d89efc14e06aa", "slug": "0035-swap-is-a-trap"}
 {"tick": 35, "date": "2026-09-13", "task": "Audit the positional rules, and find their importance inverts their emphasis", "status": "design", "visual": false, "commit": "b9ea297813b4ae3886256fb52c06fb98de00892f", "slug": "0036-positional-audit"}
+{"tick": 36, "date": "2026-09-13", "task": "Sweep every combat constant, and correct what the hand audit got wrong", "status": "ok", "visual": false, "commit": "0eaf42c95ebdf5f56cb87652f891c404b53be69d", "slug": "0037-every-constant"}

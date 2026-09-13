@@ -135,7 +135,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
-- **Two positional constants are structural; one is a free knob** (tick 35): `design/position.md`.
+- **`combat_solver.py constants` classifies every constant** (tick 36): fixed / bounded / free,
+  recomputed on demand. Current: **fixed** `MELEE_REACH`=front. **Bounded** `FRONT_DAMAGE_BONUS`
+  0–2, `BACK_TARGET_MULTIPLIER` ≤0.75, `CHARGE_MULTIPLIER` ≥1.5, `RESIST_HEAL` ≤2, `GUARD_REGEN`
+  ≥1. **Free** `BROKEN_TAKES_MORE_DAMAGE`, `SWAP_MODE`. Two rules are **decorative** — Broken's
+  50%-more-damage half and the resist heal both change no outcome (do not delete on that alone).
+  Run this before and after any balance change.
+- **Two positional constants are structural; one is a free knob** (tick 35, refined by 36): `design/position.md`.
   **Melee-locked-to-Front** is load-bearing (remove it and correct play *loses*, random 0.7%).
   **`BACK_TARGET_MULTIPLIER`** is load-bearing (remove it and `typed_hoard` wins, so Charge stops
   mattering). **`FRONT_DAMAGE_BONUS` changes none of the three outcomes** — reach for that dial
@@ -299,4 +305,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-35
+36
