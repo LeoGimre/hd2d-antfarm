@@ -135,6 +135,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Two positional constants are structural; one is a free knob** (tick 35): `design/position.md`.
+  **Melee-locked-to-Front** is load-bearing (remove it and correct play *loses*, random 0.7%).
+  **`BACK_TARGET_MULTIPLIER`** is load-bearing (remove it and `typed_hoard` wins, so Charge stops
+  mattering). **`FRONT_DAMAGE_BONUS` changes none of the three outcomes** — reach for that dial
+  first. Changing either of the first two invalidates every balance number in
+  `first_blood_balance.md`, `capture.md` and `progression.md`. Solver flags: `FRONT_BONUS`,
+  `BACK_MULT`, `MELEE_REACH`.
 - **A swapped-in creature arrives with full Guard** (tick 34): `design/swap.md`. Measured, the
   full-action Swap in `combat.md` is a *trap* — removing it leaves the shortest win unchanged and
   raises random play from 13.0% to 20.5%. Cause: **Front is where every melee attack lands, from
@@ -292,4 +299,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-34
+35
