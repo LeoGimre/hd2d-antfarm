@@ -49,6 +49,18 @@ header.site nav { display: flex; gap: 18px; margin-left: auto; font-size: 14px; 
 header.site nav a { color: var(--ink-dim); }
 header.site nav a.on { color: var(--amber); }
 
+/* Five nav items do not fit beside the brand on a phone — adding "Design" in
+   tick 19 pushed "Glass" off the right edge, and it went unnoticed because that
+   tick checked the page body at 420px and not the header. Wrap to two rows
+   instead of shrinking type, so a sixth item does not break it again. */
+@media (max-width: 560px) {
+  header.site .wrap {
+    height: auto; flex-wrap: wrap; gap: 6px 14px;
+    padding-top: 10px; padding-bottom: 10px;
+  }
+  header.site nav { margin-left: 0; width: 100%; gap: 16px; }
+}
+
 /* ---------------------------------------------------------------- hero */
 .hero { padding: 34px 0 8px; }
 .hero h1 {
@@ -70,6 +82,21 @@ header.site nav a.on { color: var(--amber); }
   display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
   padding: 12px 14px; background: var(--panel); border-top: 1px solid var(--line);
   font-size: 13px; color: var(--ink-dim);
+}
+
+/* Text hero, for when the newest tick produced no clip. Sits inside .stage so
+   it keeps the same frame the video would have had. */
+.lead { background: var(--panel); padding: 30px 28px 26px; }
+.lead-meta {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 12px;
+}
+.lead h2 { margin: 0 0 10px; font-size: clamp(19px, 2.6vw, 25px); letter-spacing: -0.01em; }
+.lead h2 a { color: var(--ink); }
+.lead p { margin: 0; color: var(--ink-dim); font-size: 15px; max-width: 74ch; }
+.lastclip {
+  margin: 10px 0 0; font-size: 13px; color: var(--muted); font-family: var(--mono);
+  display: flex; gap: 10px; flex-wrap: wrap;
 }
 
 /* ---------------------------------------------------------------- status */

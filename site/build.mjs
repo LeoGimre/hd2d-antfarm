@@ -235,15 +235,43 @@ function videoBlock(e) {
 
 // ---------------------------------------------------------------- pages
 
+/** The hero leads with the most recent tick, whatever kind it was.
+ *
+ *  It used to lead with the most recent tick that had a *clip*, which is right
+ *  while clips are frequent and quietly wrong once they are not: twenty
+ *  consecutive text-only ticks left a black video player from tick 9
+ *  headlining a project on tick 29. A site whose premise is watching the work
+ *  happen should not open on three weeks ago. When the newest entry has no
+ *  clip, it leads as text and the last capture is demoted to a strip
+ *  underneath, which is honest about both. */
 function pageIndex(entries, state, progress) {
-  const latest = entries.find((e) => e.video_mp4);
-  const stage = latest
-    ? `<div class="stage">${videoBlock(latest)}<div class="stage-cap">
-         <strong>${esc(latest.title)}</strong>
-         <span>tick ${latest.tick}</span>
-         <a href="/log/${esc(latest.slug)}">read the entry →</a>
-       </div></div>`
-    : `<div class="stage"><div class="empty">no clip yet — the loop has not shipped anything visible</div></div>`;
+  const newest = entries[0];
+  const lastClip = entries.find((e) => e.video_mp4);
+
+  let stage;
+  if (!newest) {
+    stage = `<div class="stage"><div class="empty">nothing published yet</div></div>`;
+  } else if (newest.video_mp4) {
+    stage = `<div class="stage">${videoBlock(newest)}<div class="stage-cap">
+         <strong>${esc(newest.title)}</strong>
+         <span>tick ${newest.tick}</span>
+         <a href="/log/${esc(newest.slug)}">read the entry →</a>
+       </div></div>`;
+  } else {
+    stage = `<div class="stage"><div class="lead">
+         <div class="lead-meta"><span>tick ${newest.tick}</span>${
+           newest.date ? `<span>${esc(newest.date)}</span>` : ""}${statusPill(newest)}</div>
+         <h2><a href="/log/${esc(newest.slug)}">${esc(newest.title)}</a></h2>
+         <p>${esc(newest.summary || "")}</p>
+       </div><div class="stage-cap">
+         <span>latest tick</span>
+         <a href="/log/${esc(newest.slug)}">read the entry →</a>
+       </div></div>`;
+    if (lastClip) {
+      stage += `<p class="lastclip">Last captured clip: <a href="/log/${
+        esc(lastClip.slug)}">${esc(lastClip.title)}</a> <span>tick ${lastClip.tick}</span></p>`;
+    }
+  }
 
   const feed = entries.length
     ? entries.map((e) => `<div class="entry">
