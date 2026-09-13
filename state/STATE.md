@@ -46,7 +46,10 @@ tick-ritual discipline rather than a gate until Leo wires them in.
 ## Queued for the next engine tick
 Four design documents are waiting, in this order. None needs re-deciding; all need building.
 1. `design/encounters.md` — move the roster to `game/data/encounters.json`, delete
-   `build_battle.gd`'s `TEAM` copy outright.
+   `build_battle.gd`'s `TEAM` copy outright. **The file is written**:
+   `design/proto/encounters.json` (ids `first_blood`, `the_ridge`, `first_blood_unpaired`),
+   validated by `agreements.py` and already read by the solver. Copy it across and write the
+   loader.
 2. `design/first_blood_balance.md` — apply the re-pairing, confirm both scripted lines, tick M3's
    fourth box. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
    `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (deleting that clause), `FRONT_DAMAGE_BONUS` 2.0 → 1.0.
@@ -366,4 +369,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-45
+46

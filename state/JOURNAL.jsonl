@@ -44,3 +44,4 @@
 {"tick": 43, "date": "2026-09-13", "task": "Build the test runner combat_tests.md specified, and make its skips loud", "status": "ok", "visual": false, "commit": "629ffcdcbc3f9b483174ce06ebd4a390101f1a0e", "slug": "0044-the-runner"}
 {"tick": 44, "date": "2026-09-13", "task": "Give the creatures an idle, after finding the elegant way to do it is wrong", "status": "ok", "visual": false, "commit": "f334497750c6a44af6e2120f9b353f2676f3fcff", "slug": "0045-creatures-breathe"}
 {"tick": 45, "date": "2026-09-13", "task": "Decide save and load around the one thing that makes it hard", "status": "design", "visual": false, "commit": "0f86caaa0770fdedcc6a3c4eaff875f2587c2b48", "slug": "0046-one-save"}
+{"tick": 46, "date": "2026-09-13", "task": "Move the encounters into data, and turn last week's finding into a check", "status": "ok", "visual": false, "commit": "ed01e8f68e73923e0ef252040a81b36483ebc74d", "slug": "0047-encounters-in-data"}
