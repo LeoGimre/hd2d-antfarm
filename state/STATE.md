@@ -51,6 +51,8 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
    each.** House key-light angle is now `(-44, -118, 0)` everywhere, because baked sprite shading
    forces every scene to agree.
 
+6. `design/capture.md` — M4's capture box. Needs the encounter/party work above first.
+
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
 `/Applications/Godot.app/...` does not exist here and `curl`/`wget` are denied, so it cannot be
@@ -73,6 +75,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **Capture: Seen + a two-Charge Offer** (tick 20): `design/capture.md`. Breaking a creature's
+  Guard makes it *Seen* for the rest of the battle (persistent, not a window); Offer replaces an
+  attack, costs **two** banked Charges, reaches either slot, and lands on anything Seen and alive.
+  Deterministic, no refusal roll. Two earlier versions died in the solver — a one-turn Broken
+  window makes speed-14 creatures *uncapturable*, and a one-Charge cost lets the break that makes
+  a creature Seen pay for taking it (2 decisions, 14% by accident). Authoring constraint for
+  encounters: every creature must be capturable by a party the player can plausibly have.
 - **Guard is composure, not armour** (tick 17): `design/creatures.md`. A creature's Guard is what
   it is *pretending*; Breaking it is the pretence failing and the creature being seen. No rule in
   `combat.md` changes — this is the fiction those rules already described. Authoring template for
@@ -178,4 +187,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-19
+20
