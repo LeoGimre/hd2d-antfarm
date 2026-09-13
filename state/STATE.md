@@ -129,6 +129,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Twenty real creatures exist, in `design/roster.md`** (tick 27): authored from place/habit/tell,
+  five per type across all six body plans, shapes in `design/proto/creature_forge.py`. Finding: the
+  *tell* decides the silhouette — write the sentence first and the proportions follow. Type falls
+  out of place, so author place-first or the roster drifts to one animal per element.
+  **Deliberately unstatted** — no HP/Guard/speed/moves for the sixteen new ones, because statting
+  them without running `encounters.md`'s tolerance checklist is what ticks 8 and 9 did.
 - **Shade from a local surface normal, never from the centroid** (tick 26): the thin-limb problem
   that beat three attempts. A centroid-relative "how much does this face the light" puts every leg
   below the centroid, so both sides of a limb read as unlit and there is no lit edge to find.
@@ -235,4 +241,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-26
+27
