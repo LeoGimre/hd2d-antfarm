@@ -60,6 +60,12 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **`design/*.md` is published at `/design/<slug>`** (tick 19): the site renders every design
+  document, and backticked `design/foo.md` references in devlog entries auto-link to them. So a
+  new design doc needs no site change — but it does need a `# Title` heading and a real first
+  paragraph, since the index card uses both. Also fixed in `md.mjs`: list items may now wrap
+  (lazy continuation). Before that, any wrapped item became a stray paragraph and bold spanning
+  the wrap leaked literal `**` onto the page.
 - **One key-light angle for the whole game: `(-44, -118, 0)`** (tick 18): generated sprites bake
   their shading from a fixed direction and billboards carry it everywhere, so scenes that key from
   different angles light the creatures wrong. `design/hd2d_look.md` has the full recipe and the
@@ -172,4 +178,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-18
+19

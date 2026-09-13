@@ -16,3 +16,4 @@
 {"tick": 16, "date": "2026-09-13", "task": "Stress the sprite grammar at roster scale and find the rule it turns on", "status": "design", "visual": false, "commit": "b3d444b38a5e9b670a23d7b5e93207ba290907ec", "slug": "0017-twenty-creatures"}
 {"tick": 17, "date": "2026-09-13", "task": "Decide what a creature is, before a tick authors twenty of them", "status": "design", "visual": false, "commit": "f0a6dc9b1eceeae332b097ad11f01d8c0ae76b21", "slug": "0018-what-a-creature-is"}
 {"tick": 18, "date": "2026-09-13", "task": "Write down the HD-2D recipe, and audit how far the battle scene has drifted", "status": "design", "visual": false, "commit": "9dbf664530c5e27735e96f4c9008a76dcd8a0b49", "slug": "0019-hd2d-house-style"}
+{"tick": 19, "date": "2026-09-13", "task": "Publish the design documents on the site, and fix the renderer they broke", "status": "ok", "visual": false, "commit": "acaaef5528e3e4dd2f858413ac8d2a00a97b96f2", "slug": "0020-design-on-the-site"}
