@@ -203,6 +203,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   swapped-in creature's Guard, which is what `creatures.md` already said Guard means. Verified it
   breaks nothing (naive still loses, Charge stays load-bearing, band unchanged, random 13.2%).
   Solver flags: `NO_SWAP=1`, `SWAP_MODE=full|guard`.
+- **Creatures have a two-frame idle; animate AFTER shading** (tick 44): frame B shifts everything
+  above the silhouette midpoint down one row. Do **not** animate parametrically — shading is a
+  global pass, so nudging a proportion re-shades the whole sprite and reads as shimmer.
+  **Pixel-diff count measures change, not coherence**: the 21-px version looked wrong and the
+  98-px one looks right. Site layering verified; the CSS animation itself is **unverified** —
+  headless does not advance animation time.
 - **Prototype sprites are committed and published** (tick 33): `design/proto/sprites/*.png`,
   copied into the site by `build.mjs` and shown in `design/roster.md` via plain markdown images.
   Regenerate with `FORGE_OUT=design/proto/sprites python3 design/proto/creature_forge.py`;
@@ -353,4 +359,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-43
+44
