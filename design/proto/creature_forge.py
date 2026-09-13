@@ -117,17 +117,49 @@ def depth(g):
         cur = nxt
     return d
 
+def normals(g, radius=2):
+    """Outward surface normal per filled pixel, estimated as the direction
+    toward nearby empty space, inverse-square weighted.
+
+    This replaces an earlier version that took the direction from the sprite's
+    *centroid* to the pixel. That is fine for a torso and wrong for everything
+    else: every leg sits below the centroid, so every leg pixel read as facing
+    away from an overhead light and went uniformly dark. A local normal knows
+    that the left side of a leg faces left whatever the leg's position is,
+    which is the whole of why a three-pixel limb can have a lit edge, a base
+    spine and a shadowed edge."""
+    solid = [[g[y][x] not in (EMPTY, "K") for x in range(W)] for y in range(H)]
+    out = {}
+    for y in range(H):
+        for x in range(W):
+            if not solid[y][x]:
+                continue
+            nx = ny = 0.0
+            for dy in range(-radius, radius + 1):
+                for dx in range(-radius, radius + 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    px, py = x + dx, y + dy
+                    if 0 <= px < W and 0 <= py < H and solid[py][px]:
+                        continue
+                    dist2 = dx * dx + dy * dy
+                    dist = math.sqrt(dist2)
+                    nx += dx / dist / dist2
+                    ny += dy / dist / dist2
+            m = math.hypot(nx, ny)
+            out[(x, y)] = (nx / m, ny / m) if m > 1e-9 else (0.0, 0.0)
+    return out
+
+
 def shade(g, light=(-0.6, -0.8)):
-    """Pick a ramp role per filled pixel: rim-lit toward the light, dark away
-    from it, base in the interior. One light direction for the whole roster is
+    """Pick a ramp role per filled pixel from its surface normal and its
+    distance from the edge. One light direction for the whole roster is
     deliberate -- pillar 6 wants every frame to read as one lit diorama, and a
-    creature lit from its own private angle breaks that instantly."""
+    creature lit from its own private angle breaks that instantly. It must also
+    match the scenes' key light; see design/hd2d_look.md."""
     d = depth(g)
+    nrm = normals(g)
     out = [row[:] for row in g]
-    cx = sum(x for y in range(H) for x in range(W) if g[y][x] == FILL) or 1
-    n = sum(1 for y in range(H) for x in range(W) if g[y][x] == FILL) or 1
-    cx /= n
-    cy = sum(y for y in range(H) for x in range(W) if g[y][x] == FILL) / n
     lx, ly = light
     for y in range(H):
         for x in range(W):
@@ -140,25 +172,22 @@ def shade(g, light=(-0.6, -0.8)):
                 # limb properly: the point is separation, not description.
                 out[y][x] = "d"
                 continue
-            # dot of (pixel -> centre) against the light: >0 means facing it
-            vx, vy = x - cx, y - cy
-            mag = math.hypot(vx, vy) or 1.0
-            face = (vx / mag) * lx + (vy / mag) * ly
+            nx, ny = nrm.get((x, y), (0.0, 0.0))
+            face = nx * lx + ny * ly
             dd = d[y][x]
-            if dd <= 1 and face > 0.45:
+            if dd <= 1 and face > 0.62:
                 out[y][x] = "s"
-            elif dd <= 2 and face > 0.1:
+            elif dd <= 2 and face > 0.18:
                 out[y][x] = "l"
             elif dd <= 1 and face < -0.30:
                 out[y][x] = "d"
             else:
-                # Interior stays base tone whatever direction it faces. Letting
-                # "away from the light" darken the interior too is what turned
-                # four legs into one black mass: the legs are all below the
-                # centroid, so every interior pixel in them read as shadow.
-                # Shading belongs on edges; interiors carry the colour.
+                # Interiors carry the colour; shading belongs on edges. Letting
+                # "away from the light" darken interiors too is the other half
+                # of what turned four legs into one black mass.
                 out[y][x] = "m"
     return out
+
 
 def render(g, palette, path):
     rows = [[palette.get(c, palette["."]) for c in row] for row in g]

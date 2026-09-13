@@ -98,20 +98,37 @@ single change.
 hue works, but only if the hue itself drifts warm into the light and cool into
 the shadow. Straight value steps on a fixed hue look like a UI gradient.
 
-### What it did not solve
+### What it did not solve — and what eventually did
 
-Emberling — long thin legs under a small body, on the unlit side — still reads
-as a torso above a dark mass, and three attempts did not fix it. The diagnosis is
-general and worth writing down: **a thin part has no interior**, so any
-edge-based shading rule swallows it whole. A 3-pixel leg is all edge. The fix is
-probably a forced mid-tone spine down the centre of thin limbs, or a weak second
-light from below; both need trying against pixels rather than reasoning about.
+For two ticks, Emberling — long thin legs under a small body, on the unlit side —
+read as a torso above a dark smear, and three attempts failed to fix it. The
+diagnosis was right and general: **a thin part has no interior**, so any
+edge-based shading rule swallows it whole. A three-pixel leg is all edge.
 
-The rest of the roster came out legible: Rootshell reads as a shelled
-quadruped, Tidalpup as a serpent rearing off the ground, Galewing as a winged
-biped, each in its type's colour, all under the same light. Three out of four
-from one generator is enough to believe the grammar; the fourth is a tuning
-problem, not a structural one.
+What was wrong was one line, and it was the *other* half of the shading rule.
+`face` — how much a pixel points toward the light — was computed as the
+direction from the **sprite's centroid** to that pixel. That is a reasonable
+approximation for a torso and wrong for everything else, because every leg on
+every creature sits below the centroid, so every leg pixel reads as facing away
+from an overhead light no matter which side of the leg it is on. The limb had no
+lit side available to it.
+
+The fix is a real local surface normal, estimated per pixel as the
+inverse-square-weighted direction toward nearby empty space. A leg's left column
+then knows it faces left regardless of where the leg is, so a three-pixel limb
+gets a lit edge, a base-tone spine and a shadowed edge — which is exactly how
+the medium draws a cylinder.
+
+It improved every body plan, not just the one that was broken: the serpents
+gained cylindrical volume, the jellyfish tendrils became individually visible,
+and the insectoid plan's legs stopped merging into a skirt. The whole roster is
+somewhat lighter than before, since fewer pixels now qualify as shadow, and that
+is a threshold worth revisiting once these are seen against a real scene's
+lighting rather than a flat swatch.
+
+The general lesson is the same one this project keeps relearning in different
+costumes: the symptom was in the thin limbs, the cause was in a rule that was
+only ever tested against a torso.
 
 ## Does it scale?
 
@@ -159,10 +176,10 @@ it sits on cannot be separated by a one-pixel line. When a creature will not
 read after edging, the proportions are wrong, not the renderer.
 
 One correction to the first pass: Emberling's dark leg mass, which looked
-fatal at 8× on its own, reads acceptably at roster scale among its peers. The
-diagnosis — a thin part has no interior — still stands and still wants fixing,
-but it was judged too harshly from a single blown-up sprite. Looking at one
-thing very large is not the same as looking at the set.
+fatal at 8× on its own, read acceptably at roster scale among its peers — it was
+judged too harshly from a single blown-up sprite. Looking at one thing very
+large is not the same as looking at the set. It is fixed now regardless; see
+above.
 
 **The twenty names are placeholders.** They exist to spread shapes across the
 plans, not to propose a roster. What these creatures actually *are* — the
