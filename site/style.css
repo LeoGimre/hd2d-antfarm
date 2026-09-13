@@ -84,6 +84,13 @@ header.site nav a.on { color: var(--amber); }
 .status dd.green { color: var(--green); }
 .status dd.amber { color: var(--amber); }
 
+/* The two lines under the status strip. `.blocked` only renders when STATE.md
+   has an open blocker — this site's premise is the unedited record, and a loop
+   that is stuck should say so above the fold. */
+.now, .blocked { font-size: 13.5px; margin: 4px 0 0; }
+.now { color: var(--muted); }
+.blocked { color: var(--rust); }
+
 /* ---------------------------------------------------------------- feed */
 h2.section {
   font-size: 12px; text-transform: uppercase; letter-spacing: .12em;

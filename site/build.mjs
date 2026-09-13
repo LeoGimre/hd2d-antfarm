@@ -92,17 +92,55 @@ function loadTypes() {
   try { return JSON.parse(read(path)).types || {}; } catch { return {}; }
 }
 
-/** STATE.md is prose for the loop, but a few fields are worth surfacing. */
+/** Flatten markdown to something a one-line status tile can hold. */
+function plain(md) {
+  return String(md)
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\*\*([^*]*)\*\*/g, "$1")
+    .replace(/\*([^*]*)\*/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** First `count` sentences, then a hard cap that breaks on a word boundary.
+ *  Splits on a terminator *followed by whitespace* rather than matching
+ *  sentence shapes: STATE.md is full of filenames, and a pattern that treats
+ *  every "." as an end-of-sentence cuts `first_blood_balance.md` in half and
+ *  puts "md, in-engine." on the front page. */
+function summarise(md, count, cap) {
+  const text = plain(md);
+  let out = text.split(/(?<=[.!?])\s+/).slice(0, count).join(" ").trim();
+  if (!out) out = text;
+  if (out.length > cap) out = out.slice(0, cap - 1).replace(/[\s,;:—-]+\S*$/, "") + "…";
+  return out;
+}
+
+/** STATE.md is the loop's own memory, written for whichever session reads it
+ *  next — not copy for this page. Its line breaks fall wherever the paragraph
+ *  happened to wrap and its prose is markdown, so slicing physical lines out of
+ *  it puts stray `**` on the front page and stops sentences mid-word. That is
+ *  exactly what shipped when tick 10 rewrote the file. Work in sentences, strip
+ *  the markup, and cap the length here, so how the next tick words its notes
+ *  cannot break the page. */
 function loadState() {
   const src = read(join(ROOT, "state", "STATE.md"));
+  // No "m" flag on purpose. With it, `$` matches at every line end, so the lazy
+  // body stops at the first newline and every section silently collapses to its
+  // first line — which is how a mid-sentence fragment reached the front page.
+  // `(?:^|\n)## ` anchors the heading without needing multiline.
   const section = (name) => {
-    const m = src.match(new RegExp(`^## ${name}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "m"));
+    const m = src.match(new RegExp(`(?:^|\\n)## ${name}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`));
     return m ? m[1].trim() : "";
   };
+  const blockers = section("Open blockers");
   return {
-    milestone: section("Current milestone").split("\n")[0] || "—",
-    focus: section("Current focus").split("\n").slice(0, 2).join(" ") || "—",
-    blockers: section("Open blockers") || "None.",
+    milestone: summarise(section("Current milestone"), 1, 58) || "—",
+    focus: summarise(section("Current focus"), 2, 240) || "—",
+    // "None." is the normal case and not worth a line; anything else is.
+    // Three sentences rather than two: a blocker is only useful if the reader
+    // learns what is actually stuck. The character cap is what bounds it.
+    blocker: /^none\.?$/i.test(plain(blockers)) ? "" : summarise(blockers, 3, 240),
     ticks: (section("Tick counter").match(/\d+/) || ["0"])[0],
   };
 }
@@ -204,7 +242,8 @@ function pageIndex(entries, state, progress) {
     <div><dt>Roadmap</dt><dd class="green">${progress.done}/${progress.total}</dd></div>
     <div><dt>Entries</dt><dd>${entries.length}</dd></div>
   </dl>
-  <p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">Now: ${esc(state.focus)}</p>
+  <p class="now">Now: ${esc(state.focus)}</p>
+  ${state.blocker ? `<p class="blocked">Blocked: ${esc(state.blocker)}</p>` : ""}
 </section>
 <h2 class="section">Devlog</h2>
 ${feed}`,
