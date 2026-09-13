@@ -43,10 +43,10 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
 1. `design/encounters.md` — move the roster to `game/data/encounters.json`, delete
    `build_battle.gd`'s `TEAM` copy outright.
 2. `design/first_blood_balance.md` — apply the re-pairing, confirm both scripted lines, tick M3's
-   fourth box. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0 and
-   `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (deleting that clause). Takes the tolerance band from
-   +0%/+15% to +75%/+50%, drops random play to 10.8%, and makes "melee everything and spend
-   Charges" lose. Update the solver's constants in the same commit or `agreements.py` will fail —
+   fourth box. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
+   `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (deleting that clause), `FRONT_DAMAGE_BONUS` 2.0 → 1.0.
+   Validated on **both** encounters: exactly one of seven scripted lines wins and it is the
+   correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
    that is deliberate.
 3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
@@ -139,6 +139,11 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **A one-encounter measurement is wrong in one direction: "this rule does nothing"** (tick 39).
+  `FRONT_DAMAGE_BONUS` looked like slack for three ticks; on the Ridge, zeroing it means the fight
+  **does not work at all**. Slack in one fight is not slack everywhere. **Read `position.md`'s
+  classification as "on the proof battle", and re-run it per encounter** — the tool takes
+  `--encounter`. Final answer: +1, best on both.
 - **Every enemy line must give each player creature something it can break** (tick 38):
   `design/second_encounter.md`. A one-type enemy line **cannot** make a pillar-2 encounter — 0 of
   192 stat settings — because a creature whose attacks are all resisted does 0 Guard damage,
@@ -325,4 +330,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-38
+39

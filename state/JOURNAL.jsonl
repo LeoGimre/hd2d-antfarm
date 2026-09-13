@@ -37,3 +37,4 @@
 {"tick": 36, "date": "2026-09-13", "task": "Sweep every combat constant, and correct what the hand audit got wrong", "status": "ok", "visual": false, "commit": "0eaf42c95ebdf5f56cb87652f891c404b53be69d", "slug": "0037-every-constant"}
 {"tick": 37, "date": "2026-09-13", "task": "Recommend a two-constant retune that improves the fight on every axis", "status": "design", "visual": false, "commit": "2ea072bb6ac213d0154254d8db7eddaf83c0b10c", "slug": "0038-two-constants"}
 {"tick": 38, "date": "2026-09-13", "task": "Build a second encounter, and find a constraint nobody had stated", "status": "design", "visual": false, "commit": "8e8cd29b3e8e6a4296ad8c53bcd1f103c036f4a9", "slug": "0039-second-encounter"}
+{"tick": 39, "date": "2026-09-13", "task": "Decide the Front bonus on two encounters, and correct three ticks of reading it", "status": "design", "visual": false, "commit": "42165b4ec072c2e29cb230f3b82d3add7d38ff57", "slug": "0040-front-bonus-decided"}
