@@ -239,6 +239,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   per region — never the key angle**, which is baked into every sprite. Build the Ridge first: the
   emptiest, so the cheapest geometry and the hardest test of "distinct". For `agreements.py` once
   regions exist: every exit's destination must exist and have an exit back.
+- **Three NPCs written and checked** (tick 48): `design/proto/conversations.json`.
+  `agreements.py` enforces dialogue.md's rules — unconditional last node, at least one line
+  conditioned on something the player *did*, **no templating** (a `{` fails), **no signposts** (a
+  line matching `<Type>-type` or `weak to <Type>` fails and quotes GAME.md). New rule the checker
+  produced on its first run: **`party_has` may only name a creature that has stats**, not merely
+  one in the roster — otherwise the condition can never fire.
 - **Dialogue: ordered nodes, first match wins** (tick 31): `design/dialogue.md`,
   `game/data/conversations.json`. The bar that makes M5's "worth talking to twice" checkable: **an
   NPC is not finished until it has at least one line that only appears because of something the
@@ -375,4 +381,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-47
+48
