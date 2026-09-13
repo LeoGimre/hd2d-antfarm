@@ -135,6 +135,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **A swapped-in creature arrives with full Guard** (tick 34): `design/swap.md`. Measured, the
+  full-action Swap in `combat.md` is a *trap* — removing it leaves the shortest win unchanged and
+  raises random play from 13.0% to 20.5%. Cause: **Front is where every melee attack lands, from
+  both enemies**, so Swap moves a creature into danger uncomposed. The fix restores the
+  swapped-in creature's Guard, which is what `creatures.md` already said Guard means. Verified it
+  breaks nothing (naive still loses, Charge stays load-bearing, band unchanged, random 13.2%).
+  Solver flags: `NO_SWAP=1`, `SWAP_MODE=full|guard`.
 - **Prototype sprites are committed and published** (tick 33): `design/proto/sprites/*.png`,
   copied into the site by `build.mjs` and shown in `design/roster.md` via plain markdown images.
   Regenerate with `FORGE_OUT=design/proto/sprites python3 design/proto/creature_forge.py`;
@@ -285,4 +292,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-33
+34

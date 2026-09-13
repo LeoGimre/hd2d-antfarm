@@ -32,3 +32,4 @@
 {"tick": 31, "date": "2026-09-13", "task": "Design dialogue around one testable bar: a line you only see because you changed", "status": "design", "visual": false, "commit": "01daafa7112c87c511eba7e2f5d8f186040a8c2f", "slug": "0032-dialogue"}
 {"tick": 32, "date": "2026-09-13", "task": "Design region authoring, and make \"distinct\" something a region has to earn", "status": "design", "visual": false, "commit": "c6badb0f82f4e7274e55f91851f3641a0dc87c39", "slug": "0033-regions"}
 {"tick": 33, "date": "2026-09-13", "task": "Show the prototype sprites on the site, and guard them against going stale", "status": "ok", "visual": false, "commit": "6c2564e5248e948d3655e1761ca91e8634f727e9", "slug": "0034-sprites-on-the-site"}
+{"tick": 34, "date": "2026-09-13", "task": "Find that Swap is a trap, and fix it with what Guard already meant", "status": "design", "visual": false, "commit": "3f7542dbc1415e66cabcf060c76d89efc14e06aa", "slug": "0035-swap-is-a-trap"}
