@@ -119,6 +119,44 @@ frames have been looked at most. The sprite generator's baked direction should
 be derived from it, and any new scene adopts it. Colour and energy stay free —
 a scene may light cold or warm, bright or dim, but not from somewhere else.
 
+### The number, computed
+
+Asserting that scenes must agree on a key angle is not the same as knowing what
+the sprites are baked to. Both sides of that coupling have now been worked out
+rather than assumed.
+
+A `DirectionalLight3D`'s direction projected into the camera's screen plane —
+Godot's `rotation_degrees` is `EULER_ORDER_YXZ`, so the basis is `Ry * Rx * Rz`
+and the light points along local −Z:
+
+| light | camera | screen angle (0° = from the right) |
+|---|---|---|
+| house `(−44, −118, 0)` | diorama, tilt −31° | **130°** |
+| house `(−44, −118, 0)` | battle, tilt −38° | **130°** |
+| battle's current `(−50, −140, 0)` | battle, tilt −38° | **114°** |
+| *what the sprite generator bakes* | — | **130°** |
+
+Three things follow.
+
+**The two cameras agree.** Despite an 7° difference in tilt, the house angle
+projects to the same screen direction in both, within a degree, so **one baked
+direction serves both scenes**. That is luck rather than law: both cameras are
+tilted about X only and neither is yawed. A scene whose camera looks along a
+different axis would need this recomputed, and would probably need its key
+angle chosen to match rather than inherited.
+
+**The battle scene's key is 16° off in screen space**, which is the real cost of
+the misalignment already on the remediation list below — not an abstract
+inconsistency but sprites lit from noticeably the wrong side. Aligning it fixes
+lighting and sprites in one edit.
+
+**The bake is now derived, not eyeballed.** `creature_forge.py` computes its
+light vector from `HOUSE_KEY_EULER` and the camera tilt rather than carrying a
+hand-picked constant, so changing the house angle changes the sprites instead of
+obliging someone to remember that it should. For the record the hand-picked
+value was 127° against a correct 130° — a good guess, and not a reason to keep
+guessing.
+
 ## Rules for a new scene
 
 For whoever builds region two:

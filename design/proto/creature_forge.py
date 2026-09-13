@@ -22,6 +22,46 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 "..", "..", "game", "tools"))
 from pixelforge import write_png  # noqa: E402  (the project's own PNG writer)
 
+# ---------------------------------------------------------------- lighting
+#
+# A billboarded sprite carries its baked shading into whatever scene it stands
+# in, so the direction it is lit from has to agree with that scene's key light.
+# design/hd2d_look.md makes that a rule; this makes it arithmetic, so changing
+# the house angle changes the sprites rather than merely obliging someone to
+# remember. Derived rather than eyeballed: the previous hand-picked
+# (-0.60, -0.80) was 127 degrees and the correct answer is 130, which is a nice
+# result for guessing but not a reason to keep guessing.
+
+HOUSE_KEY_EULER = (-44.0, -118.0, 0.0)   # design/hd2d_look.md's house angle
+CAMERA_TILT_DEG = -38.0                  # battle camera; the diorama's -31 lands
+                                         # within a degree, so one bake serves both
+
+
+def _screen_light(key_euler, cam_tilt_deg):
+    """Project a Godot DirectionalLight3D's direction into the camera's screen
+    plane, as (x right, y down) — the space the shader works in.
+
+    Godot's Node3D rotation_degrees is EULER_ORDER_YXZ, so the basis is
+    Ry * Rx * Rz and the light points along its local -Z. The camera here is
+    tilted about X only, which is what makes the two scenes' projections agree
+    to within a degree; a camera yawed away from the board would not, and this
+    would need recomputing."""
+    x, y, _z = key_euler
+    ax, ay = math.radians(x), math.radians(y)
+    # Ry(ay) * Rx(ax) applied to (0, 0, 1) -- the direction *toward* the light.
+    tx = math.sin(ay) * math.cos(ax)
+    ty = -math.sin(ax)
+    tz = math.cos(ay) * math.cos(ax)
+    t = math.radians(cam_tilt_deg)
+    # camera right is (1,0,0); camera up is Rx(t) * (0,1,0)
+    sx = tx
+    sy = ty * math.cos(t) + tz * math.sin(t)
+    m = math.hypot(sx, sy) or 1.0
+    return (sx / m, -sy / m)
+
+
+LIGHT = _screen_light(HOUSE_KEY_EULER, CAMERA_TILT_DEG)
+
 W, H = 40, 44
 EMPTY, FILL, FAR = ".", "#", "="
 
@@ -151,7 +191,7 @@ def normals(g, radius=2):
     return out
 
 
-def shade(g, light=(-0.6, -0.8)):
+def shade(g, light=None):
     """Pick a ramp role per filled pixel from its surface normal and its
     distance from the edge. One light direction for the whole roster is
     deliberate -- pillar 6 wants every frame to read as one lit diorama, and a
@@ -160,7 +200,7 @@ def shade(g, light=(-0.6, -0.8)):
     d = depth(g)
     nrm = normals(g)
     out = [row[:] for row in g]
-    lx, ly = light
+    lx, ly = light if light is not None else LIGHT
     for y in range(H):
         for x in range(W):
             ch = g[y][x]
