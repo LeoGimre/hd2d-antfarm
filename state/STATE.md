@@ -73,6 +73,13 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
 
 6. `design/capture.md` — M4's capture box. Needs the encounter/party work above first.
 
+## The tick ritual
+Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
+self-check and the fifteen cross-file agreements, and *loudly skips* the GDScript suite until
+`game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
+says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
+has no allowlisted way to invoke a shell script it just created.)
+
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
 `/Applications/Godot.app/...` does not exist here and `curl`/`wget` are denied, so it cannot be
@@ -346,4 +353,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-42
+43

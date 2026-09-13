@@ -41,3 +41,4 @@
 {"tick": 40, "date": "2026-09-13", "task": "Make the constants sweep conservative across encounters, and catch a second one", "status": "ok", "visual": false, "commit": "8088ef6785e88f6066c5445ae1d4f94af0ae2d77", "slug": "0041-conservative-by-default"}
 {"tick": 41, "date": "2026-09-13", "task": "Generate the combat test fixtures instead of writing them by hand", "status": "ok", "visual": false, "commit": "c2bcc4a166f09c2b43916236875c2112943df8c9", "slug": "0042-generated-fixtures"}
 {"tick": 42, "date": "2026-09-13", "task": "Give the design corpus a reading order, and make the site lead with it", "status": "ok", "visual": false, "commit": "9f8524550c2825e5fa404b7a1bc5300d228a2f32", "slug": "0043-reading-order"}
+{"tick": 43, "date": "2026-09-13", "task": "Build the test runner combat_tests.md specified, and make its skips loud", "status": "ok", "visual": false, "commit": "629ffcdcbc3f9b483174ce06ebd4a390101f1a0e", "slug": "0044-the-runner"}
