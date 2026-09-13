@@ -108,6 +108,48 @@ project rather than for this fight: the retune nearly doubles the space of
 workable stat assignments. Encounters become *easier to balance*, which is
 exactly what a roster heading for sixty creatures needs.
 
+## Retuned: an encounter needs to admit more than one party
+
+The stats above were searched on a single objective — does the encounter
+discriminate skill? — and that turned out to be too narrow. Measured
+afterwards against every player pair the roster can field:
+
+| | as first built | first_blood, for comparison |
+|---|---|---|
+| player pairs that can win | **2 of 12** | 6 of 12 |
+| distinct Front creatures that work | **1** | 4 |
+
+A fight that exactly one party can enter is a **key check**, not a tactical
+fight, and a world made of those is a set of gates rather than a place worth
+crossing. The Ridge came out that way by accident of the search objective, not
+by design.
+
+Re-searched on both objectives — discriminate skill **and** admit several
+parties — across 256 stat settings, of which 46 discriminate:
+
+| | before | after |
+|---|---|---|
+| Ashmoth | 28 HP, speed 12 | **28 HP, speed 8** |
+| Ridgewalk | 26 HP, speed 14 | **26 HP, speed 16** |
+| player pairs that can win | 2 of 12 | **8 of 12** |
+| distinct Fronts | 1 | **4** |
+| tolerance band | +0% / +40% | **+50% / +40%** |
+| random play | 7.2% | **6.1%** |
+
+Better on every axis, and the mechanism is legible: **a slow Front enemy is what
+opens a fight.** Dropping Ashmoth to speed 8 gives the player time, which is
+what lets parties other than the single optimal one survive long enough to
+matter, while Ridgewalk at 16 — the fastest thing in the roster — keeps the
+fight sharp. Slow and dangerous beats uniformly quick.
+
+Openness is now measurable on demand rather than by hand:
+
+```
+python3 design/proto/combat_solver.py parties --encounter the_ridge
+```
+
+and it belongs on `encounters.md`'s pre-ship checklist next to the other three.
+
 ## What is still caveated
 
 Two encounters is not many, and both use the same player pair. The next thing

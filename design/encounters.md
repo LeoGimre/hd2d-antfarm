@@ -238,6 +238,11 @@ Before an encounter ships:
    middle of it rather than at one edge.
 4. `capture` — every creature in it is capturable by a party the player could
    have.
+5. `parties` — **more than one party can win it, and more than one Front works.**
+   An encounter exactly one party can enter is a key check rather than a
+   tactical fight, and a world made of those is a set of gates. The Ridge was
+   built without this step and came out at one viable Front; see
+   `design/second_encounter.md`.
 
 ## Rejected alternatives
 

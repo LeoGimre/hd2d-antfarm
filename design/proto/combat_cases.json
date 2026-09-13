@@ -571,22 +571,22 @@
       "encounter": "the_ridge",
       "line": "melee_charge",
       "description": "always melee, always spend Charge",
-      "expect_winner": "player",
-      "expect_player_decisions": 5
+      "expect_winner": "enemy",
+      "expect_player_decisions": 3
     },
     {
       "encounter": "the_ridge",
       "line": "snipe_back",
       "description": "always attack the Back slot",
-      "expect_winner": "enemy",
-      "expect_player_decisions": 3
+      "expect_winner": "player",
+      "expect_player_decisions": 7
     },
     {
       "encounter": "the_ridge",
       "line": "anti_typed",
       "description": "attack whoever resists you",
       "expect_winner": "enemy",
-      "expect_player_decisions": 2
+      "expect_player_decisions": 3
     },
     {
       "encounter": "the_ridge",
@@ -600,14 +600,14 @@
       "line": "typed_hoard",
       "description": "correct targeting, never spends a Charge",
       "expect_winner": "enemy",
-      "expect_player_decisions": 8
+      "expect_player_decisions": 7
     },
     {
       "encounter": "the_ridge",
       "line": "typed_swap",
       "description": "open with a Swap, then correct targeting",
-      "expect_winner": "enemy",
-      "expect_player_decisions": 4
+      "expect_winner": "player",
+      "expect_player_decisions": 8
     }
   ],
   "golden_trace": {

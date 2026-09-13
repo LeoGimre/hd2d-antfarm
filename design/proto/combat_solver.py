@@ -30,7 +30,7 @@ Encounters come from design/proto/encounters.json; --encounter names one.
 --encounter first_blood_unpaired runs the pre-repair roster, the counter-example
 every balance document cites.
 """
-import argparse, copy, json, math, os, random, sys
+import argparse, copy, itertools, json, math, os, random, sys
 
 GAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "game")
 
@@ -720,6 +720,35 @@ def balanced_encounters():
     return keep
 
 
+def party_openness(pool=None):
+    """How many player pairs can win this encounter, and how many distinct Front
+    creatures work.
+
+    Separate from discriminates() on purpose. An encounter can reward skill
+    perfectly and still admit exactly one party, which is a key check rather
+    than a tactical fight — and a world made of those is a set of gates rather
+    than a place. The Ridge was built by searching only for discrimination and
+    came out at one viable Front by accident; see design/second_encounter.md."""
+    global TEAM, CREATURES
+    base_team, base_creatures = TEAM, copy.deepcopy(CREATURES)
+    enemy = [t for t in TEAM if t[1] == "enemy"]
+    enemy_ids = {c for c, _s, _l in enemy}
+    if pool is None:
+        pool = sorted(CREATURES)
+    wins = []
+    try:
+        for f, b in itertools.permutations(pool, 2):
+            if f in enemy_ids or b in enemy_ids:
+                continue
+            CREATURES = copy.deepcopy(base_creatures)
+            TEAM = [(f, "player", "front"), (b, "player", "back")] + enemy
+            if play(typed)[0] == "player":
+                wins.append((f, b))
+    finally:
+        TEAM, CREATURES = base_team, base_creatures
+    return wins
+
+
 # ---------------------------------------------------------------- self-check
 
 # Tick 9 committed this outcome, and a capture of it was published. If the port
@@ -762,7 +791,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("command", nargs="?", default="lines",
                     choices=["lines", "trace", "search", "tolerance", "capture",
-                             "constants"])
+                             "constants", "parties"])
     ap.add_argument("policy", nargs="?", default="typed")
     ap.add_argument("--encounter", default=DEFAULT_ENCOUNTER, choices=sorted(ENCOUNTERS))
     ap.add_argument("--self-check", action="store_true")
@@ -867,6 +896,23 @@ def main():
         else:
             print("  Measured on ONE encounter. Add --all-encounters: a rule that looks like")
             print("  slack here may be holding another fight up (see design/position.md).")
+
+    elif args.command == "parties":
+        pool = [c for c in sorted(CREATURES)
+                if CREATURES[c].get("max_hp") and CREATURES[c].get("moves")]
+        wins = party_openness(pool)
+        total = sum(1 for f, b in itertools.permutations(pool, 2)
+                    if f not in {c for c, s_, l in TEAM if s_ == "enemy"}
+                    and b not in {c for c, s_, l in TEAM if s_ == "enemy"})
+        fronts = sorted({f for f, _b in wins})
+        print("  %d of %d player pairs can win with correct play" % (len(wins), total))
+        print("  %d distinct Front creatures work: %s" % (len(fronts), ", ".join(fronts) or "none"))
+        print()
+        for f, b in wins:
+            print("     %-12s / %s" % (CREATURES[f]["display_name"], CREATURES[b]["display_name"]))
+        print()
+        print("  An encounter only one party can enter is a key check, not a tactical fight.")
+        print("  Aim for several, and for more than one workable Front.")
 
     elif args.command == "capture":
         for ti in (2, 3):
