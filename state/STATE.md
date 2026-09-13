@@ -37,6 +37,14 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **The site scrapes this file, so its prose is load-bearing** (tick 12): `loadState()` in
+  `site/build.mjs` lifts `Current milestone`, `Current focus` and `Open blockers` onto the front
+  page. Its section regex used to carry an `m` flag, under which `$` matches every line end, so
+  every section collapsed to its first line — fixed by anchoring as `(?:^|\n)## ` with no flag.
+  The scraped text now goes through a markdown flattener and a sentence-wise summariser with a
+  character cap, so **wording this file freely can no longer break the page**. Write for the next
+  tick, not for the site. (Splitting sentences: match a terminator *followed by whitespace*, or
+  `first_blood_balance.md` gets cut in half.)
 - **The site's bestiary reads `game/data/*.json` directly** (tick 11): it had guessed a
   `game/data/creatures/` one-file-per-creature directory that the game never adopted, so it
   reported an empty roster for four ticks while shipping four creatures. Two lessons worth keeping:
@@ -103,4 +111,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-11
+12
