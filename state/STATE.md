@@ -129,6 +129,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **`farm/agreements.py` checks cross-file consistency** (tick 29): eleven agreements — data
+  integrity, the two hand-synced `TEAM` tables, input actions vs the autoload, solver constants vs
+  `combat_resolver.gd`, and the published record (every devlog commit sha resolves; devlog and
+  JOURNAL agree). **Run it alongside `verify.sh` in the tick ritual.** It caught a devlog citing an
+  invented commit sha and a missing tick-0 journal line. Note: the TEAM check is *meant* to start
+  failing once `encounters.md` is built — update the check, not the code.
 - **Screen-space light: house angle = 130 deg, battle scene currently 114** (tick 28): computed,
   not assumed. `creature_forge.py` now *derives* its baked light from `HOUSE_KEY_EULER` + camera
   tilt, so changing the house angle changes the sprites. Both cameras project the house angle to
@@ -247,4 +253,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-28
+29

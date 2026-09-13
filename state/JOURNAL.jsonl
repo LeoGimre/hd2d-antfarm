@@ -27,3 +27,4 @@
 {"tick": 26, "date": "2026-09-13", "task": "Fix the thin-limb shading by giving pixels a real surface normal", "status": "ok", "visual": false, "commit": "cc6723e2c097912e1815983ba293c37aafefd414", "slug": "0027-thin-limbs"}
 {"tick": 27, "date": "2026-09-13", "task": "Author twenty creatures, and find that the tells produce the silhouettes", "status": "design", "visual": false, "commit": "e70400fcab877bdb1ffe6024551f1fdba0693a4c", "slug": "0028-twenty-real-creatures"}
 {"tick": 28, "date": "2026-09-13", "task": "Compute the screen-space light angle instead of asserting the scenes agree", "status": "ok", "visual": false, "commit": "10e8a7dc5cd9d37c786ba868e32a3388a8cccc63", "slug": "0029-computing-the-light"}
+{"tick": 29, "date": "2026-09-13", "task": "Check the things this project claims must agree, and fix the two that did not", "status": "ok", "visual": false, "commit": "fa363afb5a6c879487f728d55f04345b9265c130", "slug": "0030-agreements"}
