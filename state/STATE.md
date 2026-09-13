@@ -75,6 +75,14 @@ vacuously when the binary is missing — only the smoke stage catches it.
   block, change only sky / ambient energy / key colour+energy, FOV stays 18 (move the camera back,
   never widen), and **check the DOF band's arithmetic** — a band that brackets nothing looks
   identical, in the file, to one that works.
+- **An encounter is atomic; region state is a region's problem** (tick 24): `encounters.md` now
+  reconciles the requirements `capture.md`, `progression.md` and `narrative.md` put on it. **Do
+  not add a condition field to an encounter entry** — a quieter version of a fight is a second
+  encounter with its own id, owned by a region's per-state list. Consequence recorded there:
+  baking `encounter_id` into the scene is right for one battle and wrong once a region picks at
+  runtime. There is now a four-step checklist to run before any encounter ships (self-check →
+  lines → tolerance → capture). **The design corpus is big enough to contradict itself — when a
+  document imposes something on an older one, go and reconcile it.**
 - **The combat solver is committed** (tick 23): `design/proto/combat_solver.py`, runs here (no
   engine needed). `--self-check` replays tick 9's committed naive result; **if it fails, the file
   is wrong and none of its numbers count.** Subcommands: `lines` (policy battery), `trace`,
@@ -214,4 +222,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-23
+24
