@@ -129,6 +129,13 @@ vacuously when the binary is missing — only the smoke stage catches it.
   every future creature: **place, habit, tell**. Naming rule: name for the habit or tell, never
   the element (the sprite hue already says the element). **Do not rename the existing four ids
   until M3's fourth box is ticked** — four design docs reference them.
+- **Dialogue: ordered nodes, first match wins** (tick 31): `design/dialogue.md`,
+  `game/data/conversations.json`. The bar that makes M5's "worth talking to twice" checkable: **an
+  NPC is not finished until it has at least one line that only appears because of something the
+  player did.** Visit count is recorded automatically so `talked: ">0"` is free. **No templating,
+  ever** — conditions exist to make specific lines affordable, not generic ones parameterisable.
+  Last node must be unconditional (a check `agreements.py` should gain). Do not *build* it before
+  the party exists, or half the conditions are untestable.
 - **Screenshot the furniture, not just the thing you built** (tick 30): tick 19 added a fifth nav
   item, screenshotted the page body at 420px, and left "Glass" falling off the right edge for
   eleven ticks. The habit has caught four real bugs, all invisible in source and obvious on
@@ -258,4 +265,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-30
+31
