@@ -194,6 +194,37 @@ def _():
     return out
 
 
+@check("the committed sprite PNGs still match what the generator produces")
+def _():
+    import shutil, tempfile
+    src = os.path.join(ROOT, "design", "proto", "sprites")
+    if not os.path.isdir(src):
+        return []                                      # nothing committed yet
+    tmp = tempfile.mkdtemp(prefix="agreements-sprites-")
+    try:
+        env = dict(os.environ, FORGE_OUT=tmp)
+        r = subprocess.run([sys.executable,
+                            os.path.join(ROOT, "design", "proto", "creature_forge.py")],
+                           capture_output=True, text=True, env=env)
+        if r.returncode != 0:
+            return ["the generator failed: %s" % (r.stderr.strip().splitlines() or [""])[-1]]
+        out = []
+        # "_" files (the contact sheet) are produced only with --sheet; ignore them.
+        committed = {f for f in os.listdir(src) if f.endswith(".png") and not f.startswith("_")}
+        produced = {f for f in os.listdir(tmp) if f.endswith(".png") and not f.startswith("_")}
+        for f in sorted(committed - produced):
+            out.append("%s is committed but the generator no longer produces it" % f)
+        for f in sorted(produced - committed):
+            out.append("%s is produced but not committed (site/ will 404 on it)" % f)
+        for f in sorted(committed & produced):
+            if open(os.path.join(src, f), "rb").read() != open(os.path.join(tmp, f), "rb").read():
+                out.append("%s differs from the generator's output — regenerate with "
+                           "FORGE_OUT=design/proto/sprites" % f)
+        return out
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 @check("design/roster.md and the sprite generator list the same creatures")
 def _():
     sys.path.insert(0, os.path.join(ROOT, "design", "proto"))

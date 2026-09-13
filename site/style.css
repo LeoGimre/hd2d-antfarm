@@ -190,6 +190,16 @@ li.done::before { content: "[x]"; color: var(--green); }
 li.todo::before { content: "[ ]"; color: var(--muted); }
 li.done { color: var(--ink); }
 
+/* Prototype creature sprites in design documents. 40x44 source, upscaled with
+   nearest-neighbour — a smoothed pixel sprite is a different image. */
+article.post img[src^="/sprites/"] {
+  image-rendering: pixelated;
+  width: 100px; height: auto; vertical-align: bottom;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px;
+  margin: 0 4px 4px 0;
+}
+.spritestrip { margin: 14px 0 4px; line-height: 0; }
+
 /* ---------------------------------------------------------------- bestiary */
 .beasts {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));

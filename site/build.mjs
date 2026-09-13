@@ -496,6 +496,18 @@ function main() {
   for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e, slugs));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));
 
+  // The prototype creature sprites, so design/roster.md can show what it is
+  // describing. They are design artifacts rather than game assets — nothing in
+  // game/ loads them — and farm/agreements.py checks they still match what the
+  // generator produces, so a stale sprite cannot sit here unnoticed.
+  const spriteSrc = join(ROOT, "design", "proto", "sprites");
+  if (existsSync(spriteSrc)) {
+    mkdirSync(join(OUT, "sprites"), { recursive: true });
+    for (const f of readdirSync(spriteSrc).filter((f) => f.endsWith(".png"))) {
+      copyFileSync(join(spriteSrc, f), join(OUT, "sprites", f));
+    }
+  }
+
   console.log(
     `site: ${entries.length} entries, ${docs.length} design docs, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
   );

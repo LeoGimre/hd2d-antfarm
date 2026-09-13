@@ -18,6 +18,8 @@ Guard — what breaking it reveals — from its tell. The shapes are rendered by
 | **Bellowsback** | forge yards | breathes in time with work that stopped years ago | pretends it is still needed | brawler |
 | **Ashmoth** | chimney flues | goes toward light and is disappointed | pretends it meant to | avian |
 
+![Emberling](/sprites/emberling.png) ![Stokewake](/sprites/stokewake.png) ![Lastcoal](/sprites/lastcoal.png) ![Bellowsback](/sprites/bellowsback.png) ![Ashmoth](/sprites/ashmoth.png)
+
 ## Tide — tidelines, wells, gutters
 
 | | place | habit | tell | plan |
@@ -28,6 +30,8 @@ Guard — what breaking it reveals — from its tell. The shapes are rendered by
 | **Riverbend** | where a river gave up going straight | takes the long way | pretends it is not lost | quadruped |
 | **Downspout** | gutters and eaves | only appears when it rains | pretends it lives there | insectoid |
 
+![Tidalpup](/sprites/tidalpup.png) ![Wellmouth](/sprites/wellmouth.png) ![Slackwater](/sprites/slackwater.png) ![Riverbend](/sprites/riverbend.png) ![Downspout](/sprites/downspout.png)
+
 ## Gale — ridgelines, towers, thresholds
 
 | | place | habit | tell | plan |
@@ -37,6 +41,8 @@ Guard — what breaking it reveals — from its tell. The shapes are rendered by
 | **Bellhang** | bell-towers | rings things that should not ring | pretends someone else did it | insectoid |
 | **Ridgewalk** | the last hundred feet of a ridge | never comes down | pretends it has somewhere to be | brawler |
 | **Draughtcatch** | the gap under a door | fills any gap | pretends it is keeping the cold out | blob |
+
+![Galewing](/sprites/galewing.png) ![Doorslam](/sprites/doorslam.png) ![Bellhang](/sprites/bellhang.png) ![Ridgewalk](/sprites/ridgewalk.png) ![Draughtcatch](/sprites/draughtcatch.png)
 
 ## Root — old growth, foundations, orchards
 
@@ -49,6 +55,8 @@ Guard — what breaking it reveals — from its tell. The shapes are rendered by
 | **Stumpsit** | cut stumps | sits where a tree was | pretends to be the tree | brawler |
 
 Five per type, spread across all six body plans.
+
+![Rootshell](/sprites/rootshell.png) ![Holdfast](/sprites/holdfast.png) ![Windfall](/sprites/windfall.png) ![Gravebind](/sprites/gravebind.png) ![Stumpsit](/sprites/stumpsit.png)
 
 ## Did the template work?
 
