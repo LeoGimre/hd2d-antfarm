@@ -225,6 +225,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   `agreements.py` compares bytes, so a stale sprite fails. They are **not** game assets — real
   ones need `godot --headless --import`. **Habit worth keeping: when a tick creates a new way for
   two things to disagree, add the check in the same tick.**
+- **Region data is written and validated** (tick 47): `design/proto/regions.json` — three regions,
+  ready to copy to `game/data`. `agreements.py` enforces exit reciprocity (mark deliberate
+  one-way exits `"one_way": true`) and, importantly, that a region's `look` sets **only** sky /
+  ambient_energy / key_color / key_energy / fog. The key **angle** is house style and is rejected
+  by name. The Ridge's `quiet` encounter list is empty *on purpose* — that is narrative.md's
+  escalation with no new content.
 - **Regions: Ground / Work / Attention** (tick 32): `design/regions.md`, `game/data/regions.json`.
   Attention decides the creatures, creatures decide the types, types decide the palette — so a
   reskin cannot fill in line three, which is the free check against a world of palette swaps.
@@ -369,4 +375,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-46
+47
