@@ -143,6 +143,12 @@ vacuously when the binary is missing — only the smoke stage catches it.
   visits** (a requirement on `design/encounters.md`'s format), and dialogue must remember what the
   player has done. Flagged, not designed: how an unbroken creature fights differently — that goes
   to the solver, not a paragraph.
+- **Discrimination and openness are independent** (tick 50): an encounter can reward skill
+  perfectly and admit exactly one party, which is a key check rather than a fight. Run
+  **`combat_solver.py parties`** — it is the fifth item on `encounters.md`'s checklist. The Ridge
+  was retuned 2→8 viable parties and 1→4 workable Fronts by making its *Front* enemy **slower**
+  (Ashmoth speed 12→8, Ridgewalk 14→16). **A slow Front enemy is what opens a fight**; slow and
+  dangerous beats uniformly quick.
 - **Party choice is decisive and unpredictable** (tick 49): 2 of 12 pairs can beat The Ridge at
   all. It is the **types, not the stats** — transplanting Rootshell's HP/Guard/speed onto
   Emberling or Galewing saves neither. And **no simple rule predicts it**: "front resists an
@@ -387,4 +393,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-49
+50
