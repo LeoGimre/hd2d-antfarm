@@ -27,7 +27,10 @@ the format is already decided in `design/encounters.md`, including the finding t
 pairing;
 (3) re-run both lines and confirm the model (the doc lists the exact `battle_*` input sequences —
 6 decisions to win, 3 to lose); (4) drop `TURN_INTERVAL` to ~0.85 so the 16-event fight fits a
-12–16s capture; (5) then tick box 4. Box 5's unit tests come after.
+12–16s capture; (5) then tick box 4. Box 5 comes after, and its plan is decided in
+`design/combat_tests.md` — note the constraint it turns on: **the loop may not edit
+`farm/verify.sh`**, so tests go in `game/tests/`, run via a loop-owned `farm/test.sh`, and are a
+tick-ritual discipline rather than a gate until Leo wires them in.
 
 ## Open blockers
 **No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
@@ -38,6 +41,12 @@ M3 boxes have real off-engine work available (see above). Note the first two ver
 vacuously when the binary is missing — only the smoke stage catches it.
 
 ## Recent decisions
+- **Combat tests are a discipline, not a gate** (tick 14): `farm/verify.sh` is on the loop's deny
+  list, so the loop can write tests but cannot make them block a commit. Plan in
+  `design/combat_tests.md`: `game/tests/run_tests.gd` (a `SceneTree` script, no framework), run by
+  `farm/test.sh`, invoked next to `verify.sh` in the tick ritual. Three tiers — rules, outcomes
+  (naive loses / correct wins / correct-but-hoarding-Charge loses, which makes M3's *fourth* box
+  permanent), and one golden trace. Assert outcomes, never margins.
 - **Encounters become `game/data/encounters.json`** (tick 13): format decided in
   `design/encounters.md`. The key finding: `build_battle.gd`'s `TEAM` copy exists only to bake
   `InfoLabel` text that `battle.gd._ready()` overwrites before frame one, so the generated scene
@@ -118,4 +127,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-13
+14
