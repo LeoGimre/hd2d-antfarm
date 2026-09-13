@@ -92,6 +92,34 @@ function loadTypes() {
   try { return JSON.parse(read(path)).types || {}; } catch { return {}; }
 }
 
+/** The design/ directory is where the loop is allowed to invent, and by tick 18
+ *  it holds more of this project's thinking than game/ does. The devlog refers
+ *  to these documents constantly and a reader had no way to open one, which is
+ *  a strange gap on a site whose whole premise is watching the work. */
+function loadDesignDocs() {
+  const dir = join(ROOT, "design");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => {
+      const src = read(join(dir, f));
+      const slug = f.replace(/\.md$/, "");
+      const heading = src.match(/^#\s+(.+)$/m);
+      // First real paragraph: skip headings, blockquotes, tables and lists.
+      const para = src
+        .split(/\n{2,}/)
+        .find((b) => b.trim() && !/^[#>|\-*\d]/.test(b.trim()));
+      return {
+        slug,
+        file: f,
+        title: heading ? heading[1].trim() : slug,
+        summary: summarise(para || "", 2, 240),
+        body: src,
+      };
+    })
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
 /** Flatten markdown to something a one-line status tile can hold. */
 function plain(md) {
   return String(md)
@@ -158,6 +186,7 @@ function layout({ title, page, body, description }) {
   const nav = [
     ["/", "log", "Log"],
     ["/roadmap", "roadmap", "Roadmap"],
+    ["/design", "design", "Design"],
     ["/bestiary", "bestiary", "Bestiary"],
     ["/glass", "glass", "Glass"],
   ];
@@ -250,7 +279,7 @@ ${feed}`,
   });
 }
 
-function pageEntry(e) {
+function pageEntry(e, slugs = new Set()) {
   return layout({
     title: `${e.title} — hd2d-antfarm`,
     page: "log",
@@ -264,11 +293,21 @@ function pageEntry(e) {
     ${statusPill(e)}
   </div>
   ${e.video_mp4 ? `<div class="stage">${videoBlock(e)}</div>` : ""}
-  ${renderMarkdown(e.body)}
+  ${linkDesignRefs(renderMarkdown(e.body), slugs)}
   <hr>
   <p><a href="/">← all entries</a></p>
 </article>`,
   });
+}
+
+
+/** Devlog entries and design documents name each other constantly, always as
+ *  `design/thing.md` in a code span. Turning the ones that exist into links
+ *  costs a regex and makes fourteen dead references navigable. Unknown paths
+ *  are left alone rather than linked to a 404. */
+function linkDesignRefs(html, slugs) {
+  return html.replace(/<code>design\/([a-z0-9_]+)\.md<\/code>/g, (m, slug) =>
+    slugs.has(slug) ? `<a href="/design/${slug}"><code>design/${slug}.md</code></a>` : m);
 }
 
 function pageRoadmap() {
@@ -336,6 +375,41 @@ function beastCard(c, moveById, types) {
   </article>`;
 }
 
+
+function pageDesignIndex(docs) {
+  const rows = docs.length
+    ? docs.map((d) => `<div class="entry">
+        <h3><a href="/design/${d.slug}">${esc(d.title)}</a></h3>
+        <div class="meta"><span>design/${esc(d.file)}</span></div>
+        <p>${esc(d.summary)}</p>
+      </div>`).join("")
+    : `<div class="empty-note">Nothing designed yet.</div>`;
+  return layout({
+    title: "Design — hd2d-antfarm",
+    page: "design",
+    description: "The loop's design documents: what it decided and what it rejected.",
+    body: `<article class="post"><h1>Design</h1>
+    <p>Where the loop is allowed to invent. These are the decisions behind the build — including the alternatives that were rejected, which is usually the more useful half. The devlog is what happened; this is what it was trying to do.</p>
+    </article>${rows}`,
+  });
+}
+
+function pageDesignDoc(doc, slugs) {
+  // Relative links between design documents resolve to their published paths.
+  const src = doc.body.replace(/\]\((?:design\/)?([a-z0-9_]+)\.md\)/g, "](/design/$1)");
+  return layout({
+    title: `${doc.title} — hd2d-antfarm`,
+    page: "design",
+    description: doc.summary,
+    body: `<article class="post">
+  <div class="meta"><span>design/${esc(doc.file)}</span></div>
+  ${linkDesignRefs(renderMarkdown(src), slugs)}
+  <hr>
+  <p><a href="/design">← all design documents</a></p>
+</article>`,
+  });
+}
+
 function pageBestiary(creatures, moves, types) {
   const moveById = new Map(moves.map((m) => [m.id, m]));
   const body = creatures.length
@@ -384,11 +458,18 @@ function main() {
   writeFileSync(join(OUT, "roadmap.html"), pageRoadmap());
   writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures(), loadMoves(), loadTypes()));
   writeFileSync(join(OUT, "glass.html"), pageGlass(loadJournal()));
-  for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e));
+
+  const docs = loadDesignDocs();
+  const slugs = new Set(docs.map((d) => d.slug));
+  mkdirSync(join(OUT, "design"), { recursive: true });
+  writeFileSync(join(OUT, "design.html"), pageDesignIndex(docs));
+  for (const d of docs) writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs));
+
+  for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e, slugs));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));
 
   console.log(
-    `site: ${entries.length} entries, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
+    `site: ${entries.length} entries, ${docs.length} design docs, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
   );
 }
 
