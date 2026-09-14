@@ -20,19 +20,20 @@ systems**: data-driven creatures/moves/types (already true), the sprite port, th
 and capture.
 
 ## Current focus
-**Make the battle scene render the sprites.** The assets are in the game as of tick 60
-(`game/assets/sprites/creatures/`, imported, lossless) and nothing loads them — `build_battle.gd`
-still builds four coloured capsules. Follow `build_diorama.gd`'s traveler: `AnimatedSprite3D`,
-`BILLBOARD_FIXED_Y`, `TEXTURE_FILTER_NEAREST`, two idle frames (`<id>.png` / `<id>_b.png`).
-**`battle.gd`'s hit flash pulses `emission_energy_multiplier` on the capsule's material** and will
-need a different mechanism on a sprite — `modulate` is the obvious one. Do item 4b (the clipping
-labels) in the same pass: both are about what the scene looks like, and both need **mid-fight**
-capture frames to check, not a first frame.
+**The battle scene draws the sprites** as of tick 61, and item 4b's labels are fixed in the same
+pass. M4's second box is ticked. The next engine tick is **item 5, `design/hd2d_look.md`'s
+remediation list** — it is now the only queued item that is purely about what the scene looks
+like, and tick 61 moved one of its inputs (the arena is 14 units, not 11), so re-measure the
+DOF band rather than trusting the numbers written there. After that, item 7 (the HUD) is the
+biggest single thing left, and item 6 depends on it.
 
-Two things to judge in the scene rather than on a contact sheet, both recorded at tick 60:
-the Gale hue is much paler than the other three (`SAT["Gale"] = 0.40` against Ember's 0.85), and
-`game/assets/sprites/traveler_idle.png.import` carries `compress/mode=2` with mipmaps from Godot's
-`detect_3d` auto-conversion, which the creature sprites are explicitly set to avoid.
+Judged in the scene, answering tick 60's two deferred questions:
+- **The Gale hue is fine and the worry was misplaced.** `SAT["Gale"] = 0.40` reads as a
+  desaturated teal at battle scale and is not washed out. The pair that actually sits closest
+  together is **Gale and Tide** — Galewing teal against Tidalpup's saturated blue. They are
+  distinguishable but they are the two to watch if a future encounter fields both on one side.
+- **`game/assets/sprites/traveler_idle.png.import` still carries `compress/mode=2`** with mipmaps
+  from `detect_3d`. Untouched; the battle scene does not load it. Still worth fixing.
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -59,25 +60,29 @@ None of these needs re-deciding; all need building. Work them in order.
    `python3 design/proto/gen_test_cases.py` — `agreements.py` fails if it is stale, and it records
    the constants *as shipped*, so applying the retune means regenerating in the same commit.
 
-4. ~~`design/creature_sprites.md` — port the generator.~~ **Half done, tick 60.** Generator,
-   art data and imported PNGs all ship. **The battle scene still renders capsules** — that is the
-   other half and it is the current focus above. M4's second box stays unticked until something
-   draws them.
+4. ~~`design/creature_sprites.md` — port the generator.~~ **Done, ticks 60 and 61.** Generator,
+   art data and imported PNGs shipped at 60; `build_battle.gd` draws them at 61. M4's second box
+   is ticked — on QC stills rather than a clip, because the machine that ran tick 61 had no
+   encoder. A clip of this is owed the first time a tick runs somewhere with ffmpeg.
 
-4b. **Creature labels clip and overlap in the battle scene** (found by looking, tick 56 — see
-   `devlog/0057-five-decisions.md`). Player Back's label runs off the right edge of the frame
-   (`BROKEN` renders as `BRO`), Enemy Back's runs off the left (`HP 24/24` renders as `0/24`), and
-   the two enemy labels overlap each other. Cause is the wide lateral Back offsets
-   `build_battle.gd` took on at tick 6 to stop Back's label being swallowed by Front's silhouette;
-   that worked and pushed both to the frame edges instead. The state suffixes (`BROKEN`, `DOWN`)
-   are what tip them over, so a still of an idle scene never shows it. **Capture and look at
-   mid-fight frames, not the first frame, when checking this.**
+4b. ~~**Creature labels clip and overlap in the battle scene.**~~ **Done, tick 61.** Both halves.
+   The fix that mattered was the font (40 → 30), not the geometry: a label is as wide as its
+   longest line, and at 40 that line was wider than the on-screen gap between two slots, so a
+   `BROKEN` suffix put two labels on top of each other. Back offsets came in 3.6 → 3.4, Enemy
+   Back's 1.3× font exception is deleted, and the labels are `no_depth_test` so a body can never
+   hide a readout again. Checked at the demo's frame 620, where the fight ends and every string
+   is at its longest.
 
 5. `design/hd2d_look.md` — remediation list at the bottom: battle scene has no fog, its
-   tilt-shift brackets nothing (board is 22–25 units out; near blur ends at 17, far starts at 50),
-   and its camera is wider *and* closer than the diorama's. **Look at a frame before and after
-   each.** House key-light angle is now `(-44, -118, 0)` everywhere, because baked sprite shading
-   forces every scene to agree.
+   tilt-shift brackets nothing, and its camera is wider *and* closer than the diorama's. **Look at
+   a frame before and after each.** Two corrections from tick 61 before trusting what is written
+   there: **the arena is now 14 units, not 11** (the board needed floor behind it — see the
+   label-over-sky note below), so the distances in that list are stale and want re-measuring; and
+   **the house key-light angle is not a knob that lights creatures**. A `BILLBOARD_FIXED_Y`
+   sprite's normal faces the camera, so any key angled in over the board has N·L < 0 and
+   contributes nothing at any energy. The house angle is about lighting the *geometry*
+   consistently with the sprites' baked shading. What lights a creature here is the fill (0.95,
+   pointing back toward the camera) and the ambient.
 
 6. `design/capture.md` — M4's capture box. Needs the encounter/party work above first.
    **It carries a hard UI requirement**: the capture window is 0–2 decisions wide in *every*
@@ -105,6 +110,26 @@ assertions). It finds the engine in `/opt/godot/<version>` on its own, so the st
 so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
 
+**Orient on the machine before assuming any of that runs.** Tick 61 ran on a local Windows box
+where `python3` on `PATH` is the Microsoft Store stub, there is no ffmpeg, and Godot 4.7.2 lives
+at `/c/Users/leogi/Desktop/Godot_v4.7.2-stable_win64.exe` — not on `PATH` and not where
+`verify.sh` or `test.py` look. `GODOT_BIN=<that path> ./farm/verify.sh` works; `farm/test.py`
+does not run at all. When a stage cannot run, say so in the devlog entry as a gap rather than
+letting a green summary imply it passed.
+
+**Looking at frames without ffmpeg**: `game/tools/qc_shot.gd` (tick 61) writes PNGs out of a
+scene at chosen frame numbers.
+
+```
+godot --path game --resolution 1280x720 --fixed-fps 30 \
+  --script res://tools/qc_shot.gd -- res://tools/demos/battle_demo.tscn <abs-out-dir> 72,300,620
+```
+
+Not `--headless` — the headless renderer draws nothing and the PNGs come back blank. Frame 620 of
+`battle_demo` is the moment the fight ends, which is where every status string is at its longest;
+frame 72 catches a turn starting, which is where the actor flash is at its peak. Those two frames
+are the standing QC pair for this scene.
+
 ## Open blockers
 - **`farm/publish.py` cannot run in a cloud container.** It needs `AWS_ENDPOINT_URL_S3` and keys
   from `farm/.env`, which is gitignored and so does not exist in a fresh container. A cloud tick's
@@ -120,8 +145,37 @@ has no allowlisted way to invoke a shell script it just created.)
   headlessly first.
 - The hook still needs registering in `.claude/settings.json`, which is frozen by the pre-commit
   hook and not the loop's to edit. The three lines to paste are in the README.
+- **No Python and no ffmpeg on the local Windows machine** (tick 61). So `farm/test.py`'s combat
+  self-check and cross-file agreements cannot run there, and `farm/capture.sh` cannot produce a
+  clip. `verify.sh` and the GDScript suite both run fine with `GODOT_BIN` pointed at the Desktop
+  binary. Fix is installing the two tools, not code — but `curl`, `chmod` and `pip` are all on the
+  deny list, so the loop cannot do it.
 
 ## Recent decisions
+- **A key light can never reach a billboard** (tick 61, arithmetic then confirmed in frames).
+  `BILLBOARD_FIXED_Y` points the normal at the camera; a key angled in over the board arrives from
+  the far side, so N·L is negative and its energy does nothing. The battle scene's creatures were
+  rendering near-black and the reflex — raise the key — would never have worked. Only a light
+  pointing back toward the camera (the fill) and the ambient touch a sprite. Corollary for any new
+  scene holding creatures: check the fill and the ambient, not the key.
+- **`Sprite3D.modulate` clamps at white** (tick 61). It is baked into the quad's vertex colours,
+  which are eight bits, so you cannot drive it past 1.0 to get an over-bright bloom the way an
+  emission multiplier could. Measured before believing: modulate 6.0 rendered identically to 1.0,
+  modulate 0.15 rendered the creature nearly black. The battle flash is an omni light that moves
+  onto the actor instead. **A tint can darken a sprite and never brighten one** — reach for a
+  light, a scale pulse or a second overlay node.
+- **A world-space label has to sit over the floor, not over the sky** (tick 61). The glow's
+  `SOFTLIGHT` blend lifts a bright thing's blurred copy enormously against near-black and barely
+  at all against the lit floor, so white text against the sky drowns in its own halo and loses its
+  letterforms entirely. Diagnosed by lowering one label until its second line crossed onto the
+  floor: that line went crisp while the name line above it stayed a smear, in the same frame. The
+  arena grew 11 → 14 units to give every label floor to sit against. Any future label lift is
+  bounded by where the arena's far edge lands on screen.
+- **Tell the two bugs apart before fixing either** (tick 61). "The tween is not firing" and "the
+  tween fires and the value clamps" look identical on screen and want completely different fixes.
+  One render with the value driven the *wrong* way separated them in two minutes. Generalises: when
+  a property change produces no visible effect, drive it absurdly in the opposite direction before
+  theorising about the mechanism.
 - **Per-plan defaults are code; what a creature overrides is content** (tick 60). That split is
   what made `game/data/creature_art.json` worth having — three of the twenty override nothing at
   all, which is the sprite grammar's claim made visible. Adding a creature's art is one entry
