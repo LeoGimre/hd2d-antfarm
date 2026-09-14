@@ -69,6 +69,31 @@
           "slot": "back"
         }
       ]
+    },
+    {
+      "id": "the_ridge",
+      "display_name": "The Ridge",
+      "note": "design/second_encounter.md. Diagonal like first_blood, and mixed-type on purpose: a one-type enemy line cannot make a fight that rewards skill, because a creature whose attacks are all resisted never banks a Charge. Ashmoth is the visitor that wandered up from the kilns.",
+      "player": [
+        {
+          "creature": "rootshell",
+          "slot": "front"
+        },
+        {
+          "creature": "tidalpup",
+          "slot": "back"
+        }
+      ],
+      "enemy": [
+        {
+          "creature": "ashmoth",
+          "slot": "front"
+        },
+        {
+          "creature": "ridgewalk",
+          "slot": "back"
+        }
+      ]
     }
   ]
 }

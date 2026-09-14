@@ -1,5 +1,5 @@
 {
-  "_comment": "M3's first four creatures. Each lists its moves as [melee_id, ranged_id] — CombatantState.next_move_id() alternates between them so a short battle demonstrates both halves of the Front/Back rule instead of one move on repeat.",
+  "_comment": "The roster. Each lists its moves as [melee_id, ranged_id] — CombatantState.next_move_id() alternates between them so a short battle demonstrates both halves of the Front/Back rule instead of one move on repeat. A _stat_note records how a number was arrived at when it was searched rather than chosen; see design/roster.md for place/habit/tell and design/second_encounter.md for the search. Each lists its moves as [melee_id, ranged_id] — CombatantState.next_move_id() alternates between them so a short battle demonstrates both halves of the Front/Back rule instead of one move on repeat.",
   "creatures": [
     {
       "id": "emberling",
@@ -36,6 +36,26 @@
       "max_hp": 36,
       "max_guard": 3,
       "moves": ["root_slam", "spore_cloud"]
+    },
+    {
+      "id": "ashmoth",
+      "display_name": "Ashmoth",
+      "type": "Ember",
+      "speed": 8,
+      "max_hp": 28,
+      "max_guard": 2,
+      "moves": ["ember_bite", "cinder_spray"],
+      "_stat_note": "Searched, not invented. Speed 8 rather than 12: a slow Front enemy is what opens The Ridge to more than one party \u2014 see design/openness in second_encounter.md. Fictionally a moth that bumbles toward light and is disappointed reads better slow than fast anyway."
+    },
+    {
+      "id": "ridgewalk",
+      "display_name": "Ridgewalk",
+      "type": "Gale",
+      "speed": 16,
+      "max_hp": 26,
+      "max_guard": 2,
+      "moves": ["gale_claw", "windburst"],
+      "_stat_note": "Speed 16, the fastest thing in the roster: it performs being out of reach, and mechanically it is what keeps the fight sharp while its slow partner keeps it open."
     }
   ]
 }

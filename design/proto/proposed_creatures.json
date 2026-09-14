@@ -1,31 +1,4 @@
 {
-  "_comment": "Stats proposed for creatures that exist in design/roster.md but not yet in game/data/creatures.json. Kept here rather than in game/ because they have not been through an engine \u2014 design/second_encounter.md records how each number was arrived at. combat_solver.py merges this over the real data so the second encounter is reproducible; farm/agreements.py checks every id here appears in the roster.",
-  "creatures": [
-    {
-      "id": "ashmoth",
-      "display_name": "Ashmoth",
-      "type": "Ember",
-      "speed": 8,
-      "max_hp": 28,
-      "max_guard": 2,
-      "moves": [
-        "ember_bite",
-        "cinder_spray"
-      ],
-      "_stat_note": "Searched, not invented. Speed 8 rather than 12: a slow Front enemy is what opens The Ridge to more than one party \u2014 see design/openness in second_encounter.md. Fictionally a moth that bumbles toward light and is disappointed reads better slow than fast anyway."
-    },
-    {
-      "id": "ridgewalk",
-      "display_name": "Ridgewalk",
-      "type": "Gale",
-      "speed": 16,
-      "max_hp": 26,
-      "max_guard": 2,
-      "moves": [
-        "gale_claw",
-        "windburst"
-      ],
-      "_stat_note": "Speed 16, the fastest thing in the roster: it performs being out of reach, and mechanically it is what keeps the fight sharp while its slow partner keeps it open."
-    }
-  ]
+  "_comment": "Stats proposed for creatures that exist in design/roster.md but not yet in game/data/creatures.json. Empty means every statted creature has shipped, which is the state to prefer — this file is a staging area, not a second roster. combat_solver.py merges it over the real data so an unshipped encounter is still reproducible; farm/agreements.py checks every id here appears in design/roster.md and appears in game/data/creatures.json nowhere.",
+  "creatures": []
 }

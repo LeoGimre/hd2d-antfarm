@@ -479,6 +479,22 @@ def _():
     return [] if r.returncode == 0 else [r.stdout.strip() or "fixtures are stale"]
 
 
+@check("every shipped creature is authored in design/roster.md")
+def _():
+    """A creature can reach game/data by someone adding six numbers, and then it
+    has stats and no place, habit or tell — which design/creatures.md says is
+    the whole of what a creature is. The staging file was already checked
+    against the roster; the shipped file was not, which is the wrong way round
+    now that things ship."""
+    roster = read("design", "roster.md")
+    out = []
+    for c in json.loads(read("game", "data", "creatures.json"))["creatures"]:
+        if ("**%s**" % c["display_name"]) not in roster:
+            out.append("%s ships in game/data but has no place/habit/tell row in "
+                       "design/roster.md" % c["id"])
+    return out
+
+
 @check("proposed creature stats name creatures that exist in the roster")
 def _():
     path = os.path.join(ROOT, "design", "proto", "proposed_creatures.json")
