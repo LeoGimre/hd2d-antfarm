@@ -1,0 +1,4 @@
+{
+  "_comment": "Stats proposed for creatures that exist in design/roster.md but not yet in game/data/creatures.json. Empty means every statted creature has shipped, which is the state to prefer — this file is a staging area, not a second roster. combat_solver.py merges it over the real data so an unshipped encounter is still reproducible; farm/agreements.py checks every id here appears in design/roster.md and appears in game/data/creatures.json nowhere.",
+  "creatures": []
+}

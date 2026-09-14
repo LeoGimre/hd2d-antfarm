@@ -6,9 +6,14 @@ extends Node3D
 ## produced was a loss. The box this milestone is actually on is "a battle that
 ## can be lost by playing badly and won by playing well," so the demo now plays
 ## the well half: the exact sequence tools/battle_sim.gd found by exhausting
-## every line the player could take. Nothing shorter than seven decisions wins
+## every line the player could take. Nothing shorter than five decisions wins
 ## this fight, and the naive line (every creature swinging melee at whatever is
 ## in Front) loses it — the sim prints both.
+##
+## Both numbers move when the encounter does, and they did: this scene fielded
+## first_blood_unpaired until tick 56, where the shortest win was seven. Re-run
+## `battle_sim.gd --search` after changing battle.gd's encounter and paste what
+## it finds, rather than assuming the old line still applies.
 ##
 ## Input is synthesized with Input.action_press()/action_release(), matching
 ## battle.gd's own note on why: that updates the polled Input state the same way
@@ -28,17 +33,19 @@ const DEMO_TURN_INTERVAL := 0.7
 ## game/data/creatures.json convention), `target` is the slot a ranged move
 ## aims at, and `charge` spends a banked Charge on that hit.
 ##
-## Read as tactics: Rootshell's one job is Galewing, the only enemy it has a
-## real type edge on, and its ranged move is what lets it do that job while
-## Galewing hides in Back. The break that opens the fight and the Charge that
-## closes it both come out of that single decision to shoot past the Front
-## slot instead of hitting what is standing in front of it.
+## Read as tactics: every creature on this board has exactly one correct target
+## and every one of them is diagonal — Tidalpup answers the enemy Front,
+## Rootshell answers the enemy Back — so the fight cannot be played correctly
+## without going through the Front/Back reach rule. Rootshell's ranged move is
+## the only thing that reaches Galewing while it hides in Back, and both Charges
+## are spent on hits that a Break paid for.
+##
+## Five decisions. The unpaired roster this scene used to field needed seven and
+## admitted no explainable plan at all; see design/first_blood_balance.md.
 const LINE := [
 	{"move": 1},
-	{"move": 2, "target": "back"},
 	{"move": 1},
-	{"move": 1},
-	{"move": 1},
+	{"move": 2, "target": "back", "charge": true},
 	{"move": 1},
 	{"move": 1, "charge": true},
 ]

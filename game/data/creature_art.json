@@ -1,0 +1,320 @@
+{
+  "_comment": "How each creature is drawn: its body plan, its type (which picks the hue), its features, and only the plan parameters it overrides. Per-plan defaults live in tools/creature_forge.py because they are renderer values tuned by looking at output, not content. farm/agreements.py checks every type here against creatures.json, so the two cannot disagree about a creature that ships; entries with no stats yet are design/roster.md's authored roster, drawn for the site. Fiction (place, habit, tell) is in design/roster.md; design/creature_sprites.md decides the grammar. Adding a creature's art is one entry naming a plan — the pillar that the roster stays cheap to grow, applied to the drawing as well as the stats.",
+  "plans": [
+    "avian",
+    "blob",
+    "brawler",
+    "insectoid",
+    "quadruped",
+    "serpent"
+  ],
+  "creatures": [
+    {
+      "id": "emberling",
+      "plan": "quadruped",
+      "type": "Ember",
+      "features": [
+        "horns"
+      ],
+      "params": {}
+    },
+    {
+      "id": "stokewake",
+      "plan": "insectoid",
+      "type": "Ember",
+      "features": [
+        "horns"
+      ],
+      "params": {
+        "body_rx": 6.4,
+        "legs": 4,
+        "splay": 2.2,
+        "head_r": 2.4,
+        "ant": 6
+      }
+    },
+    {
+      "id": "lastcoal",
+      "plan": "blob",
+      "type": "Ember",
+      "features": [],
+      "params": {
+        "hover": 8,
+        "rx": 5.2,
+        "ry": 4.4,
+        "lobe_r": 2.2,
+        "tendrils": 0
+      }
+    },
+    {
+      "id": "bellowsback",
+      "plan": "brawler",
+      "type": "Ember",
+      "features": [],
+      "params": {
+        "leg": 6,
+        "leg_w": 3.0,
+        "torso": 8,
+        "torso_w": 6.0,
+        "arm": 6,
+        "arm_w": 3.2,
+        "head_r": 2.8
+      }
+    },
+    {
+      "id": "ashmoth",
+      "plan": "avian",
+      "type": "Ember",
+      "features": [],
+      "params": {
+        "body_rx": 4.4,
+        "body_ry": 3.6,
+        "leg": 4,
+        "leg_w": 1.0,
+        "wing": 15,
+        "wing_w": 2.0,
+        "head_r": 2.4,
+        "beak": 2.2
+      }
+    },
+    {
+      "id": "tidalpup",
+      "plan": "serpent",
+      "type": "Tide",
+      "features": [
+        "crest"
+      ],
+      "params": {}
+    },
+    {
+      "id": "wellmouth",
+      "plan": "serpent",
+      "type": "Tide",
+      "features": [
+        "horns"
+      ],
+      "params": {
+        "length": 17,
+        "amp": 3.0,
+        "rise": 15,
+        "body_w": 4.6,
+        "head_r": 4.6,
+        "waves": 0.9,
+        "coils": 22
+      }
+    },
+    {
+      "id": "slackwater",
+      "plan": "blob",
+      "type": "Tide",
+      "features": [],
+      "params": {
+        "hover": 11,
+        "rx": 7.4,
+        "ry": 4.6,
+        "lobes": 4,
+        "lobe_r": 2.8,
+        "tendrils": 5,
+        "tendril_len": 5
+      }
+    },
+    {
+      "id": "riverbend",
+      "plan": "quadruped",
+      "type": "Tide",
+      "features": [],
+      "params": {
+        "body_rx": 8.2,
+        "body_ry": 4.2,
+        "leg": 6,
+        "leg_w": 1.6,
+        "neck": 7,
+        "neck_w": 1.8,
+        "head_r": 2.8,
+        "tail": 9,
+        "tail_lift": 2,
+        "splay": 0.9
+      }
+    },
+    {
+      "id": "downspout",
+      "plan": "insectoid",
+      "type": "Tide",
+      "features": [
+        "crest"
+      ],
+      "params": {
+        "body_rx": 5.6,
+        "body_ry": 3.0,
+        "leg": 6,
+        "leg_w": 1.1,
+        "splay": 2.6,
+        "head_r": 2.2,
+        "ant": 6
+      }
+    },
+    {
+      "id": "galewing",
+      "plan": "avian",
+      "type": "Gale",
+      "features": [
+        "crest"
+      ],
+      "params": {}
+    },
+    {
+      "id": "doorslam",
+      "plan": "avian",
+      "type": "Gale",
+      "features": [],
+      "params": {
+        "body_rx": 6.2,
+        "body_ry": 4.0,
+        "leg": 3,
+        "leg_w": 1.4,
+        "wing": 17,
+        "wing_w": 3.0,
+        "head_r": 3.0,
+        "beak": 2.8
+      }
+    },
+    {
+      "id": "bellhang",
+      "plan": "insectoid",
+      "type": "Gale",
+      "features": [
+        "horns"
+      ],
+      "params": {
+        "body_rx": 6.0,
+        "body_ry": 4.0,
+        "leg": 7,
+        "leg_w": 1.0,
+        "splay": 1.2,
+        "ant": 4
+      }
+    },
+    {
+      "id": "ridgewalk",
+      "plan": "brawler",
+      "type": "Gale",
+      "features": [
+        "horns"
+      ],
+      "params": {
+        "leg": 10,
+        "leg_w": 1.8,
+        "torso": 11,
+        "torso_w": 3.8,
+        "arm": 8,
+        "arm_w": 2.0,
+        "head_r": 3.0
+      }
+    },
+    {
+      "id": "draughtcatch",
+      "plan": "blob",
+      "type": "Gale",
+      "features": [],
+      "params": {
+        "hover": 5,
+        "rx": 8.4,
+        "ry": 3.6,
+        "lobes": 5,
+        "lobe_r": 2.4,
+        "tendrils": 6,
+        "tendril_len": 3
+      }
+    },
+    {
+      "id": "rootshell",
+      "plan": "quadruped",
+      "type": "Root",
+      "features": [
+        "shell"
+      ],
+      "params": {
+        "body_rx": 8.6,
+        "body_ry": 5.6,
+        "leg": 3,
+        "leg_w": 2.4,
+        "neck": 3,
+        "neck_w": 2.2,
+        "head_r": 3.0,
+        "snout": 1.6,
+        "tail": 3,
+        "tail_w": 1.4,
+        "tail_lift": 0,
+        "splay": 1.2
+      }
+    },
+    {
+      "id": "holdfast",
+      "plan": "brawler",
+      "type": "Root",
+      "features": [],
+      "params": {
+        "leg": 5,
+        "leg_w": 3.4,
+        "torso": 9,
+        "torso_w": 6.4,
+        "arm": 5,
+        "arm_w": 3.4,
+        "head_r": 2.6
+      }
+    },
+    {
+      "id": "windfall",
+      "plan": "quadruped",
+      "type": "Root",
+      "features": [
+        "crest"
+      ],
+      "params": {
+        "body_rx": 5.4,
+        "body_ry": 3.8,
+        "leg": 3,
+        "leg_w": 1.6,
+        "neck": 3,
+        "neck_w": 1.7,
+        "head_r": 3.0,
+        "tail": 4,
+        "tail_lift": 2
+      }
+    },
+    {
+      "id": "gravebind",
+      "plan": "serpent",
+      "type": "Root",
+      "features": [
+        "crest"
+      ],
+      "params": {
+        "length": 25,
+        "amp": 7.0,
+        "rise": 6,
+        "body_w": 2.6,
+        "head_r": 2.8,
+        "waves": 2.1,
+        "coils": 28
+      }
+    },
+    {
+      "id": "stumpsit",
+      "plan": "brawler",
+      "type": "Root",
+      "features": [
+        "horns"
+      ],
+      "params": {
+        "leg": 4,
+        "leg_w": 3.8,
+        "torso": 7,
+        "torso_w": 6.8,
+        "arm": 4,
+        "arm_w": 3.0,
+        "head_r": 2.4
+      }
+    }
+  ]
+}

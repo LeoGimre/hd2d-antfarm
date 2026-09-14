@@ -1,0 +1,139 @@
+{
+  "_comment": "Proposed content for game/data/conversations.json, in the format design/dialogue.md decides. Ordered nodes, first match wins, top to bottom — so the most specific lines come first and the file reads in the order it will fire. The last node of every conversation must be unconditional. Rules being held: name a creature by its tell and never by its type; every NPC has a relationship with attention; no templating, ever — every line is written whole. A party_has condition can only ever fire for a creature that has stats, so it may not name a roster creature that is not yet statted — that is dialogue written for content which does not exist.",
+  "conversations": [
+    {
+      "id": "kiln_yard_woman",
+      "region": "kiln_yards",
+      "about": "Her kiln has been cold since spring. She is the one who still notices, and has not decided whether that is a virtue.",
+      "nodes": [
+        {
+          "when": {
+            "party_has": "emberling"
+          },
+          "say": "Oh, you've brought the one that won't admit it's cold. Look at it — sat as near the dead kiln as it can get, telling itself the morning's only just started. Nobody's going to correct it. I'm certainly not."
+        },
+        {
+          "when": {
+            "flag": "took_the_leash"
+          },
+          "say": "You've got one of the new collars on. No — it's fine. Everyone does. My brother does."
+        },
+        {
+          "when": {
+            "party_type": "Ember"
+          },
+          "say": "Whatever you've got there came off warm ground, I can tell from here. They all stand like that. Like they're about to be needed."
+        },
+        {
+          "when": {
+            "talked": ">2"
+          },
+          "say": "You keep coming back to a cold yard. That's either very stupid or the first sensible thing I've seen this year."
+        },
+        {
+          "when": {
+            "talked": ">0"
+          },
+          "say": "Still here."
+        },
+        {
+          "say": "Kiln's been cold since spring. Something still wakes up when I light the small one, though. Comes and sits where the heat would be, if there were any."
+        }
+      ]
+    },
+    {
+      "id": "the_stoker",
+      "region": "kiln_yards",
+      "about": "He took the shortcut, cheerfully, and would recommend it. narrative.md's antagonist is a method rather than a person, and this is what the method looks like when it is being kind to you.",
+      "nodes": [
+        {
+          "when": {
+            "flag": "took_the_leash"
+          },
+          "say": "There, see? No fuss. You'll wonder what the standing about was ever for.",
+          "replies": [
+            {
+              "text": "It didn't look at me.",
+              "goto": "didnt_look"
+            },
+            {
+              "text": "(say nothing)"
+            }
+          ]
+        },
+        {
+          "when": {
+            "not_flag": "took_the_leash",
+            "talked": ">0"
+          },
+          "say": "Offer stands. Take one. I'll not think less of you either way — I'd think less of me, standing out here in the cold on principle.",
+          "replies": [
+            {
+              "text": "Fine. Give me one.",
+              "set": {
+                "took_the_leash": true
+              }
+            },
+            {
+              "text": "Not yet.",
+              "set": {
+                "refused_once": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "didnt_look",
+          "say": "No. That's rather the point of it, isn't it. Saves everyone a morning."
+        },
+        {
+          "say": "You're doing it the long way. I did, once. Stood out here half a day waiting for a thing to make its mind up about me.",
+          "replies": [
+            {
+              "text": "And now?",
+              "goto": "and_now"
+            },
+            {
+              "text": "It's not waiting. It's looking.",
+              "set": {
+                "argued_with_stoker": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "and_now",
+          "say": "Now I've got a collar and a full yard and my afternoons back. You should have one."
+        }
+      ]
+    },
+    {
+      "id": "the_surveyor",
+      "region": "the_ridge",
+      "about": "She has measured this pass for eleven years. She could once name everything on it. She cannot now, and she has not connected the two facts.",
+      "nodes": [
+        {
+          "when": {
+            "party_type": "Gale"
+          },
+          "say": "That one won't come down for you, you know. Not properly. They stand about looking like they've somewhere better to be, and they never do go."
+        },
+        {
+          "when": {
+            "talked": ">1"
+          },
+          "say": "Back again. You'll have noticed it's quieter up here than the maps suggest. Everyone says weather. It isn't weather."
+        },
+        {
+          "when": {
+            "talked": ">0"
+          },
+          "say": "Mind the edge. It doesn't care that you're careful."
+        },
+        {
+          "say": "Eleven years I've measured this pass. Used to be I could put a name to everything that crossed it. Can't now — my eyes, probably. You get to an age."
+        }
+      ]
+    }
+  ]
+}

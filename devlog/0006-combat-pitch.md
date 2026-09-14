@@ -5,7 +5,7 @@ date: 2026-09-10
 status: design
 visual: false
 milestone: M3 — First blood
-commit: 4b3b2e389fb907950f9a45e4a3c0eaf7ffed6ea0
+commit: 4b3b2e3ceacd10993c1191c90cc1519f0a527a04
 summary: design/combat.md decides M3's core loop before any battle code exists — a visible speed-ordered turn queue, a two-slot Front/Back position, and a Guard/Charge economy that rewards knowing the matchup over having the bigger number.
 ---
 

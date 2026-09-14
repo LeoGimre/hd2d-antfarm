@@ -19,6 +19,24 @@ function inline(s) {
   return out;
 }
 
+
+/** Markdown lets a list item wrap onto following lines — "lazy continuation".
+ *  Both list loops below used to take exactly one line per item, so a wrapped
+ *  item fell through and became a stray paragraph *and*, worse, any inline
+ *  markup spanning the wrap was split across two inline() calls, leaking
+ *  literal `**` onto the page. A line continues the item unless it starts
+ *  something else. */
+const continues = (l) =>
+  l !== undefined &&
+  !/^\s*$/.test(l) &&
+  !/^\s*[-*]\s+/.test(l) &&
+  !/^\s*\d+\.\s+/.test(l) &&
+  !/^#{1,4}\s/.test(l) &&
+  !/^\|/.test(l) &&
+  !/^>\s?/.test(l) &&
+  !/^```/.test(l) &&
+  !/^(---|\*\*\*)\s*$/.test(l);
+
 export function renderMarkdown(src) {
   const lines = src.replace(/\r\n/g, "\n").split("\n");
   const out = [];
@@ -84,6 +102,8 @@ export function renderMarkdown(src) {
       const items = [];
       while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
         let text = lines[i].replace(/^\s*[-*]\s+/, "");
+        i++;
+        while (continues(lines[i])) text += " " + lines[i++].trim();
         // GitHub-style task boxes, so a pasted roadmap renders as progress.
         const box = text.match(/^\[( |x|X)\]\s*/);
         let cls = "";
@@ -92,7 +112,6 @@ export function renderMarkdown(src) {
           text = text.slice(box[0].length);
         }
         items.push(`<li${cls}>${inline(text)}</li>`);
-        i++;
       }
       out.push(`<ul>${items.join("")}</ul>`);
       continue;
@@ -102,8 +121,10 @@ export function renderMarkdown(src) {
       flush();
       const items = [];
       while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(`<li>${inline(lines[i].replace(/^\s*\d+\.\s+/, ""))}</li>`);
+        let text = lines[i].replace(/^\s*\d+\.\s+/, "");
         i++;
+        while (continues(lines[i])) text += " " + lines[i++].trim();
+        items.push(`<li>${inline(text)}</li>`);
       }
       out.push(`<ol>${items.join("")}</ol>`);
       continue;

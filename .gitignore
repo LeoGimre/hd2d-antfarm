@@ -8,6 +8,12 @@
 /farm/logs/
 *.ogv
 
+# Python bytecode. design/proto/creature_forge.py imports game/tools/pixelforge.py,
+# which drops a __pycache__ inside game/ — build cruft, and `rm` is not available
+# to the loop, so it has to be ignored rather than cleaned up.
+__pycache__/
+*.pyc
+
 # Node / Next
 node_modules/
 .next/

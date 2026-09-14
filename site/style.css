@@ -49,6 +49,18 @@ header.site nav { display: flex; gap: 18px; margin-left: auto; font-size: 14px; 
 header.site nav a { color: var(--ink-dim); }
 header.site nav a.on { color: var(--amber); }
 
+/* Five nav items do not fit beside the brand on a phone — adding "Design" in
+   tick 19 pushed "Glass" off the right edge, and it went unnoticed because that
+   tick checked the page body at 420px and not the header. Wrap to two rows
+   instead of shrinking type, so a sixth item does not break it again. */
+@media (max-width: 560px) {
+  header.site .wrap {
+    height: auto; flex-wrap: wrap; gap: 6px 14px;
+    padding-top: 10px; padding-bottom: 10px;
+  }
+  header.site nav { margin-left: 0; width: 100%; gap: 16px; }
+}
+
 /* ---------------------------------------------------------------- hero */
 .hero { padding: 34px 0 8px; }
 .hero h1 {
@@ -72,6 +84,21 @@ header.site nav a.on { color: var(--amber); }
   font-size: 13px; color: var(--ink-dim);
 }
 
+/* Text hero, for when the newest tick produced no clip. Sits inside .stage so
+   it keeps the same frame the video would have had. */
+.lead { background: var(--panel); padding: 30px 28px 26px; }
+.lead-meta {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 12px;
+}
+.lead h2 { margin: 0 0 10px; font-size: clamp(19px, 2.6vw, 25px); letter-spacing: -0.01em; }
+.lead h2 a { color: var(--ink); }
+.lead p { margin: 0; color: var(--ink-dim); font-size: 15px; max-width: 74ch; }
+.lastclip {
+  margin: 10px 0 0; font-size: 13px; color: var(--muted); font-family: var(--mono);
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+
 /* ---------------------------------------------------------------- status */
 .status {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -83,6 +110,13 @@ header.site nav a.on { color: var(--amber); }
 .status dd { margin: 0; font-family: var(--mono); font-size: 15px; color: var(--ink); }
 .status dd.green { color: var(--green); }
 .status dd.amber { color: var(--amber); }
+
+/* The two lines under the status strip. `.blocked` only renders when STATE.md
+   has an open blocker — this site's premise is the unedited record, and a loop
+   that is stuck should say so above the fold. */
+.now, .blocked { font-size: 13.5px; margin: 4px 0 0; }
+.now { color: var(--muted); }
+.blocked { color: var(--rust); }
 
 /* ---------------------------------------------------------------- feed */
 h2.section {
@@ -155,6 +189,87 @@ li.done::before, li.todo::before {
 li.done::before { content: "[x]"; color: var(--green); }
 li.todo::before { content: "[ ]"; color: var(--muted); }
 li.done { color: var(--ink); }
+
+/* Prototype creature sprites in design documents. 40x44 source, upscaled with
+   nearest-neighbour — a smoothed pixel sprite is a different image. */
+article.post img[src^="/sprites/"] {
+  image-rendering: pixelated;
+  width: 100px; height: auto; vertical-align: bottom;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 8px;
+  margin: 0 4px 4px 0;
+}
+.spritestrip { margin: 14px 0 4px; line-height: 0; }
+
+/* Two-frame idle. The B frame is layered over A and cross-cut with one
+   animation for the whole roster — no per-sprite CSS. Held still for anyone who
+   has asked their system not to animate things. */
+.sprite { position: relative; display: inline-block; line-height: 0; }
+.sprite img:last-child {
+  position: absolute; inset: 0; margin: 0;
+  /* Base state is hidden so that anywhere the animation does not run — reduced
+     motion, an old browser, a screenshot tool that does not advance the
+     animation clock — the sprite falls back to frame A, the canonical one,
+     rather than to a creature permanently mid-breath. */
+  opacity: 0;
+  /* No steps() — with only two discrete keyframe stops it holds the whole
+     animation at its start value, which is a silent no-op. The 55%-to-56%
+     window is 16ms of a 1.6s cycle, so linear is already a hard cut. */
+  animation: creature-idle 1.6s linear infinite;
+}
+@keyframes creature-idle {
+  0%, 55% { opacity: 0; }
+  56%, 100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sprite img:last-child { animation: none; opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- bestiary */
+.beasts {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 14px; margin: 22px 0 10px;
+}
+.beast {
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+  padding: 16px 18px;
+}
+.beast header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+/* Outranks `article.post h2`, which is more specific than a bare `.beast h2`. */
+article.post .beast h2 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+
+/* Type tag. The accent classes are cosmetic; an unrecognised type falls through
+   to .t on its own and still reads fine. */
+.t {
+  font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.t.rust  { color: var(--rust);    border-color: #4a2a24; background: #241512; }
+.t.blue  { color: var(--blue);    border-color: #2b3a52; background: #141a24; }
+.t.green { color: var(--green);   border-color: #2f4a2a; background: #16200f; }
+.t.ink   { color: var(--ink-dim); border-color: #3a3f4a; background: #1b1f26; }
+
+.beast .vitals {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: 8px; overflow: hidden; margin: 0 0 12px;
+}
+.beast .vitals div { background: var(--bg-2); padding: 8px 10px; }
+.beast .vitals dt {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); margin: 0 0 2px;
+}
+.beast .vitals dd { margin: 0; font-family: var(--mono); font-size: 15px; color: var(--ink); }
+
+.beast .moves { list-style: none; margin: 0 0 12px; padding: 0; }
+.beast .moves li {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline;
+  padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px;
+}
+.beast .moves .mv  { color: var(--ink-dim); }
+.beast .moves .cat { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.beast .moves .pw  { font-family: var(--mono); font-size: 13px; color: var(--amber); }
+
+.beast .match { margin: 0; font-size: 13px; color: var(--muted); }
 
 /* ---------------------------------------------------------------- glass */
 .tick {

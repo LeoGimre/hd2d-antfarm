@@ -123,3 +123,22 @@ kill, swap the exposed creature back before the enemy's burst lands — should w
 same levels, same four creatures. If a future tick builds the four creatures and that second line
 doesn't reliably beat the first, the numbers in this document (Guard size, the Back damage
 penalty, Charge's power bonus) are the ones to retune, not the shape of the systems.
+
+> **Followed up in [`first_blood_balance.md`](first_blood_balance.md).** That document solves this
+> battle exhaustively and finds the paragraph above was right to expect a retune — but wrong about
+> which number. Nothing in this design needed changing; the four creatures were paired onto the
+> wrong sides, which aimed the player's only type advantage at the enemy it least needed to kill.
+
+> **Swap's price is revised in [`swap.md`](swap.md).** Measured, the full-action
+> Swap specified above is a trap: it never appears on an optimal line and it
+> makes random play *worse*. The cause is not its price — it is that Front is
+> where every melee attack lands, so Swap moves a creature into danger
+> uncomposed. A swapped-in creature now arrives with full Guard, which is what
+> Guard already meant.
+
+> **The three positional rules above are audited in [`position.md`](position.md),
+> and their importance is the reverse of the space they are given here.** Melee
+> being locked to Front is structural — removing it makes the fight unwinnable.
+> The Back penalty is what stops correct targeting from winning without the
+> Charge economy. The Front damage bonus, argued for at greatest length, changes
+> none of the encounter's three defining outcomes.

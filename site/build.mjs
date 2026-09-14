@@ -65,26 +65,110 @@ function loadJournal() {
     .reverse();
 }
 
-function loadCreatures() {
-  const dir = join(ROOT, "game", "data", "creatures");
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => { try { return JSON.parse(read(join(dir, f))); } catch { return null; } })
-    .filter(Boolean);
+/** The game keeps its content in three flat files under game/data/, each an
+ *  object wrapping one named array. This page was written before any of them
+ *  existed and guessed a one-file-per-creature directory instead, so from the
+ *  moment creatures actually landed it quietly reported an empty roster while
+ *  the build shipped four. Read what is really there. */
+function loadGameData(file, key) {
+  const path = join(ROOT, "game", "data", file);
+  if (!existsSync(path)) return [];
+  try {
+    const parsed = JSON.parse(read(path));
+    return Array.isArray(parsed[key]) ? parsed[key] : [];
+  } catch {
+    return [];
+  }
 }
 
-/** STATE.md is prose for the loop, but a few fields are worth surfacing. */
+const loadCreatures = () => loadGameData("creatures.json", "creatures");
+const loadMoves = () => loadGameData("moves.json", "moves");
+
+/** types.json keys its chart by type name instead of listing it, so it does not
+ *  go through loadGameData. */
+function loadTypes() {
+  const path = join(ROOT, "game", "data", "types.json");
+  if (!existsSync(path)) return {};
+  try { return JSON.parse(read(path)).types || {}; } catch { return {}; }
+}
+
+/** The design/ directory is where the loop is allowed to invent, and by tick 18
+ *  it holds more of this project's thinking than game/ does. The devlog refers
+ *  to these documents constantly and a reader had no way to open one, which is
+ *  a strange gap on a site whose whole premise is watching the work. */
+function loadDesignDocs() {
+  const dir = join(ROOT, "design");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => {
+      const src = read(join(dir, f));
+      const slug = f.replace(/\.md$/, "");
+      const heading = src.match(/^#\s+(.+)$/m);
+      // First real paragraph: skip headings, blockquotes, tables and lists.
+      const para = src
+        .split(/\n{2,}/)
+        .find((b) => b.trim() && !/^[#>|\-*\d]/.test(b.trim()));
+      return {
+        slug,
+        file: f,
+        title: heading ? heading[1].trim() : slug,
+        summary: summarise(para || "", 2, 240),
+        body: src,
+      };
+    })
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/** Flatten markdown to something a one-line status tile can hold. */
+function plain(md) {
+  return String(md)
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\*\*([^*]*)\*\*/g, "$1")
+    .replace(/\*([^*]*)\*/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** First `count` sentences, then a hard cap that breaks on a word boundary.
+ *  Splits on a terminator *followed by whitespace* rather than matching
+ *  sentence shapes: STATE.md is full of filenames, and a pattern that treats
+ *  every "." as an end-of-sentence cuts `first_blood_balance.md` in half and
+ *  puts "md, in-engine." on the front page. */
+function summarise(md, count, cap) {
+  const text = plain(md);
+  let out = text.split(/(?<=[.!?])\s+/).slice(0, count).join(" ").trim();
+  if (!out) out = text;
+  if (out.length > cap) out = out.slice(0, cap - 1).replace(/[\s,;:—-]+\S*$/, "") + "…";
+  return out;
+}
+
+/** STATE.md is the loop's own memory, written for whichever session reads it
+ *  next — not copy for this page. Its line breaks fall wherever the paragraph
+ *  happened to wrap and its prose is markdown, so slicing physical lines out of
+ *  it puts stray `**` on the front page and stops sentences mid-word. That is
+ *  exactly what shipped when tick 10 rewrote the file. Work in sentences, strip
+ *  the markup, and cap the length here, so how the next tick words its notes
+ *  cannot break the page. */
 function loadState() {
   const src = read(join(ROOT, "state", "STATE.md"));
+  // No "m" flag on purpose. With it, `$` matches at every line end, so the lazy
+  // body stops at the first newline and every section silently collapses to its
+  // first line — which is how a mid-sentence fragment reached the front page.
+  // `(?:^|\n)## ` anchors the heading without needing multiline.
   const section = (name) => {
-    const m = src.match(new RegExp(`^## ${name}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "m"));
+    const m = src.match(new RegExp(`(?:^|\\n)## ${name}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`));
     return m ? m[1].trim() : "";
   };
+  const blockers = section("Open blockers");
   return {
-    milestone: section("Current milestone").split("\n")[0] || "—",
-    focus: section("Current focus").split("\n").slice(0, 2).join(" ") || "—",
-    blockers: section("Open blockers") || "None.",
+    milestone: summarise(section("Current milestone"), 1, 58) || "—",
+    focus: summarise(section("Current focus"), 2, 240) || "—",
+    // "None." is the normal case and not worth a line; anything else is.
+    // Three sentences rather than two: a blocker is only useful if the reader
+    // learns what is actually stuck. The character cap is what bounds it.
+    blocker: /^none\.?$/i.test(plain(blockers)) ? "" : summarise(blockers, 3, 240),
     ticks: (section("Tick counter").match(/\d+/) || ["0"])[0],
   };
 }
@@ -102,6 +186,7 @@ function layout({ title, page, body, description }) {
   const nav = [
     ["/", "log", "Log"],
     ["/roadmap", "roadmap", "Roadmap"],
+    ["/design", "design", "Design"],
     ["/bestiary", "bestiary", "Bestiary"],
     ["/glass", "glass", "Glass"],
   ];
@@ -150,15 +235,43 @@ function videoBlock(e) {
 
 // ---------------------------------------------------------------- pages
 
+/** The hero leads with the most recent tick, whatever kind it was.
+ *
+ *  It used to lead with the most recent tick that had a *clip*, which is right
+ *  while clips are frequent and quietly wrong once they are not: twenty
+ *  consecutive text-only ticks left a black video player from tick 9
+ *  headlining a project on tick 29. A site whose premise is watching the work
+ *  happen should not open on three weeks ago. When the newest entry has no
+ *  clip, it leads as text and the last capture is demoted to a strip
+ *  underneath, which is honest about both. */
 function pageIndex(entries, state, progress) {
-  const latest = entries.find((e) => e.video_mp4);
-  const stage = latest
-    ? `<div class="stage">${videoBlock(latest)}<div class="stage-cap">
-         <strong>${esc(latest.title)}</strong>
-         <span>tick ${latest.tick}</span>
-         <a href="/log/${esc(latest.slug)}">read the entry →</a>
-       </div></div>`
-    : `<div class="stage"><div class="empty">no clip yet — the loop has not shipped anything visible</div></div>`;
+  const newest = entries[0];
+  const lastClip = entries.find((e) => e.video_mp4);
+
+  let stage;
+  if (!newest) {
+    stage = `<div class="stage"><div class="empty">nothing published yet</div></div>`;
+  } else if (newest.video_mp4) {
+    stage = `<div class="stage">${videoBlock(newest)}<div class="stage-cap">
+         <strong>${esc(newest.title)}</strong>
+         <span>tick ${newest.tick}</span>
+         <a href="/log/${esc(newest.slug)}">read the entry →</a>
+       </div></div>`;
+  } else {
+    stage = `<div class="stage"><div class="lead">
+         <div class="lead-meta"><span>tick ${newest.tick}</span>${
+           newest.date ? `<span>${esc(newest.date)}</span>` : ""}${statusPill(newest)}</div>
+         <h2><a href="/log/${esc(newest.slug)}">${esc(newest.title)}</a></h2>
+         <p>${esc(newest.summary || "")}</p>
+       </div><div class="stage-cap">
+         <span>latest tick</span>
+         <a href="/log/${esc(newest.slug)}">read the entry →</a>
+       </div></div>`;
+    if (lastClip) {
+      stage += `<p class="lastclip">Last captured clip: <a href="/log/${
+        esc(lastClip.slug)}">${esc(lastClip.title)}</a> <span>tick ${lastClip.tick}</span></p>`;
+    }
+  }
 
   const feed = entries.length
     ? entries.map((e) => `<div class="entry">
@@ -186,14 +299,15 @@ function pageIndex(entries, state, progress) {
     <div><dt>Roadmap</dt><dd class="green">${progress.done}/${progress.total}</dd></div>
     <div><dt>Entries</dt><dd>${entries.length}</dd></div>
   </dl>
-  <p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">Now: ${esc(state.focus)}</p>
+  <p class="now">Now: ${esc(state.focus)}</p>
+  ${state.blocker ? `<p class="blocked">Blocked: ${esc(state.blocker)}</p>` : ""}
 </section>
 <h2 class="section">Devlog</h2>
 ${feed}`,
   });
 }
 
-function pageEntry(e) {
+function pageEntry(e, slugs = new Set()) {
   return layout({
     title: `${e.title} — hd2d-antfarm`,
     page: "log",
@@ -207,11 +321,21 @@ function pageEntry(e) {
     ${statusPill(e)}
   </div>
   ${e.video_mp4 ? `<div class="stage">${videoBlock(e)}</div>` : ""}
-  ${renderMarkdown(e.body)}
+  ${linkDesignRefs(renderMarkdown(e.body), slugs)}
   <hr>
   <p><a href="/">← all entries</a></p>
 </article>`,
   });
+}
+
+
+/** Devlog entries and design documents name each other constantly, always as
+ *  `design/thing.md` in a code span. Turning the ones that exist into links
+ *  costs a regex and makes fourteen dead references navigable. Unknown paths
+ *  are left alone rather than linked to a 404. */
+function linkDesignRefs(html, slugs) {
+  return html.replace(/<code>design\/([a-z0-9_]+)\.md<\/code>/g, (m, slug) =>
+    slugs.has(slug) ? `<a href="/design/${slug}"><code>design/${slug}.md</code></a>` : m);
 }
 
 function pageRoadmap() {
@@ -224,18 +348,130 @@ function pageRoadmap() {
   });
 }
 
-function pageBestiary(creatures) {
+/** Type accents are cosmetic, keyed by name with a neutral fallback, so a fifth
+ *  type appearing in game/data/types.json renders correctly — just in grey —
+ *  without anyone editing this file. The pillar that content must stay cheap to
+ *  add applies to the page that shows it off too. */
+const TYPE_ACCENT = { Ember: "rust", Tide: "blue", Gale: "ink", Root: "green" };
+const accent = (t) => TYPE_ACCENT[t] || "grey";
+const typeTag = (t) => (t ? `<span class="t ${accent(t)}">${esc(t)}</span>` : "—");
+
+/** Rendered as a table rather than the cycle it happens to be today: the chart
+ *  is data, and the next one may not be a cycle. */
+function typeChart(types) {
+  const rows = Object.entries(types).map(([name, e]) => {
+    const beats = Object.entries(types)
+      .filter(([, other]) => other.weak_to === name)
+      .map(([n]) => typeTag(n))
+      .join(" ");
+    return `<tr><td>${typeTag(name)}</td><td>${beats || "—"}</td><td>${typeTag(e.weak_to)}</td></tr>`;
+  });
+  if (!rows.length) return "";
+  return `<h2>Type chart</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Type</th><th>Strong against</th><th>Weak to</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table></div>`;
+}
+
+function beastCard(c, moveById, types) {
+  const moves = (c.moves || [])
+    .map((id) => moveById.get(id))
+    .filter(Boolean)
+    .map((m) => `<li>
+        <span class="mv">${esc(m.display_name || m.id)}</span>
+        <span class="cat">${esc(m.category || "—")}</span>
+        <span class="pw">${esc(m.power ?? "—")}</span>
+      </li>`)
+    .join("");
+
+  const strong = Object.entries(types)
+    .filter(([, e]) => e.weak_to === c.type)
+    .map(([n]) => n);
+  const weak = (types[c.type] || {}).weak_to;
+
+  return `<article class="beast">
+    <header><h2>${esc(c.display_name || c.id)}</h2>${typeTag(c.type)}</header>
+    <dl class="vitals">
+      <div><dt>HP</dt><dd>${esc(c.max_hp ?? "—")}</dd></div>
+      <div><dt>Guard</dt><dd>${esc(c.max_guard ?? "—")}</dd></div>
+      <div><dt>Speed</dt><dd>${esc(c.speed ?? "—")}</dd></div>
+    </dl>
+    ${moves ? `<ul class="moves">${moves}</ul>` : ""}
+    <p class="match">Strong vs ${strong.length ? strong.map(esc).join(", ") : "nothing yet"}
+      · Weak to ${weak ? esc(weak) : "nothing yet"}</p>
+  </article>`;
+}
+
+
+/** The index leads with design/README.md when it exists — seventeen documents
+ *  listed alphabetically is not navigable, and the alphabet says nothing about
+ *  which ones overturn which. Its own H1 is dropped so it does not compete with
+ *  the page's. */
+function stripFirstHeading(md) {
+  return md.replace(/^#\s+.*\n+/, "");
+}
+
+function pageDesignIndex(docs, intro, slugs) {
+  const rows = docs.length
+    ? docs.map((d) => `<div class="entry">
+        <h3><a href="/design/${d.slug}">${esc(d.title)}</a></h3>
+        <div class="meta"><span>design/${esc(d.file)}</span></div>
+        <p>${esc(d.summary)}</p>
+      </div>`).join("")
+    : `<div class="empty-note">Nothing designed yet.</div>`;
+  return layout({
+    title: "Design — hd2d-antfarm",
+    page: "design",
+    description: "The loop's design documents: what it decided and what it rejected.",
+    body: `<article class="post"><h1>Design</h1>
+    <p>Where the loop is allowed to invent. These are the decisions behind the build — including the alternatives that were rejected, which is usually the more useful half. The devlog is what happened; this is what it was trying to do.</p>
+    ${intro ? linkDesignRefs(renderMarkdown(stripFirstHeading(intro.body)), slugs) : ""}
+    <hr><h2>Every document</h2>
+    </article>${rows}`,
+  });
+}
+
+/** Creature sprites ship as two frames — see design/creature_sprites.md's
+ *  animation section. Markdown can only emit one <img>, so the frame-A image is
+ *  wrapped with its frame-B partner layered over it and a single CSS animation
+ *  cross-cuts between them. One rule for the whole roster, no per-sprite CSS,
+ *  and it degrades to a static frame A if the B file is missing. */
+function animateSprites(html, haveFrameB) {
+  return html.replace(/<img src="\/sprites\/([a-z0-9_]+)\.png" alt="([^"]*)">/g,
+    (m, id, alt) => haveFrameB.has(id)
+      ? `<span class="sprite">${m}<img src="/sprites/${id}_b.png" alt="" aria-hidden="true"></span>`
+      : m);
+}
+
+function pageDesignDoc(doc, slugs, haveFrameB = new Set()) {
+  // Relative links between design documents resolve to their published paths.
+  const src = doc.body.replace(/\]\((?:design\/)?([a-z0-9_]+)\.md\)/g, "](/design/$1)");
+  return layout({
+    title: `${doc.title} — hd2d-antfarm`,
+    page: "design",
+    description: doc.summary,
+    body: `<article class="post">
+  <div class="meta"><span>design/${esc(doc.file)}</span></div>
+  ${animateSprites(linkDesignRefs(renderMarkdown(src), slugs), haveFrameB)}
+  <hr>
+  <p><a href="/design">← all design documents</a></p>
+</article>`,
+  });
+}
+
+function pageBestiary(creatures, moves, types) {
+  const moveById = new Map(moves.map((m) => [m.id, m]));
   const body = creatures.length
-    ? `<div class="status">${creatures
-        .map((c) => `<div><dt>${esc(c.name || c.id)}</dt><dd>${esc(c.type || c.types || "—")}</dd></div>`)
-        .join("")}</div>`
+    ? `<div class="beasts">${creatures.map((c) => beastCard(c, moveById, types)).join("")}</div>
+       ${typeChart(types)}`
     : `<div class="empty-note">No creatures yet. The roster starts filling at milestone M4, when creatures become data rather than code.</div>`;
   return layout({
     title: "Bestiary — hd2d-antfarm",
     page: "bestiary",
     description: "Every creature the loop has designed.",
     body: `<article class="post"><h1>Bestiary</h1>
-    <p>Generated from the same data files the game reads, so this page is never out of date with what is actually in the build.</p>
+    <p>Generated from the same data files the game reads, so this page is never out of date with what is actually in the build. ${creatures.length} creature${creatures.length === 1 ? "" : "s"} so far.</p>
     ${body}</article>`,
   });
 }
@@ -270,13 +506,55 @@ function main() {
 
   writeFileSync(join(OUT, "index.html"), pageIndex(entries, state, progress));
   writeFileSync(join(OUT, "roadmap.html"), pageRoadmap());
-  writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures()));
+  writeFileSync(join(OUT, "bestiary.html"), pageBestiary(loadCreatures(), loadMoves(), loadTypes()));
   writeFileSync(join(OUT, "glass.html"), pageGlass(loadJournal()));
-  for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e));
+
+  // design/README.md is the reading guide, not an entry in the list: it leads
+  // the index page and is excluded from the cards below it.
+  const allDocs = loadDesignDocs();
+  const intro = allDocs.find((d) => d.slug.toLowerCase() === "readme");
+  const docs = allDocs.filter((d) => d !== intro);
+  const slugs = new Set(allDocs.map((d) => d.slug));
+  mkdirSync(join(OUT, "design"), { recursive: true });
+  writeFileSync(join(OUT, "design.html"), pageDesignIndex(docs, intro, slugs));
+  const spriteDir = join(ROOT, "game", "assets", "sprites", "creatures");
+  const haveFrameB = new Set(
+    existsSync(spriteDir)
+      ? readdirSync(spriteDir).filter((f) => f.endsWith("_b.png")).map((f) => f.slice(0, -6))
+      : []);
+  for (const d of allDocs)
+    writeFileSync(join(OUT, "design", `${d.slug}.html`), pageDesignDoc(d, slugs, haveFrameB));
+
+  for (const e of entries) writeFileSync(join(OUT, "log", `${e.slug}.html`), pageEntry(e, slugs));
   copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));
 
+  // The creature sprites, so design/roster.md can show what it is describing.
+  // They are real game assets as of tick 60 — game/assets/sprites/creatures/,
+  // generated by game/tools/creature_forge.py — and farm/agreements.py checks
+  // they still match what that generator produces, so a stale sprite cannot sit
+  // here unnoticed. .import sidecars are Godot's and are not copied.
+  const spriteSrc = join(ROOT, "game", "assets", "sprites", "creatures");
+  if (existsSync(spriteSrc)) {
+    mkdirSync(join(OUT, "sprites"), { recursive: true });
+    for (const f of readdirSync(spriteSrc).filter((f) => f.endsWith(".png"))) {
+      copyFileSync(join(spriteSrc, f), join(OUT, "sprites", f));
+    }
+  }
+
+  // The battle HUD mockups, drawn from live solver state by
+  // design/proto/battle_hud.py. Kept out of /sprites/ deliberately: that
+  // directory's files are paired <id>.png / <id>_b.png for the idle animation,
+  // and a mockup dropped in there would be treated as half a creature.
+  const mockSrc = join(ROOT, "design", "proto", "mockups");
+  if (existsSync(mockSrc)) {
+    mkdirSync(join(OUT, "mockups"), { recursive: true });
+    for (const f of readdirSync(mockSrc).filter((f) => f.endsWith(".png"))) {
+      copyFileSync(join(mockSrc, f), join(OUT, "mockups", f));
+    }
+  }
+
   console.log(
-    `site: ${entries.length} entries, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
+    `site: ${entries.length} entries, ${docs.length} design docs, ${progress.done}/${progress.total} roadmap items -> ${basename(OUT)}/`
   );
 }
 
