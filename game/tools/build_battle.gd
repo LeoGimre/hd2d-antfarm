@@ -21,6 +21,12 @@ const MARKER_RADIUS := 0.7
 const MARKER_HEIGHT := 0.05
 const CREATURE_HEIGHT := 1.5
 
+## Larger than the diorama's 0.05: at that scale a creature's visible body is
+## shorter than its slot marker is wide and it reads as standing in a puddle.
+const SPRITE_PIXEL_SIZE := 0.07
+const SPRITE_PIXELS_TALL := 44        # creature_forge.py's canvas height
+const IDLE_FPS := 2.0                 # design/creature_sprites.md's idle cadence
+
 ## The encounter the scene is built for when the command line does not name one.
 ## battle.gd carries the same value for the same reason; keeping both is
 ## deliberate, since either file can be run without the other.
@@ -221,10 +227,24 @@ func _add_slot_markers(root: Node3D) -> void:
 	markers.name = "SlotMarkers"
 	root.add_child(markers)
 
-	markers.add_child(_marker("PlayerFrontMarker", PLAYER_FRONT_POS, FRONT_MARKER_TINT))
-	markers.add_child(_marker("PlayerBackMarker", PLAYER_BACK_POS, BACK_MARKER_TINT))
-	markers.add_child(_marker("EnemyFrontMarker", ENEMY_FRONT_POS, FRONT_MARKER_TINT))
-	markers.add_child(_marker("EnemyBackMarker", ENEMY_BACK_POS, BACK_MARKER_TINT))
+	# Tinted by side since tick 61. The capsules used to carry that — blue for
+	# the player, red for the enemy — and a creature sprite's hue is coded to
+	# its *type*, so with the capsules gone nothing on the board said which side
+	# anything was on. The disc under each creature says it instead.
+	markers.add_child(_marker("PlayerFrontMarker", PLAYER_FRONT_POS, _tint(PLAYER_COLOR, false)))
+	markers.add_child(_marker("PlayerBackMarker", PLAYER_BACK_POS, _tint(PLAYER_COLOR, true)))
+	markers.add_child(_marker("EnemyFrontMarker", ENEMY_FRONT_POS, _tint(ENEMY_COLOR, false)))
+	markers.add_child(_marker("EnemyBackMarker", ENEMY_BACK_POS, _tint(ENEMY_COLOR, true)))
+
+
+## Front reads stronger than Back, same relationship the old white tints had.
+func _tint(side_color: Color, is_back: bool) -> Color:
+	# Mostly white, faintly tinted. The first pass lerped only 35% toward white
+	# and kept the old alphas, which on this dark floor produced saturated pink
+	# and blue lozenges that pulled the eye off the creatures standing on them.
+	var c := side_color.lerp(Color(1, 1, 1), 0.78)
+	c.a = (BACK_MARKER_TINT.a if is_back else FRONT_MARKER_TINT.a) * 0.7
+	return c
 
 
 func _marker(node_name: String, pos: Vector3, tint: Color) -> Node3D:
@@ -244,10 +264,8 @@ func _marker(node_name: String, pos: Vector3, tint: Color) -> Node3D:
 	return mi
 
 
-## Real creatures — no sprites yet (M4's composable creature system), so
-## each is still a capsule body plus floating text, but now loaded from
-## game/data/ rather than hardcoded: a name, a type, and a live HP/Guard
-## readout that battle.gd rewrites every turn.
+## Real creatures: a billboarded pixel sprite from game/assets/sprites/creatures/
+## plus floating text, all of it loaded from game/data/ rather than hardcoded.
 func _add_creatures(root: Node3D) -> void:
 	var creatures := Node3D.new()
 	creatures.name = "Creatures"
@@ -290,28 +308,55 @@ func _add_creatures(root: Node3D) -> void:
 		creatures.add_child(_creature(node_name, pos, color, data, label_lift, label_font_scale))
 
 
+## Two frames, a and b, exactly as design/creature_sprites.md's idle section
+## specifies: b is the settled pose, produced by the generator's post-shading
+## settle() pass rather than by re-shading a moved body.
+func _idle_frames(creature_id: String) -> SpriteFrames:
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", IDLE_FPS)
+	for suffix in ["", "_b"]:
+		frames.add_frame("idle", load(
+			"res://assets/sprites/creatures/%s%s.png" % [creature_id, suffix]))
+	return frames
+
+
 func _creature(node_name: String, pos: Vector3, color: Color, data: Dictionary,
 		label_lift: float, label_font_scale: float) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = node_name
 	holder.position = pos
 
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.45
-	capsule.height = CREATURE_HEIGHT
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.95
-	mat.metallic_specular = 0.05
-	mat.emission_enabled = true
-	mat.emission = color
-	mat.emission_energy_multiplier = 0.0
-	var body := MeshInstance3D.new()
+	var body := AnimatedSprite3D.new()
 	body.name = "Body"
-	body.mesh = capsule
-	body.material_override = mat
-	body.position = Vector3(0.0, CREATURE_HEIGHT * 0.5, 0.0)
-	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	body.sprite_frames = _idle_frames(data["id"])
+	body.animation = "idle"
+	body.pixel_size = SPRITE_PIXEL_SIZE
+	# Y-billboard keeps the sprite upright while it turns to face the camera —
+	# the trick that lets a 2D sprite live in a 3D scene without shearing. Same
+	# settings as the diorama's traveler, which is the reference implementation.
+	body.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	# UNSHADED, unlike the diorama's traveler, and this was decided by looking.
+	# A Y-billboard's normal faces the camera, so a single key light at -140 yaw
+	# lights one side of this board and leaves the other in near-black: the first
+	# capture had the two enemies as unreadable silhouettes while the two player
+	# creatures read fine. The art already carries its own shading, baked in
+	# creature_forge.py from that same house key angle precisely so the two
+	# agree — relighting it a second time is what broke it. A tactical board
+	# also has to read equally on both sides, which scene lighting cannot promise.
+	body.shaded = false
+	# ALPHA_CUT_DISCARD is what makes the shadow a cut-out silhouette instead of
+	# a rectangle. Without it the whole HD-2D illusion collapses.
+	body.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	body.alpha_scissor_threshold = 0.5
+	body.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+	# Centred sprite lifted by half its texture height, so the bottom row of the
+	# texture lands on the floor. The art is drawn with its feet on GROUND = 39
+	# of 44, so the creature stands on its slot marker rather than floating.
+	body.position = Vector3(0.0, SPRITE_PIXELS_TALL * 0.5 * SPRITE_PIXEL_SIZE, 0.0)
 	holder.add_child(body)
 
 	# One label, two lines, rather than two stacked Label3Ds — the Back slots

@@ -30,6 +30,10 @@ const QUEUE_PREVIEW := 6
 ## creature's own InfoLabel (caught in QC, not obvious on paper). A smaller
 ## peak still reads as "this one just acted" without doing that.
 const FLASH_PEAK := 1.1
+
+## What a defeated creature's sprite is multiplied by: dark and drained, still
+## legible as a silhouette so the board keeps showing what was there.
+const DOWN_TINT := Color(0.34, 0.32, 0.38)
 const FLASH_UP_SECONDS := 0.15
 const FLASH_DOWN_SECONDS := 0.55
 
@@ -288,21 +292,26 @@ func _make_chip(actor: TurnQueue.Combatant, is_next: bool) -> Control:
 
 
 ## The queue strip shows the future; this is the present — the acting
-## creature's capsule pulses its emission so a viewer can match "who the
-## strip predicted" against "who just moved" without any combat log text.
+## creature brightens so a viewer can match "who the strip predicted" against
+## "who just moved" without any combat log text.
+##
+## This used to pulse emission_energy_multiplier on the capsule's material. A
+## billboarded Sprite3D has no such material to reach into, and adding one would
+## mean overriding the sprite's own — so it tweens `modulate` instead, which
+## multiplies the baked pixels rather than adding a glow over them. Brightening
+## art that already carries its own shading keeps the ramp; adding emission to
+## it would flatten the thing the generator spent a tick getting right.
 func _flash(id: String) -> void:
 	var holder := _creatures.get_node_or_null(id)
 	if holder == null:
 		return
-	var body: MeshInstance3D = holder.get_node_or_null("Body")
+	var body: SpriteBase3D = holder.get_node_or_null("Body")
 	if body == null:
 		return
-	var mat: StandardMaterial3D = body.material_override
-	if mat == null:
-		return
 	var tween := create_tween()
-	tween.tween_property(mat, "emission_energy_multiplier", FLASH_PEAK, FLASH_UP_SECONDS)
-	tween.tween_property(mat, "emission_energy_multiplier", 0.0, FLASH_DOWN_SECONDS)
+	var peak := Color(FLASH_PEAK, FLASH_PEAK, FLASH_PEAK)
+	tween.tween_property(body, "modulate", peak, FLASH_UP_SECONDS)
+	tween.tween_property(body, "modulate", Color.WHITE, FLASH_DOWN_SECONDS)
 
 
 ## Each creature's InfoLabel (a Label3D under its capsule) reads its name,
@@ -315,6 +324,14 @@ func _refresh_status_labels() -> void:
 		var holder := _creatures.get_node_or_null(id)
 		if holder == null:
 			continue
+		# A defeated creature used to go on standing there at full brightness.
+		# That was survivable when every creature was a coloured capsule and is
+		# not now: the two enemies at 0 HP looked exactly as alive as the winners
+		# in the tick-61 capture. Dimming the sprite is the cheapest honest read
+		# of "this one is out" until design/battle_hud.md replaces these labels.
+		var body: SpriteBase3D = holder.get_node_or_null("Body")
+		if body != null and state.defeated:
+			body.modulate = DOWN_TINT
 		var label: Label3D = holder.get_node_or_null("InfoLabel")
 		if label == null:
 			continue
