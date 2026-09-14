@@ -59,12 +59,15 @@ None of these needs re-deciding; all need building. Work them in order.
    Validated on **both** encounters: exactly one of seven scripted lines wins and it is the
    correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
    that is deliberate.
-3. `design/combat_tests.md` — `game/tests/` + `farm/test.sh`, three tiers, tick M3's fifth box.
-   **Tiers 1 and 2 are already generated**: copy `design/proto/combat_cases.json` to
-   `game/tests/cases.json` and write a runner that walks its sections (74 cases + a golden
-   trace). Regenerate with `python3 design/proto/gen_test_cases.py` — `agreements.py` fails if it
-   is stale, and the fixture records the constants *as shipped*, so applying the retune means
-   regenerating in the same commit.
+3. `design/combat_tests.md` — **tier 1 done, tick 57.** `game/tests/run_tests.gd` walks
+   `design/proto/combat_cases.json` and runs 97 assertions; `farm/test.py` runs it and no longer
+   skips. **M3's fifth box is deliberately still unticked**: tiers 2 (whole-fight outcomes for
+   both encounters, 14 cases) and 3 (the golden trace, 16 events) need a policy driver in
+   GDScript — ports of the solver's `naive`, `melee_charge`, `snipe_back`, `anti_typed`, `typed`,
+   `typed_hoard`, `typed_swap` on top of `BattleCore`. They report as skipped every run. Do that,
+   then tick the box. Regenerate the fixture with `python3 design/proto/gen_test_cases.py` —
+   `agreements.py` fails if it is stale, and it records the constants *as shipped*, so applying
+   the retune means regenerating in the same commit.
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
    generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
    now carries six body plans and twenty placeholder entries, validated at roster scale — but
@@ -106,9 +109,10 @@ None of these needs re-deciding; all need building. Work them in order.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check and the twenty-two cross-file agreements, and *loudly skips* the GDScript suite until
-`game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
-says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
+self-check, the twenty-two cross-file agreements, and the GDScript combat suite (97
+assertions). It finds the engine in `/opt/godot/<version>` on its own, so the stage runs without
+`GODOT_BIN` being exported. A skipped stage is a check that is not happening — the summary says
+so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
 
 ## Open blockers
@@ -128,6 +132,16 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **A test case you cannot reach through the real API is not coverage** (tick 57). The fixture
+  carried a `breaks_defender` case at 3 Guard damage since tick 14; no hit in this game does 3,
+  the table being `{weak: 2, neutral: 1, resist: 0}`. The Python model never noticed because it
+  takes the number directly; the GDScript suite resolves through an effectiveness and could not
+  express it. `gen_test_cases.py` now asserts every listed value is one the type chart produces.
+  General form: agreement between a model and an engine is only as good as the questions you can
+  ask both of them.
+- **Test files state no numbers** (tick 57). Every expectation in `game/tests/run_tests.gd` comes
+  from the generated fixture, because three constants are under a live proposal and hand-written
+  expectations go stale together.
 - **The two searches have now agreed three times** (tick 56): the unpaired roster's depth of seven
   and its exact sequence, and the re-paired roster's depth of five and its exact sequence.
   `battle_sim.gd --search` in-engine and `combat_solver.py search --no-capture` off-engine. Treat
@@ -516,4 +530,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-56
+57

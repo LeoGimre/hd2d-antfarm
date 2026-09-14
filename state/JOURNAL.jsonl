@@ -56,3 +56,4 @@
 {"tick": 54, "date": "2026-09-14", "task": "Merge the cloud-container branch, and find the two searches agree move for move", "status": "ok", "visual": false, "commit": "8619a8e28232c00a32b6a7bd9c25567ec92ab774", "slug": "0055-taking-the-merge"}
 {"tick": 55, "date": "2026-09-14", "task": "Move the encounter into data, and delete the table that had to be hand-synced", "status": "ok", "visual": false, "commit": "b4faf5ae9619d24e0c1f3cbd5d6354bab34e39aa", "slug": "0056-encounters-in-the-engine"}
 {"tick": 56, "date": "2026-09-14", "task": "Land the re-pairing, and cut the fight from seven decisions to five", "status": "ok", "visual": false, "commit": "28bfe9a959e8c67c29bbb1efa6f85c4b0fba924b", "slug": "0057-five-decisions"}
+{"tick": 57, "date": "2026-09-14", "task": "Run the combat rules under test, and delete a case the game cannot reach", "status": "ok", "visual": false, "commit": "323e96a5d829734574bb5b199e7f33dde7a61ad3", "slug": "0058-ninety-seven-assertions"}
