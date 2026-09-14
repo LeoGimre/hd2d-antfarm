@@ -25,13 +25,26 @@ const QUEUE_PREVIEW := 6
 ## seconds, and captures that long coalesce frames (see STATE.md). The demo
 ## turns this down; nothing else should.
 @export var turn_interval := 1.35
-## Lower than tick 6's 2.2 — at the Back slots' distance the tilt-shift blur
-## spreads a bloomed flash into a soft cloud big enough to swallow that
-## creature's own InfoLabel (caught in QC, not obvious on paper). A smaller
-## peak still reads as "this one just acted" without doing that.
-const FLASH_PEAK := 1.1
+## The acting creature used to be a capsule and the flash pulsed its material's
+## emission. A sprite has no material to reach into, and the obvious substitute
+## — driving SpriteBase3D.modulate past 1.0 so the glow pass picks it up — does
+## not work: Sprite3D bakes modulate into its quad's vertex colours, which are
+## 8-bit, so everything above white clamps to white and nothing happens.
+## Measured, not assumed: modulate 6.0 rendered identically to 1.0, while
+## modulate 0.15 rendered the creature nearly black, which is the same tween
+## proving it runs.
+##
+## So the flash is a light instead. build_battle.gd parks one unshadowed omni
+## in the scene; this moves it onto the acting creature and pulses it. That
+## suits a billboard better than a tint did — a sprite facing the camera can
+## only be lit from the camera's side, and a light also spills onto the floor
+## around the actor, which a tint never could.
+const FLASH_PEAK := 3.4
 const FLASH_UP_SECONDS := 0.15
 const FLASH_DOWN_SECONDS := 0.55
+## Chest height on the creature and a little toward the camera, so the light
+## reaches the face of the billboard rather than grazing its edge.
+const FLASH_OFFSET := Vector3(0.0, 1.5, 1.2)
 
 const CHIP_COLORS := {
 	"player": Color(0.30, 0.55, 0.95),
@@ -58,6 +71,7 @@ const DEFAULT_ENCOUNTER := "first_blood"
 @onready var _prompt_label: Label = $UI/PlayerPrompt
 @onready var _player_charge_label: Label = $UI/PlayerCharge
 @onready var _enemy_charge_label: Label = $UI/EnemyCharge
+@onready var _actor_spot: OmniLight3D = $ActorSpot
 
 var _db := CreatureDB.new()
 var _core: BattleCore
@@ -287,25 +301,20 @@ func _make_chip(actor: TurnQueue.Combatant, is_next: bool) -> Control:
 	return panel
 
 
-## The queue strip shows the future; this is the present — the acting
-## creature's capsule pulses its emission so a viewer can match "who the
-## strip predicted" against "who just moved" without any combat log text.
+## The queue strip shows the future; this is the present — a light swings onto
+## the acting creature and fades, so a viewer can match "who the strip
+## predicted" against "who just moved" without any combat log text.
 func _flash(id: String) -> void:
-	var holder := _creatures.get_node_or_null(id)
+	var holder: Node3D = _creatures.get_node_or_null(id)
 	if holder == null:
 		return
-	var body: MeshInstance3D = holder.get_node_or_null("Body")
-	if body == null:
-		return
-	var mat: StandardMaterial3D = body.material_override
-	if mat == null:
-		return
+	_actor_spot.position = holder.position + FLASH_OFFSET
 	var tween := create_tween()
-	tween.tween_property(mat, "emission_energy_multiplier", FLASH_PEAK, FLASH_UP_SECONDS)
-	tween.tween_property(mat, "emission_energy_multiplier", 0.0, FLASH_DOWN_SECONDS)
+	tween.tween_property(_actor_spot, "light_energy", FLASH_PEAK, FLASH_UP_SECONDS)
+	tween.tween_property(_actor_spot, "light_energy", 0.0, FLASH_DOWN_SECONDS)
 
 
-## Each creature's InfoLabel (a Label3D under its capsule) reads its name,
+## Each creature's InfoLabel (a Label3D above its sprite) reads its name,
 ## type, HP and Guard directly, plus a Broken/Down callout — the thing a
 ## viewer needs to check the combat log's claims against without reading
 ## combat_resolver.gd.

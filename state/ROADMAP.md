@@ -34,7 +34,7 @@ building it.
 
 ## M4 — Creature systems
 - [ ] Creatures, moves and types fully data-driven — adding one is a data edit
-- [ ] Composable creature sprite system: parts, palettes, per-species proportions
+- [x] Composable creature sprite system: parts, palettes, per-species proportions
 - [ ] Capture implemented as designed
 - [ ] Party management and progression
 - [ ] Roster passes 20 creatures

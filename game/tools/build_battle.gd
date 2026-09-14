@@ -15,11 +15,27 @@ extends SceneTree
 ## Build a scene for a different encounter by passing its id:
 ##   godot --headless --path game --script res://tools/build_battle.gd -- <id>
 
-const ARENA_SIZE := Vector2(11.0, 11.0)
+const ARENA_SIZE := Vector2(14.0, 14.0)
 const ARENA_TILE_UNITS := 2.0
 const MARKER_RADIUS := 0.7
 const MARKER_HEIGHT := 0.05
-const CREATURE_HEIGHT := 1.5
+
+## Same world scale as build_diorama.gd's traveler — one pixel is one pixel
+## everywhere in this game, or a creature that walks out of a battle changes
+## size. Creatures are drawn on a 40x44 canvas against the traveler's 24x32,
+## so they are genuinely bigger than a person, which is what a creature is.
+const SPRITE_PIXEL_SIZE := 0.05
+const SPRITE_PX := Vector2(40.0, 44.0)
+## The pixel row creature_forge.py stands its creatures on (its GROUND). A
+## Sprite3D centres its texture on the node, so standing a creature on the
+## slot marker rather than sinking it into the floor means lifting the sprite
+## by the distance from that row to the texture's middle. Four rows of the
+## canvas hang below the feet; without this every creature is buried to the
+## ankle and the shadow starts in the wrong place.
+const SPRITE_GROUND_ROW := 39.0
+const SPRITE_FEET_LIFT := (SPRITE_GROUND_ROW + 0.5 - SPRITE_PX.y * 0.5) * SPRITE_PIXEL_SIZE
+## Top of the sprite canvas above the floor — where a label has to clear to.
+const CREATURE_HEIGHT := SPRITE_FEET_LIFT + SPRITE_PX.y * 0.5 * SPRITE_PIXEL_SIZE
 
 ## The encounter the scene is built for when the command line does not name one.
 ## battle.gd carries the same value for the same reason; keeping both is
@@ -37,10 +53,23 @@ var _encounter_id := DEFAULT_ENCOUNTER
 ## light/material/DOF tuning that would fix an actual overexposure). Widening
 ## the lateral offset and flattening the depth offset keeps Back farther from
 ## the board's center line without stacking it almost directly over Front.
+##
+## That worked and then cost the frame's edges instead: at 3.6 out, Player
+## Back's label ran off the right of a 16:9 frame and Enemy Back's off the
+## left, which only showed once a state suffix (BROKEN, DOWN) made the strings
+## longer mid-fight — an idle first frame never revealed it.
+##
+## 3.4 is where both failures stop, and it only holds because the labels are
+## smaller now (30, was 40, and Enemy Back's 1.3x scale is gone). Checked at
+## the frame where the fight ends, with a DOWN on one side and a BROKEN on the
+## other, which is the widest every string gets: Player Back's line ends
+## around x=950 of 1280, and no two labels on a side touch. Lateral separation
+## rather than vertical lift is what does the work — a label lifted clear of
+## its neighbour stops looking like it belongs to the creature under it.
 const PLAYER_FRONT_POS := Vector3(1.1, 0.0, 1.8)
-const PLAYER_BACK_POS := Vector3(3.6, 0.0, 2.6)
+const PLAYER_BACK_POS := Vector3(3.4, 0.0, 2.6)
 const ENEMY_FRONT_POS := Vector3(-1.1, 0.0, -1.3)
-const ENEMY_BACK_POS := Vector3(-3.6, 0.0, -1.7)
+const ENEMY_BACK_POS := Vector3(-3.4, 0.0, -1.7)
 
 const PLAYER_COLOR := Color(0.30, 0.55, 0.95)
 const ENEMY_COLOR := Color(0.85, 0.30, 0.28)
@@ -118,7 +147,7 @@ func _add_environment(root: Node3D) -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_sky_contribution = 0.85
-	env.ambient_light_energy = 0.95
+	env.ambient_light_energy = 1.10
 
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.tonemap_exposure = 1.05
@@ -158,11 +187,29 @@ func _add_lights(root: Node3D) -> void:
 	key.shadow_normal_bias = 1.4
 	root.add_child(key)
 
+	# The fill is the only light in this scene a creature can actually see.
+	# Work the key's direction out: euler (-50, -140, 0) points it along
+	# roughly (0.41, -0.77, 0.49), so it arrives from behind the board — and a
+	# BILLBOARD_FIXED_Y sprite's normal always faces the camera, which sits on
+	# the opposite side, so N·L is negative and the key contributes exactly
+	# nothing to a creature no matter what its energy is. That is not a bug in
+	# this scene's key; it is true of any key angled over a board of
+	# billboards, which is why the house key angle in design/hd2d_look.md is
+	# about lighting the *geometry* consistently with the sprites' baked
+	# shading rather than about lighting the sprites.
+	#
+	# So a sprite's brightness here comes from the fill and the ambient, and
+	# both were set when the only things standing on this board were capsules
+	# with normals pointing every way. At 0.25 against a near-black sky,
+	# Emberling — a bright orange creature, see the source PNG — rendered as a
+	# dark brown smudge. The fill points back at the camera, so raising it is
+	# the one knob that lights a billboard's face without flattening the
+	# floor's shading the way raising ambient alone would.
 	var fill := DirectionalLight3D.new()
 	fill.name = "Fill"
 	fill.rotation_degrees = Vector3(-24.0, 60.0, 0.0)
-	fill.light_color = Color(0.55, 0.62, 0.95)
-	fill.light_energy = 0.25
+	fill.light_color = Color(0.72, 0.76, 0.98)
+	fill.light_energy = 0.95
 	fill.shadow_enabled = false
 	root.add_child(fill)
 
@@ -188,6 +235,19 @@ func _add_lights(root: Node3D) -> void:
 	enemy_rim.light_energy = 1.6
 	enemy_rim.omni_range = 5.5
 	root.add_child(enemy_rim)
+
+	# The "this one is acting" cue, parked dark at the origin. battle.gd moves
+	# it onto whoever's turn it is and pulses its energy; see the long note on
+	# FLASH_PEAK there for why the cue is a light and not a tint on the sprite.
+	# No shadow: it moves every turn and a swinging shadow would read as a
+	# second, unrelated event.
+	var actor_spot := OmniLight3D.new()
+	actor_spot.name = "ActorSpot"
+	actor_spot.light_color = Color(1.0, 0.95, 0.82)
+	actor_spot.light_energy = 0.0
+	actor_spot.omni_range = 3.4
+	actor_spot.shadow_enabled = false
+	root.add_child(actor_spot)
 
 
 func _pixel_material(tex_path: String, uv: Vector2, tint: Color) -> StandardMaterial3D:
@@ -244,8 +304,8 @@ func _marker(node_name: String, pos: Vector3, tint: Color) -> Node3D:
 	return mi
 
 
-## Real creatures — no sprites yet (M4's composable creature system), so
-## each is still a capsule body plus floating text, but now loaded from
+## Real creatures, drawn as the sprites tools/creature_forge.py generates:
+## a billboarded body plus floating text, both loaded from
 ## game/data/ rather than hardcoded: a name, a type, and a live HP/Guard
 ## readout that battle.gd rewrites every turn.
 func _add_creatures(root: Node3D) -> void:
@@ -267,51 +327,61 @@ func _add_creatures(root: Node3D) -> void:
 		var pos_key: String = "%s_%s" % [info["side"], info["slot"]]
 		var pos: Vector3 = positions[pos_key]
 		var color := PLAYER_COLOR if info["side"] == "player" else ENEMY_COLOR
-		var is_back: bool = info["slot"] == "back"
 		# Lifted clear of Front's own label so the two don't share screen
-		# space at this camera angle. Enemy Back needed much less of this
-		# once it got its own wide lateral offset from Enemy Front (below) —
-		# the two no longer compete for the same screen space, and Enemy
-		# Back sits close enough to the frame's top edge already that
-		# lifting it as far as Player Back would crop it.
-		var label_lift := 0.35
+		# space at this camera angle. Back gets much more of it than Front:
+		# from a camera this high, a slot one rank further away is only a few
+		# dozen pixels higher on screen, which is not enough of a gap for two
+		# two-line labels that are each wider than the creature they name.
+		var label_lift := 0.3
 		if pos_key == "player_back":
-			label_lift = 1.15
+			label_lift = 1.0
 		elif pos_key == "enemy_back":
 			label_lift = 0.5
-		# Enemy Back moves *away* from camera as it moves off Front (Player
-		# Back moves *toward* camera instead), so only it ends up small
-		# enough on screen for a Front-sized label's glyphs to anti-alias
-		# into a solid blob instead of legible letterforms — invisible on
-		# paper, only caught by opening the QC frames, and immune to every
-		# lighting/DOF knob tried first because it was never a lighting
-		# problem. Scaling just that one label up compensates directly.
-		var label_font_scale := 1.3 if pos_key == "enemy_back" else 1.0
-		creatures.add_child(_creature(node_name, pos, color, data, label_lift, label_font_scale))
+		creatures.add_child(_creature(node_name, pos, color, data, label_lift))
+
+
+## Two frames, ~2fps: creature_forge.py draws every creature twice, the `_b`
+## pass being the same body one pixel of breath further on. That is the whole
+## idle animation, and at this speed it reads as alive rather than as a
+## flicker — the point is that a still frame of this scene is never quite the
+## frame you saw a second ago.
+func _idle_frames(creature_id: String) -> SpriteFrames:
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 2.0)
+	frames.add_frame("idle", load("res://assets/sprites/creatures/%s.png" % creature_id))
+	frames.add_frame("idle", load("res://assets/sprites/creatures/%s_b.png" % creature_id))
+	return frames
 
 
 func _creature(node_name: String, pos: Vector3, color: Color, data: Dictionary,
-		label_lift: float, label_font_scale: float) -> Node3D:
+		label_lift: float) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = node_name
 	holder.position = pos
 
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.45
-	capsule.height = CREATURE_HEIGHT
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.95
-	mat.metallic_specular = 0.05
-	mat.emission_enabled = true
-	mat.emission = color
-	mat.emission_energy_multiplier = 0.0
-	var body := MeshInstance3D.new()
+	# The creature itself, at last: the sprite tools/creature_forge.py drew,
+	# billboarded the same way build_diorama.gd billboards the traveler. The
+	# node keeps the name "Body" the capsule had, because battle.gd's flash
+	# and status-label code addresses it by name and a rename would be a
+	# second change riding along with this one.
+	var body := AnimatedSprite3D.new()
 	body.name = "Body"
-	body.mesh = capsule
-	body.material_override = mat
-	body.position = Vector3(0.0, CREATURE_HEIGHT * 0.5, 0.0)
-	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	body.sprite_frames = _idle_frames(data["id"])
+	body.animation = "idle"
+	body.pixel_size = SPRITE_PIXEL_SIZE
+	body.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	body.shaded = true
+	# ALPHA_CUT_DISCARD is what makes the shadow a cut-out silhouette rather
+	# than a rectangle, and it is also why the info labels can now sit behind
+	# a creature without vanishing: discarded pixels write no depth.
+	body.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	body.alpha_scissor_threshold = 0.5
+	body.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+	body.position = Vector3(0.0, SPRITE_FEET_LIFT, 0.0)
 	holder.add_child(body)
 
 	# One label, two lines, rather than two stacked Label3Ds — the Back slots
@@ -324,11 +394,25 @@ func _creature(node_name: String, pos: Vector3, color: Color, data: Dictionary,
 		data["display_name"], data["type"], data["max_hp"], data["max_hp"],
 		data["max_guard"], data["max_guard"],
 	]
-	info.font_size = int(40 * label_font_scale)
-	info.outline_size = int(9 * label_font_scale)
+	# 30, down from the capsules' 40. A label is as wide as its longest line,
+	# and at 40 the HP/Guard line was wider than the gap between two adjacent
+	# slots on screen, so every pair of labels on a side overlapped the moment
+	# a state suffix made one of them longer. Enemy Back used to get its own
+	# 1.3x scale to survive the 3.6-unit lateral offset it no longer has;
+	# that exception is gone with the offset that caused it.
+	info.font_size = 30
+	info.outline_size = 7
 	info.position = Vector3(0.0, CREATURE_HEIGHT + label_lift, 0.0)
 	info.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	info.no_depth_test = false
+	# Never occluded. The capsules made this a positional problem to be solved
+	# by moving slots apart; a readout of the board's state is not something a
+	# body should ever be allowed to hide, so say that instead of arranging
+	# for it not to happen.
+	info.no_depth_test = true
+	# Which side a creature is on used to be its body colour. The sprites carry
+	# their own type hue now, so the side colour moves to the label's outline —
+	# still the first thing the eye sorts by, and it does not fight the art.
+	info.outline_modulate = color
 	holder.add_child(info)
 
 	return holder
