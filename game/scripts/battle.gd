@@ -1,10 +1,14 @@
 extends Node3D
-## Battle scene root — M3's fourth box: the player actually chooses on their
-## own creatures' turns (move, target, whether to Swap, whether to spend a
-## banked Charge) instead of every combatant picking for itself, and the
-## fight now has a real end — one side fully defeated stops the clock and
-## announces a result. The enemy side keeps picking its own move/target
-## exactly as before; only the player's turns pause for input.
+## Battle scene root — the view. Turn order, Guard/Charge bookkeeping and move
+## resolution used to live in here, tangled up with tweens and Label3D writes,
+## which meant the only way to ask "does this line win?" was to boot a window
+## and watch one line at a time. All of that moved to BattleCore
+## (scripts/battle_core.gd), which runs headless; this file now drives it and
+## draws the result. The rules a player sees are the same rules
+## tools/battle_sim.gd searches, by construction rather than by discipline.
+##
+## What stays here: the turn clock, the flash tween, the queue strip, the
+## status labels, and the player's input prompts.
 ##
 ## Input is polled (Input.is_action_just_pressed), not delivered through
 ## _unhandled_input — matching player.gd's own convention, and for the same
@@ -14,8 +18,13 @@ extends Node3D
 ## callback would never see it fire.
 
 const QUEUE_PREVIEW := 6
-# Slow enough to read as discrete turns on a captured clip, not a blur.
-const TURN_INTERVAL := 1.35
+
+## Slow enough to read as discrete turns on a captured clip, not a blur.
+## Exported rather than const because the demo now plays a whole fight to its
+## end instead of a slice of one: at 1.35 the winning line runs past 30
+## seconds, and captures that long coalesce frames (see STATE.md). The demo
+## turns this down; nothing else should.
+@export var turn_interval := 1.35
 ## Lower than tick 6's 2.2 — at the Back slots' distance the tilt-shift blur
 ## spreads a bloomed flash into a soft cloud big enough to swallow that
 ## creature's own InfoLabel (caught in QC, not obvious on paper). A smaller
@@ -32,7 +41,8 @@ const CHIP_COLORS := {
 ## Which creature stands in which slot. build_battle.gd builds the same
 ## table to place and label the capsules; the two files have to stay in
 ## agreement on ids and creature choices, same coupling tick 6 already noted
-## for node names.
+## for node names. tools/battle_sim.gd reads this constant off this script
+## rather than restating it, so a searched fight is this fight.
 const TEAM := {
 	"PlayerFront": {"creature_id": "emberling", "side": "player", "slot": "front"},
 	"PlayerBack": {"creature_id": "rootshell", "side": "player", "slot": "back"},
@@ -47,13 +57,9 @@ const TEAM := {
 @onready var _player_charge_label: Label = $UI/PlayerCharge
 @onready var _enemy_charge_label: Label = $UI/EnemyCharge
 
-var _queue := TurnQueue.new()
 var _db := CreatureDB.new()
-var _types := TypeChart.new()
-var _states: Dictionary = {} # id -> CombatantState
-var _charge := {"player": 0, "enemy": 0}
+var _core: BattleCore
 var _timer := 0.0
-var _battle_over := false
 
 # Player-turn input state. _pending_move is empty ({}) while the player is
 # still choosing a move (or Swap); once set, the next input is a target.
@@ -64,123 +70,53 @@ var _charge_queued := false
 
 
 func _ready() -> void:
-	for id in TEAM:
-		var info: Dictionary = TEAM[id]
-		var data := _db.get_creature(info["creature_id"])
-		var state := CombatantState.new(
-			id, data["display_name"], info["side"], info["slot"], data["type"],
-			float(data["speed"]), data["max_hp"], data["max_guard"], data["moves"])
-		_states[id] = state
-		# Speeds come straight from data now, not a hand-picked ratio — the
-		# roster itself (11/9/14/7) already spreads enough that the queue
-		# visibly reorders instead of ping-ponging.
-		_queue.add_combatant(id, state.display_name, state.side, state.speed)
-
+	_core = BattleCore.new(TEAM, _db)
 	_refresh_strip()
 	_refresh_status_labels()
 	_refresh_charge_labels()
 
 
 func _process(delta: float) -> void:
-	if _battle_over:
+	if _core.battle_over:
 		return
 	if _awaiting_input:
 		_poll_player_input()
 		return
 	_timer += delta
-	if _timer < TURN_INTERVAL:
+	if _timer < turn_interval:
 		return
 	_timer = 0.0
 	_take_turn()
 
 
 func _take_turn() -> void:
-	var actor := _queue.advance()
-	var state: CombatantState = _states[actor.id]
-
-	# Guard regenerates at the start of the owner's own scheduled turn, even
-	# the turn a Broken creature is about to lose — the loop is "sustained
-	# pressure keeps you down," not "one break ends your recovery forever."
-	state.guard = mini(state.max_guard, state.guard + 1)
+	var turn := _core.start_turn()
 
 	_refresh_strip()
-	_flash(actor.id)
+	_flash(turn.actor_id)
 
-	if state.defeated:
-		return
-
-	if state.broken:
-		state.broken = false
-		_log("%s is Broken and loses this turn." % state.display_name)
+	if turn.log_line != "":
+		_log(turn.log_line)
 		_refresh_status_labels()
+	if turn.state.defeated or turn.log_line != "":
 		return
 
-	if state.side == "player":
-		_begin_player_turn(state)
+	if turn.needs_player_input:
+		_begin_player_turn(turn.state)
 		return
 
-	var move_id := state.next_move_id()
-	var move := _db.get_move(move_id)
-	var target := _pick_target(state, move)
-	if target == null:
-		_log("%s has no target left standing." % state.display_name)
-		return
-	_resolve_and_apply(state, target, move, _charge[state.side] > 0)
+	_log(_core.enemy_act(turn.state))
+	_after_action()
 
 
-## Melee can only reach the opposing Front slot (or Back, if Front has
-## fallen); ranged can reach either. The enemy AI aims ranged at Back on
-## purpose so a capture actually shows the 25%-less-damage rule instead of
-## relying on the viewer to trust it exists; the player picks their own
-## ranged target instead (see _poll_target_choice()).
-func _pick_target(attacker: CombatantState, move: Dictionary) -> CombatantState:
-	var enemy_side := "enemy" if attacker.side == "player" else "player"
-	var front: CombatantState = _states.get(enemy_side.capitalize() + "Front")
-	var back: CombatantState = _states.get(enemy_side.capitalize() + "Back")
-
-	if move["category"] == "melee":
-		if front != null and not front.defeated:
-			return front
-		if back != null and not back.defeated:
-			return back
-		return null
-
-	if back != null and not back.defeated:
-		return back
-	if front != null and not front.defeated:
-		return front
-	return null
-
-
-## The only place an attack actually resolves, for both the AI and the
-## player — keeps Charge bookkeeping, Guard/HP application, the log line and
-## the end-of-battle check in one spot instead of duplicated per caller.
-func _resolve_and_apply(attacker: CombatantState, target: CombatantState, move: Dictionary,
-		charge_available: bool) -> void:
-	var effectiveness := _types.effectiveness(attacker.ctype, target.ctype)
-	var result := CombatResolver.resolve(attacker.slot, target, move, effectiveness, charge_available)
-	if charge_available:
-		_charge[attacker.side] -= 1
-	CombatResolver.apply(target, result)
-	if result.breaks_defender:
-		_charge[attacker.side] += 1
-
-	_log(_describe(attacker, target, move, result))
+## Everything the view owes the screen after any resolved action, player's or
+## enemy's. Kept in one place because forgetting one of these three is how a
+## fight ends up looking wrong while being right.
+func _after_action() -> void:
 	_refresh_status_labels()
 	_refresh_charge_labels()
-	_check_battle_over()
-
-
-func _describe(attacker: CombatantState, defender: CombatantState, move: Dictionary,
-		result: CombatResolver.Result) -> String:
-	var verbs := {"weak": "Weak hit!", "resist": "Resisted.", "neutral": "Hit."}
-	var verb: String = verbs[result.effectiveness]
-	var charge_note := " (Charge spent!)" if result.charge_spent else ""
-	var break_note := " %s is Broken!" % defender.display_name if result.breaks_defender else ""
-	return "%s used %s on %s — %s -%d HP, -%d Guard%s%s" % [
-		attacker.display_name, move["display_name"], defender.display_name, verb,
-		result.hp_damage, result.guard_damage, charge_note, break_note,
-	]
+	if _core.battle_over:
+		_announce_result(_core.result_text)
 
 
 ## ---- Player turn: choose a move (or Swap), then a target if the move needs one ----
@@ -197,7 +133,7 @@ func _show_move_prompt() -> void:
 	var state := _pending_state
 	var move_a := _db.get_move(state.move_ids[0])
 	var move_b := _db.get_move(state.move_ids[1])
-	var charge_available: bool = _charge[state.side] > 0
+	var charge_available: bool = _core.charge[state.side] > 0
 	var charge_note := ""
 	if charge_available:
 		charge_note = "   [C] Charge: %s" % ("ON" if _charge_queued else "off")
@@ -210,8 +146,8 @@ func _show_move_prompt() -> void:
 func _show_target_prompt(move: Dictionary) -> void:
 	var state := _pending_state
 	var enemy_side := "enemy" if state.side == "player" else "player"
-	var front: CombatantState = _states.get(enemy_side.capitalize() + "Front")
-	var back: CombatantState = _states.get(enemy_side.capitalize() + "Back")
+	var front: CombatantState = _core.states.get(enemy_side.capitalize() + "Front")
+	var back: CombatantState = _core.states.get(enemy_side.capitalize() + "Back")
 	var options: Array[String] = []
 	if front != null and not front.defeated:
 		options.append("[F] %s (Front)" % front.display_name)
@@ -232,13 +168,15 @@ func _poll_player_input() -> void:
 func _poll_move_choice() -> void:
 	var state := _pending_state
 
-	if Input.is_action_just_pressed("battle_charge") and _charge[state.side] > 0:
+	if Input.is_action_just_pressed("battle_charge") and _core.charge[state.side] > 0:
 		_charge_queued = not _charge_queued
 		_show_move_prompt()
 		return
 
 	if Input.is_action_just_pressed("battle_swap"):
-		_execute_player_swap(state.id)
+		_log(_core.swap(state.id))
+		_refresh_status_labels()
+		_end_player_turn()
 		return
 
 	var move_id := ""
@@ -254,12 +192,14 @@ func _poll_move_choice() -> void:
 		# Melee has no target choice — it hits Front, or Back if Front has
 		# already fallen (design/combat.md's "no free pass" rule) — so it
 		# resolves immediately instead of asking a question with one answer.
-		var target := _pick_target(state, move)
+		var target := _core.pick_target(state, move)
 		if target == null:
 			_log("%s has no target left standing." % state.display_name)
 			_end_player_turn()
 			return
-		_resolve_and_apply(state, target, move, _charge_queued and _charge[state.side] > 0)
+		_log(_core.resolve_and_apply(state, target, move,
+			_charge_queued and _core.charge[state.side] > 0))
+		_after_action()
 		_end_player_turn()
 	else:
 		_pending_move = move
@@ -268,44 +208,21 @@ func _poll_move_choice() -> void:
 
 func _poll_target_choice() -> void:
 	var state := _pending_state
-	var enemy_side := "enemy" if state.side == "player" else "player"
-	var target: CombatantState = null
+	var slot := ""
 	if Input.is_action_just_pressed("battle_target_front"):
-		target = _states.get(enemy_side.capitalize() + "Front")
+		slot = "front"
 	elif Input.is_action_just_pressed("battle_target_back"):
-		target = _states.get(enemy_side.capitalize() + "Back")
+		slot = "back"
 	else:
 		return
 
-	if target == null or target.defeated:
+	var target := _core.pick_target(state, _pending_move, slot)
+	if target == null:
 		return
 
-	_resolve_and_apply(state, target, _pending_move, _charge_queued and _charge[state.side] > 0)
-	_end_player_turn()
-
-
-## Swap trades which creature occupies PlayerFront/PlayerBack — id keys stay
-## slot-shaped (that's what every other lookup in this file assumes), so the
-## swap moves the CombatantState objects between the two dictionary entries
-## and hands the turn queue the swapped-in creature's own speed, so turn
-## order follows the creature rather than staying pinned to the slot it
-## used to stand in.
-func _execute_player_swap(actor_id: String) -> void:
-	var partner_id := "PlayerBack" if actor_id == "PlayerFront" else "PlayerFront"
-	var a: CombatantState = _states[actor_id]
-	var b: CombatantState = _states[partner_id]
-	var a_slot := a.slot
-	a.slot = b.slot
-	b.slot = a_slot
-	_states[actor_id] = b
-	_states[partner_id] = a
-	_queue.rename(actor_id, b.display_name, b.speed)
-	_queue.rename(partner_id, a.display_name, a.speed)
-
-	_log("%s swaps to %s, %s steps up to %s." % [
-		a.display_name, a.slot.capitalize(), b.display_name, b.slot.capitalize(),
-	])
-	_refresh_status_labels()
+	_log(_core.resolve_and_apply(state, target, _pending_move,
+		_charge_queued and _core.charge[state.side] > 0))
+	_after_action()
 	_end_player_turn()
 
 
@@ -317,27 +234,6 @@ func _end_player_turn() -> void:
 	_prompt_label.text = ""
 	_refresh_strip()
 	_timer = 0.0
-
-
-func _is_side_defeated(side: String) -> bool:
-	for id in _states:
-		var s: CombatantState = _states[id]
-		if s.side == side and not s.defeated:
-			return false
-	return true
-
-
-## A battle that can be lost or won needs an actual end — before this tick
-## nothing ever checked, so a fully-defeated side just sat there feeding
-## "no target left standing" log lines forever. Checked after every attack;
-## stops the turn clock and freezes input the instant one side is wiped.
-func _check_battle_over() -> void:
-	if _is_side_defeated("enemy"):
-		_battle_over = true
-		_announce_result("Player wins!")
-	elif _is_side_defeated("player"):
-		_battle_over = true
-		_announce_result("Enemy wins!")
 
 
 func _announce_result(text: String) -> void:
@@ -352,7 +248,7 @@ func _log(text: String) -> void:
 func _refresh_strip() -> void:
 	for child in _strip.get_children():
 		child.queue_free()
-	var upcoming := _queue.preview(QUEUE_PREVIEW)
+	var upcoming := _core.queue.preview(QUEUE_PREVIEW)
 	for i in upcoming.size():
 		_strip.add_child(_make_chip(upcoming[i], i == 0))
 
@@ -411,8 +307,8 @@ func _flash(id: String) -> void:
 ## viewer needs to check the combat log's claims against without reading
 ## combat_resolver.gd.
 func _refresh_status_labels() -> void:
-	for id in _states:
-		var state: CombatantState = _states[id]
+	for id in _core.states:
+		var state: CombatantState = _core.states[id]
 		var holder := _creatures.get_node_or_null(id)
 		if holder == null:
 			continue
@@ -431,5 +327,5 @@ func _refresh_status_labels() -> void:
 
 
 func _refresh_charge_labels() -> void:
-	_player_charge_label.text = "Player Charge: %d" % _charge["player"]
-	_enemy_charge_label.text = "Enemy Charge: %d" % _charge["enemy"]
+	_player_charge_label.text = "Player Charge: %d" % _core.charge["player"]
+	_enemy_charge_label.text = "Enemy Charge: %d" % _core.charge["enemy"]

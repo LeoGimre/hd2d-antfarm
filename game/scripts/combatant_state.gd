@@ -51,3 +51,18 @@ func next_move_id() -> String:
 	var chosen: String = move_ids[0] if _next_is_melee else move_ids[1]
 	_next_is_melee = not _next_is_melee
 	return chosen
+
+
+## A deep copy for BattleCore.clone(), so a search can play a line out and
+## back out of it. `_next_is_melee` has to travel with the rest: it is the
+## enemy policy's entire memory, and a copy that resets it plays a different
+## fight from the one being searched.
+func clone() -> CombatantState:
+	var copy := CombatantState.new(
+		id, display_name, side, slot, ctype, speed, max_hp, max_guard, move_ids)
+	copy.hp = hp
+	copy.guard = guard
+	copy.broken = broken
+	copy.defeated = defeated
+	copy._next_is_melee = _next_is_melee
+	return copy

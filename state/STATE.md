@@ -15,33 +15,31 @@ tick 9 has had an engine.** Prefer building, checking or correcting over writing
 document.
 
 ## Current milestone
-M3 — First blood. Boxes 1–3 done. Box 4 (a battle that can be lost badly, won well) is **solved on
-paper but not in the engine**; box 5 (combat logic under unit test) is untouched.
+M3 — First blood. **Four of five boxes done**; the fourth closed in the merged branch's tick 10,
+in the engine, on the *unpaired* roster. Box 5 (combat logic under unit test) is untouched, and
+`design/combat_tests.md` plus the 74 generated cases in `design/proto/combat_cases.json` are
+waiting for it.
 
 ## Current focus
-**Land the re-pairing from `design/first_blood_balance.md`, in-engine.** Tick 10 searched the proof
-battle exhaustively off-engine and found that ticks 8 and 9 were chasing the wrong variable: no
-stat and no resolver constant needs changing. The four creatures are paired onto the wrong sides.
-The type chart is a four-cycle and the roster was split *along* it, so the player's only type
-advantage points at Galewing — already resisted against the player's survivor, so the enemy it
-least needs to kill. Every explainable line loses; random play wins 0.4%.
+**The engine works here now, and forty-four ticks of design are waiting to land.** Work the queue
+below in order. Start with item 1, because everything after it reads the encounter data.
 
-The fix: **Player Rootshell (Front) + Tidalpup (Back) vs Enemy Emberling (Front) + Galewing
-(Back).** Every creature then has exactly one correct target and every correct target is diagonal,
-so reaching it goes through the Front/Back reach rule. Naive loses; correct targeting wins with 34
-HP left; correct targeting that never spends a banked Charge *loses by 10 HP* — the first time
-Break/Charge has been load-bearing here. Skill gradient 100/80/59/36/8% as decisions are randomised.
+**The re-pairing is still the recommendation, and it is not what the engine ships.** The merged
+branch closed M3's fourth box on the *unpaired* roster by finding a seven-decision winning line
+exhaustively. That result is real and it is not the same claim as this line's: a fight can have a
+winning line and still have no winning *plan*, and on the unpaired roster no explainable policy
+wins and random play wins 0.4%. `design/first_blood_balance.md` prescribes **Player Rootshell
+(Front) + Tidalpup (Back) vs Enemy Emberling (Front) + Galewing (Back)**, where every correct
+target is diagonal, naive loses, correct targeting wins, and hoarding Charges loses by 10 HP.
+Landing it is item 2 of the queue. Do not treat box 4 as reopened — it is closed; this improves
+the fight it closed with.
 
-Next tick with an engine, in order: (1) move the encounter into `game/data/encounters.json` —
-the format is already decided in `design/encounters.md`, including the finding that
-`build_battle.gd`'s copy of `TEAM` can just be deleted rather than replaced; (2) apply the new
-pairing;
-(3) re-run both lines and confirm the model (the doc lists the exact `battle_*` input sequences —
-6 decisions to win, 3 to lose); (4) drop `TURN_INTERVAL` to ~0.85 so the 16-event fight fits a
-12–16s capture; (5) then tick box 4. Box 5 comes after, and its plan is decided in
-`design/combat_tests.md` — note the constraint it turns on: **the loop may not edit
-`farm/verify.sh`**, so tests go in `game/tests/`, run via a loop-owned `farm/test.sh`, and are a
-tick-ritual discipline rather than a gate until Leo wires them in.
+**The two searches agree exactly** (tick 54). `battle_sim.gd` (GDScript, in-engine, exhaustive)
+and `design/proto/combat_solver.py --no-capture` (Python, off-engine) both report no win at six
+decisions and a win at seven on the unpaired roster, and produce the same line move for move:
+Emberling melee, **Rootshell ranged at the enemy Back slot**, Emberling melee, Rootshell melee ×3,
+Rootshell melee +Charge. Two implementations, two sessions, one answer. Anything that makes them
+disagree is a bug in one of them, and finding out which is now a five-minute job.
 
 ## Queued for the next engine tick
 Four design documents are waiting, in this order. None needs re-deciding; all need building.
@@ -100,14 +98,59 @@ says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop can
 has no allowlisted way to invoke a shell script it just created.)
 
 ## Open blockers
-**No Godot in the container.** `verify.sh` fails at the smoke stage with exit 127 —
-`/Applications/Godot.app/...` does not exist here and `curl`/`wget` are denied, so it cannot be
-installed. If a tick sees exit 127, it is running in the remote container and not on Leo's Mac:
-**nothing in `game/` may be committed.** Do design, devlog or `site/` work instead; both remaining
-M3 boxes have real off-engine work available (see above). Note the first two verify stages pass
-vacuously when the binary is missing — only the smoke stage catches it.
+- **`farm/publish.py` cannot run in a cloud container.** It needs `AWS_ENDPOINT_URL_S3` and keys
+  from `farm/.env`, which is gitignored and so does not exist in a fresh container. A cloud tick's
+  devlog entry is text-only even when the clip is fine. Fix is credentials in the environment, not
+  code.
+- ~~**No Godot in the container.**~~ **Solved by the merge (tick 54).**
+  `.claude/hooks/session-start.sh` installs Godot (version read from `project.godot`), ffmpeg and
+  `mesa-vulkan-drivers`; lavapipe gives software Vulkan so Forward+ and its depth of field still
+  render, and `farm/capture.sh` re-execs under Xvfb when `DISPLAY` is unset. **The hook only runs
+  at session start**, and it was committed without the executable bit — fixed in tick 54, but if a
+  session ever finds `GODOT_BIN` unset, run `./.claude/hooks/session-start.sh` by hand and export
+  what it writes. Rendering costs ~390 ms/frame, so a 24s clip is a ~6 minute render: check things
+  headlessly first.
+- The hook still needs registering in `.claude/settings.json`, which is frozen by the pre-commit
+  hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **Two lines of work merged at tick 54.** A parallel session branched from tick 9, taught the farm
+  to run in a cloud container, and closed M3's fourth box in the engine. Both branches numbered
+  their next tick 10, so `JOURNAL.jsonl` has two tick-10 rows (`0011-search-the-line` from theirs,
+  `0011-solving-first-blood` from this line) sitting next to each other. Renumbering 44 published
+  devlog URLs to tidy a counter would trade a real asset for a cosmetic one, so the collision
+  stays and this note explains it. This line's numbering continues.
+
+### From the merged branch (its tick 9 and 10)
+- **The fight's rules live outside the scene** (tick 10): `BattleCore` owns states, turn queue,
+  Charge bank and turn sequencing; `battle.gd` is a view over it (turn clock, flash tween, queue
+  strip, prompts). `CombatantState.clone()`/`TurnQueue.clone()` exist so a search can branch.
+  `game/tools/battle_sim.gd` runs `--naive`, `--search` and `--demo` off that core and reads the
+  `TEAM` table off `battle.gd` rather than restating it. **Anything that changes the fight's rules
+  belongs in `battle_core.gd`, not `battle.gd`** — if the scene and the sim disagree the sim is
+  worthless.
+- **The proof battle is settled** (tick 10): the naive line loses; no six-decision player line
+  wins; a seven-decision one does. It hinges on Rootshell's *ranged* Spore Cloud reaching Galewing
+  in the enemy Back slot (the board's only real type edge, unreachable by melee), breaking it, and
+  spending the banked Charge on the kill six decisions later. `battle_demo.gd`'s `LINE` const is
+  that sequence; `battle_sim.gd --demo` replays it and must keep printing "Player wins!".
+- **Never synthesize input by pressing and releasing inside one frame** (tick 10):
+  `Input.is_action_just_pressed()` only asks whether the press happened during the current frame,
+  not whether the key is still down, so releasing immediately does not un-arm it and any second
+  poll that frame sees the press again. Cost a whole capture to find — the Charge toggle fired
+  twice and landed back off. `battle_demo.gd` now presses, lets the engine deliver it, and releases
+  at the top of the next frame. Do not re-add a manual `_battle._process(0.0)` call.
+- **Run the demo headless before rendering it**: `godot --headless --path game --fixed-fps 30
+  --quit-after 900 res://tools/demos/battle_demo.tscn` echoes the combat log to stdout. Two seconds
+  instead of a six-minute render. It cannot show the killing blow's own line (the result message
+  overwrites it in the same frame) — use `battle_sim.gd --demo` for the full sequence.
+- `farm/capture.sh`'s Movie Maker path drops/coalesces frames on long captures — tick 10's 24s
+  capture came out at exactly 720 frames, so the ceiling is higher than the 12–16s previously
+  assumed, but check `ffprobe` frame count when going long.
+- `battle.gd`'s `turn_interval` is exported so the demo can turn it down (0.7) to fit a whole fight
+  in one capture. Nothing else should change it.
+
+### From this line
 - **Design questions about a screen get drawn, not written** (tick 53). `design/proto/battle_hud.py`
   renders the board from live solver state; run it with no arguments to redo every frame. It
   corrected two layout decisions within an hour that prose had not caught in two ticks — an Offer
@@ -441,4 +484,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-53
+54
