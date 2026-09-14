@@ -391,8 +391,8 @@
       "expect_breaks": false
     },
     {
-      "guard_damage": 3,
-      "defender_guard": 3,
+      "guard_damage": 2,
+      "defender_guard": 1,
       "defender_broken": false,
       "expect_breaks": true
     }

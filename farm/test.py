@@ -17,7 +17,7 @@ where `./x.sh` does not. A runner nobody can run is worse than no runner.
 Stages skip loudly rather than silently. A skipped stage is a check that is not
 happening, and the output says so every time.
 """
-import os, shutil, subprocess, sys
+import glob, os, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GREEN, RED, DIM, OFF = "\033[32m", "\033[31m", "\033[2m", "\033[0m"
@@ -47,11 +47,25 @@ def skip(name, why):
 
 
 def godot_binary():
-    """verify.sh's convention, plus whatever is on PATH."""
-    cand = os.environ.get("GODOT_BIN") or "/Applications/Godot.app/Contents/MacOS/Godot"
-    if os.path.exists(cand) and os.access(cand, os.X_OK):
-        return cand
+    """verify.sh's convention, plus the cloud container's, plus PATH.
+
+    .claude/hooks/session-start.sh installs into /opt/godot/<version>/ and
+    exports GODOT_BIN into the session environment — but only at session start,
+    so a session that predates the hook (or runs this script from somewhere the
+    export did not reach) has the engine on disk and no variable pointing at it.
+    Looking is cheaper than skipping a whole stage, and a skipped stage is a
+    check that is not happening."""
+    for cand in _candidates():
+        if cand and os.path.exists(cand) and os.access(cand, os.X_OK):
+            return cand
     return shutil.which("godot")
+
+
+def _candidates():
+    yield os.environ.get("GODOT_BIN")
+    yield "/Applications/Godot.app/Contents/MacOS/Godot"
+    for d in sorted(glob.glob("/opt/godot/*"), reverse=True):
+        yield from sorted(glob.glob(os.path.join(d, "Godot_v*_linux.x86_64")))
 
 
 def main():
@@ -73,8 +87,10 @@ def main():
         skip("cross-file agreements", "farm/agreements.py is missing")
 
     # The GDScript suite design/combat_tests.md plans. Two things have to exist:
-    # the tests, and an engine to run them in. Neither does yet, and the skip
-    # message says which is missing rather than reporting a pass.
+    # the tests, and an engine to run them in. Both do as of tick 57 — but the
+    # skips stay, because a Mac with no cloud hook and a container whose hook
+    # has not run are both real, and the message has to say which is missing
+    # rather than report a pass.
     runner = os.path.join(ROOT, "game", "tests", "run_tests.gd")
     godot = godot_binary()
     if not os.path.exists(runner):

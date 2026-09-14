@@ -62,8 +62,19 @@ def guard_cases():
         out.append({"effectiveness": eff, "expect_guard_damage": gd,
                     "expect_heal": cs.RESIST_HEAL if eff == "resist" else 0})
     breaks = []
+    # Every guard_damage here must be one the type chart can actually produce.
+    # This list used to carry (3, 3) — an "exactly equal breaks" case at a value
+    # no hit in the game does, since GUARD_DAMAGE is {weak: 2, neutral: 1,
+    # resist: 0}. The off-engine model never noticed because it took the number
+    # directly; the GDScript suite drives resolve() through an effectiveness and
+    # could not express the case at all. A case the game cannot reach is not
+    # coverage, so it is gone and (2, 1) — overkill, which breaks — is in its
+    # place. The assert keeps the next one from being added by hand.
     for gd, guard, broken in [(1, 1, False), (1, 2, False), (2, 2, False), (2, 3, False),
-                              (0, 1, False), (1, 0, False), (2, 1, True), (3, 3, False)]:
+                              (0, 1, False), (1, 0, False), (2, 1, True), (2, 1, False)]:
+        assert gd in cs.GUARD_DAMAGE.values(), (
+            "breaks_defender case does %d Guard damage, which no effectiveness "
+            "produces: %s" % (gd, cs.GUARD_DAMAGE))
         breaks.append({"guard_damage": gd, "defender_guard": guard,
                        "defender_broken": broken,
                        "expect_breaks": (not broken) and guard > 0 and gd >= guard})
