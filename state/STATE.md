@@ -42,14 +42,18 @@ Rootshell melee +Charge. Two implementations, two sessions, one answer. Anything
 disagree is a bug in one of them, and finding out which is now a five-minute job.
 
 ## Queued for the next engine tick
-Four design documents are waiting, in this order. None needs re-deciding; all need building.
-1. `design/encounters.md` — move the roster to `game/data/encounters.json`, delete
-   `build_battle.gd`'s `TEAM` copy outright. **The file is written**:
-   `design/proto/encounters.json` (ids `kiln_duel`, `first_blood`, `the_ridge`, `first_blood_unpaired`),
-   validated by `agreements.py` and already read by the solver. Copy it across and write the
-   loader.
-2. `design/first_blood_balance.md` — apply the re-pairing, confirm both scripted lines, tick M3's
-   fourth box. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
+None of these needs re-deciding; all need building. Work them in order.
+
+1. ~~`design/encounters.md` — move the roster to `game/data/encounters.json`.~~ **Done, tick 55.**
+   `EncounterDB` reads it, `battle.gd` has an exported `encounter_id`, `build_battle.gd` takes one
+   on the command line, and both `TEAM` tables are deleted. `the_ridge` stays in
+   `design/proto/encounters.json` only until Ashmoth and Ridgewalk have stats in
+   `game/data/creatures.json`; an agreement check will say so the moment they do.
+2. `design/first_blood_balance.md` — apply the re-pairing. **This is now one line**: set
+   `encounter_id` to `first_blood` in `build_battle.gd`/`battle.gd` and rebuild. Then re-script
+   `battle_demo.gd`'s `LINE` (the re-paired board is a different tree, so the seven-decision line
+   does not transfer) and confirm against `battle_sim.gd --search`. Box 4 is already ticked; this
+   improves the fight it was ticked with, it does not reopen it. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
    `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (deleting that clause), `FRONT_DAMAGE_BONUS` 2.0 → 1.0.
    Validated on **both** encounters: exactly one of seven scripted lines wins and it is the
    correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
@@ -92,7 +96,7 @@ Four design documents are waiting, in this order. None needs re-deciding; all ne
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check and the twenty-one cross-file agreements, and *loudly skips* the GDScript suite until
+self-check and the twenty-two cross-file agreements, and *loudly skips* the GDScript suite until
 `game/tests/run_tests.gd` exists. A skipped stage is a check that is not happening — the summary
 says so. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
@@ -114,6 +118,16 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **Prove a refactor inert with `battle_sim.gd`'s node counts** (tick 55). The iterative-deepening
+  search prints how many nodes it expanded at each depth, and that is a fingerprint of the rules
+  and the board together. `4, 20, 93, 457, 1675, 4701, WIN at 7 in 78` before and after means no
+  rule moved. Much stronger than a green gate and it costs one command. Corollary: a change that
+  is *meant* to alter the fight cannot be checked this way, so do not land one in the same commit.
+- **Encounters live in `game/data/encounters.json`** (tick 55). Node names are derived
+  (`side.capitalize() + slot.capitalize()`), never listed. `battle.gd`'s `encounter_id` is exported
+  and always set explicitly by the builder — Godot does not serialise an exported property equal
+  to the script's default, so a defaulted scene would store nothing and follow any later change to
+  that default.
 - **Two lines of work merged at tick 54.** A parallel session branched from tick 9, taught the farm
   to run in a cloud container, and closed M3's fourth box in the engine. Both branches numbered
   their next tick 10, so `JOURNAL.jsonl` has two tick-10 rows (`0011-search-the-line` from theirs,
@@ -484,4 +498,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-54
+55
