@@ -16,14 +16,18 @@ extends SceneTree
 ## this suite keeps meaning what it meant, instead of a hundred hand-written
 ## expectations all going stale at once.
 ##
-## Scope is tier 1 of that document — the rules. The classes it covers were
-## built to be testable without a scene: CombatResolver is pure static methods,
-## TypeChart and CreatureDB parse a file and answer lookups, TurnQueue tracks
-## order and nothing else. Tiers 2 and 3 (whole-fight outcomes and the golden
-## trace) need a policy driver in GDScript and are NOT run here. They are
-## reported as skipped rather than omitted, because the failure this suite is
-## most likely to cause is somebody reading a green line and believing a check
-## ran.
+## All three tiers of that document run here. Tier 1 is the rules, against
+## classes built to be testable without a scene: CombatResolver is pure static
+## methods, TypeChart and CreatureDB parse a file and answer lookups, TurnQueue
+## tracks order and nothing else. Tier 2 plays seven scripted lines to the end
+## of the fight (see PolicyBattery) and checks the winner and the decision count
+## against what the model produced. Tier 3 replays one whole fight event for
+## event.
+##
+## A case naming an encounter the engine cannot load — the_ridge, whose
+## creatures are designed but unstatted in game/data — is reported as skipped
+## rather than omitted, because the failure this suite is most likely to cause
+## is somebody reading a green line and believing a check ran.
 
 const CASES := "res://../design/proto/combat_cases.json"
 
@@ -46,14 +50,14 @@ func _initialize() -> void:
 	_type_chart(cases)
 	_turn_queue(cases)
 	_apply_rules()
+	_outcomes(cases)
+	_golden_trace(cases)
 
 	print("")
-	for name in cases:
-		if name in ["outcomes", "golden_trace"]:
-			print("tests: SKIPPED %s (%d cases) — needs a policy driver in GDScript; "
-				% [name, _case_count(cases[name])]
-				+ "covered off-engine by design/proto/combat_solver.py only")
-	print("")
+	for note in _skips:
+		print("tests: SKIPPED %s" % note)
+	if not _skips.is_empty():
+		print("")
 	if _failed == 0:
 		print("tests: %d passed" % _passed)
 	else:
@@ -61,8 +65,13 @@ func _initialize() -> void:
 	quit(1 if _failed > 0 else 0)
 
 
-func _case_count(section: Variant) -> int:
-	return section.size() if section is Array else 1
+var _skips: Array[String] = []
+
+
+func _playable(encounter_id: String, encounters: EncounterDB) -> bool:
+	if encounters.has(encounter_id):
+		return true
+	return false
 
 
 func _load_cases() -> Dictionary:
@@ -209,6 +218,148 @@ func _apply_rules() -> void:
 	CombatResolver.apply(frail, big)
 	_eq("HP clamps at 0 rather than going negative", frail.hp, 0)
 	_eq("defeated is set exactly when HP reaches 0", frail.defeated, true)
+
+
+## ---- Tier 2: whole fights ----
+
+## Plays each scripted line to the end and checks who won and how many decisions
+## it took. These are the assertions that keep M3's fourth box true once it is
+## ticked: naive must lose, correct targeting must win, and correct targeting
+## that hoards its Charges must lose — the last one being what separates "the
+## Break/Charge economy matters" from "it exists".
+func _outcomes(cases: Dictionary) -> void:
+	_section("outcomes")
+	var encounters := EncounterDB.new()
+	var db := CreatureDB.new()
+	var unplayable := {}
+	for c in cases["outcomes"]:
+		var eid: String = c["encounter"]
+		if not encounters.has(eid):
+			unplayable[eid] = unplayable.get(eid, 0) + 1
+			continue
+		var core := BattleCore.new(encounters.team(eid, db), db)
+		var played := _play(core, c["line"])
+		_eq("%s / %s winner" % [eid, c["line"]], played["winner"], c["expect_winner"])
+		_eq("%s / %s decisions" % [eid, c["line"]], played["decisions"],
+			c["expect_player_decisions"])
+	for eid in unplayable:
+		_skips.append("%d outcome cases for %s — it is not in game/data/encounters.json "
+			% [unplayable[eid], eid]
+			+ "(its creatures have no stats there yet), so the engine cannot play it")
+
+
+const MAX_TURNS := 400
+
+
+## The driver, matching combat_solver.py's play(): run the fight forward, hand
+## every player turn to the policy, and fall back to a plain melee if the policy
+## asks for something illegal — which still costs the decision, because the
+## model counts it.
+func _play(core: BattleCore, policy: String, events: Array = []) -> Dictionary:
+	var db := CreatureDB.new()
+	var decisions := 0
+	var turns := 0
+	while not core.battle_over and turns < MAX_TURNS:
+		turns += 1
+		var turn: BattleCore.TurnStart = core.start_turn()
+		if turn.log_line != "":
+			events.append({"kind": "skip", "who": turn.state.display_name})
+			continue
+		if turn.state == null or turn.state.defeated:
+			continue
+		if not turn.needs_player_input:
+			_record(core, events, turn.state, core.enemy_act(turn.state))
+			continue
+
+		var action := PolicyBattery.choose(policy, core, turn.state, decisions)
+		decisions += 1
+		if action["kind"] == "swap":
+			core.swap(turn.state.id)
+			continue
+		var move: Dictionary = db.get_move(
+			turn.state.move_ids[0] if action["melee"] else turn.state.move_ids[1])
+		var target := core.pick_target(turn.state, move, action["slot"])
+		if target == null:
+			move = db.get_move(turn.state.move_ids[0])
+			target = core.pick_target(turn.state, move)
+		if target == null:
+			break
+		var charge: bool = action["charge"] and core.charge[turn.state.side] > 0
+		_record(core, events, turn.state, core.resolve_and_apply(
+			turn.state, target, move, charge), target, move)
+	var winner := ""
+	if core.is_side_defeated("enemy"):
+		winner = "player"
+	elif core.is_side_defeated("player"):
+		winner = "enemy"
+	return {"winner": winner, "decisions": decisions, "turns": turns}
+
+
+## resolve_and_apply() returns the log line, not the Result, so the structured
+## event is rebuilt from the states afterwards. Only the fields both the model
+## and the engine can produce are recorded — see the note on STRUCTURED in
+## combat_solver.py about why this is compared instead of the format string.
+func _record(core: BattleCore, events: Array, actor: CombatantState, line: String,
+		target: CombatantState = null, move: Dictionary = {}) -> void:
+	if target == null:
+		# An enemy turn: recover the defender from the log line it produced.
+		for id in core.states:
+			var s: CombatantState = core.states[id]
+			if s.side != actor.side and line.contains(" on %s " % s.display_name):
+				target = s
+				break
+	if target == null:
+		return
+	events.append({
+		"kind": "attack",
+		"attacker": actor.display_name,
+		"move": move.get("display_name", _move_name_from(line)),
+		"defender": target.display_name,
+		"hp": target.hp, "guard": target.guard,
+		"breaks": line.contains("is Broken!"),
+		"charge_spent": line.contains("(Charge spent!)"),
+	})
+
+
+func _move_name_from(line: String) -> String:
+	var a := line.find(" used ")
+	var b := line.find(" on ")
+	return line.substr(a + 6, b - a - 6) if a >= 0 and b > a else ""
+
+
+## ---- Tier 3: one whole fight, event for event ----
+
+func _golden_trace(cases: Dictionary) -> void:
+	_section("golden trace")
+	var spec: Dictionary = cases["golden_trace"]
+	var encounters := EncounterDB.new()
+	if not encounters.has(spec["encounter"]):
+		_skips.append("the golden trace — %s is not in game/data/encounters.json" % spec["encounter"])
+		return
+	var db := CreatureDB.new()
+	var core := BattleCore.new(encounters.team(spec["encounter"], db), db)
+	var events: Array = []
+	var played := _play(core, spec["policy"], events)
+	_eq("winner", played["winner"], spec["winner"])
+	_eq("player decisions", played["decisions"], spec["player_decisions"])
+
+	var want: Array = spec["structured_events"]
+	_eq("event count", events.size(), want.size())
+	for i in range(mini(events.size(), want.size())):
+		var got: Dictionary = events[i]
+		var exp: Dictionary = want[i]
+		var where := "event %d" % (i + 1)
+		_eq("%s kind" % where, got["kind"], exp["kind"])
+		if exp["kind"] == "skip":
+			_eq("%s who" % where, got["who"], exp["who"])
+			continue
+		_eq("%s attacker" % where, got["attacker"], exp["attacker"])
+		_eq("%s move" % where, got["move"], exp["move"])
+		_eq("%s defender" % where, got["defender"], exp["defender"])
+		_eq("%s defender HP after" % where, got["hp"], exp["defender_hp"])
+		_eq("%s defender Guard after" % where, got["guard"], exp["defender_guard"])
+		_eq("%s breaks" % where, got["breaks"], exp["breaks"])
+		_eq("%s charge spent" % where, got["charge_spent"], exp["charge_spent"])
 
 
 func _dummy(slot: String, max_hp: int, max_guard: int) -> CombatantState:

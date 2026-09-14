@@ -30,7 +30,7 @@ building it.
 - [x] Battle scene with turn order and a readable state
 - [x] Four creatures and enough moves to make a choice matter
 - [x] A battle that can be lost by playing badly and won by playing well
-- [ ] Combat logic under unit test
+- [x] Combat logic under unit test
 
 ## M4 — Creature systems
 - [ ] Creatures, moves and types fully data-driven — adding one is a data edit

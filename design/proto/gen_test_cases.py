@@ -122,9 +122,19 @@ def golden_trace(encounter=None, policy="typed"):
     was meant, commit. A golden trace nobody reads the diff of is worthless."""
     cs.set_encounter(encounter or cs.DEFAULT_ENCOUNTER)
     log = []
-    w, s, n = cs.play(cs.POLICIES[policy][0], log)
+    cs.STRUCTURED = []
+    try:
+        w, s, n = cs.play(cs.POLICIES[policy][0], log)
+        structured = cs.STRUCTURED
+    finally:
+        cs.STRUCTURED = None
+    # Both forms of the same events. `events` is for a human reading the diff;
+    # `structured_events` is what game/tests/run_tests.gd compares, because
+    # making GDScript reproduce a Python format string character for character
+    # would couple the suite to the formatting rather than to the fight.
     return {"encounter": encounter or cs.DEFAULT_ENCOUNTER, "policy": policy, "winner": w,
-            "player_decisions": n, "events": [l.strip() for l in log]}
+            "player_decisions": n, "events": [l.strip() for l in log],
+            "structured_events": structured}
 
 
 def build():

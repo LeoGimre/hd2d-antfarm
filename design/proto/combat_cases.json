@@ -632,6 +632,171 @@
       "Emberling is Broken and loses this turn.",
       "Rootshell  Spore Cloud  -> Galewing   weak     - 9 HP -2 Guard CHARGE BREAK  [Galewing hp=0 guard=0]",
       "Tidalpup   Tide Slam    -> Emberling  weak     -12 HP -2 Guard CHARGE BREAK  [Emberling hp=0 guard=0]"
+    ],
+    "structured_events": [
+      {
+        "kind": "attack",
+        "attacker": "Galewing",
+        "move": "Gale Claw",
+        "defender": "Rootshell",
+        "effectiveness": "resist",
+        "hp_damage": 8,
+        "guard_damage": 0,
+        "charge_spent": false,
+        "breaks": false,
+        "defender_hp": 30,
+        "defender_guard": 3
+      },
+      {
+        "kind": "attack",
+        "attacker": "Emberling",
+        "move": "Ember Bite",
+        "defender": "Rootshell",
+        "effectiveness": "weak",
+        "hp_damage": 10,
+        "guard_damage": 2,
+        "charge_spent": false,
+        "breaks": false,
+        "defender_hp": 20,
+        "defender_guard": 1
+      },
+      {
+        "kind": "attack",
+        "attacker": "Tidalpup",
+        "move": "Tide Slam",
+        "defender": "Emberling",
+        "effectiveness": "weak",
+        "hp_damage": 8,
+        "guard_damage": 2,
+        "charge_spent": false,
+        "breaks": true,
+        "defender_hp": 20,
+        "defender_guard": 0
+      },
+      {
+        "kind": "attack",
+        "attacker": "Rootshell",
+        "move": "Spore Cloud",
+        "defender": "Galewing",
+        "effectiveness": "weak",
+        "hp_damage": 9,
+        "guard_damage": 2,
+        "charge_spent": true,
+        "breaks": true,
+        "defender_hp": 15,
+        "defender_guard": 0
+      },
+      {
+        "kind": "skip",
+        "who": "Galewing"
+      },
+      {
+        "kind": "skip",
+        "who": "Emberling"
+      },
+      {
+        "kind": "attack",
+        "attacker": "Galewing",
+        "move": "Windburst",
+        "defender": "Tidalpup",
+        "effectiveness": "weak",
+        "hp_damage": 5,
+        "guard_damage": 2,
+        "charge_spent": false,
+        "breaks": true,
+        "defender_hp": 27,
+        "defender_guard": 0
+      },
+      {
+        "kind": "skip",
+        "who": "Tidalpup"
+      },
+      {
+        "kind": "attack",
+        "attacker": "Emberling",
+        "move": "Cinder Spray",
+        "defender": "Tidalpup",
+        "effectiveness": "resist",
+        "hp_damage": 9,
+        "guard_damage": 0,
+        "charge_spent": true,
+        "breaks": false,
+        "defender_hp": 20,
+        "defender_guard": 1
+      },
+      {
+        "kind": "attack",
+        "attacker": "Rootshell",
+        "move": "Spore Cloud",
+        "defender": "Galewing",
+        "effectiveness": "weak",
+        "hp_damage": 9,
+        "guard_damage": 2,
+        "charge_spent": true,
+        "breaks": true,
+        "defender_hp": 6,
+        "defender_guard": 0
+      },
+      {
+        "kind": "skip",
+        "who": "Galewing"
+      },
+      {
+        "kind": "attack",
+        "attacker": "Tidalpup",
+        "move": "Tide Slam",
+        "defender": "Emberling",
+        "effectiveness": "weak",
+        "hp_damage": 12,
+        "guard_damage": 2,
+        "charge_spent": true,
+        "breaks": true,
+        "defender_hp": 8,
+        "defender_guard": 0
+      },
+      {
+        "kind": "attack",
+        "attacker": "Galewing",
+        "move": "Gale Claw",
+        "defender": "Rootshell",
+        "effectiveness": "resist",
+        "hp_damage": 8,
+        "guard_damage": 0,
+        "charge_spent": false,
+        "breaks": false,
+        "defender_hp": 14,
+        "defender_guard": 3
+      },
+      {
+        "kind": "skip",
+        "who": "Emberling"
+      },
+      {
+        "kind": "attack",
+        "attacker": "Rootshell",
+        "move": "Spore Cloud",
+        "defender": "Galewing",
+        "effectiveness": "weak",
+        "hp_damage": 9,
+        "guard_damage": 2,
+        "charge_spent": true,
+        "breaks": true,
+        "defender_hp": 0,
+        "defender_guard": 0
+      },
+      {
+        "kind": "attack",
+        "attacker": "Tidalpup",
+        "move": "Tide Slam",
+        "defender": "Emberling",
+        "effectiveness": "weak",
+        "hp_damage": 12,
+        "guard_damage": 2,
+        "charge_spent": true,
+        "breaks": true,
+        "defender_hp": 0,
+        "defender_guard": 0
+      }
     ]
   }
 }

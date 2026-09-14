@@ -287,8 +287,27 @@ def next_move(cs, i):
     return MOVES[CREATURES[cid]["moves"][0 if nm else 1]]
 
 
+# When this is a list, every logged event is also appended to it as a dict.
+# The strings above are for a human reading a diff; game/tests/run_tests.gd
+# compares these instead, because asking GDScript to reproduce a Python format
+# string character for character couples the suite to the wrong thing.
+STRUCTURED = None
+
+
+def _record(event):
+    if STRUCTURED is not None:
+        STRUCTURED.append(event)
+
+
 def describe(cs, ai, di, move, info):
     eff, hp_damage, gdmg, breaks, charged = info
+    _record({"kind": "attack",
+             "attacker": CREATURES[cs[ai][0]]["display_name"],
+             "move": move["display_name"],
+             "defender": CREATURES[cs[di][0]]["display_name"],
+             "effectiveness": eff, "hp_damage": hp_damage, "guard_damage": gdmg,
+             "charge_spent": bool(charged), "breaks": bool(breaks),
+             "defender_hp": cs[di][2], "defender_guard": cs[di][3]})
     return "%-10s %-12s -> %-10s %-8s -%2d HP -%d Guard%s%s  [%s hp=%d guard=%d]" % (
         CREATURES[cs[ai][0]]["display_name"], move["display_name"],
         CREATURES[cs[di][0]]["display_name"], eff, hp_damage, gdmg,
@@ -312,6 +331,7 @@ def run_to_player_choice(s, log=None, limit=400):
         if broken:
             cs[i] = (cid, slot, hp, guard, False, dead, nm)
             if log is not None:
+                _record({"kind": "skip", "who": CREATURES[cid]["display_name"]})
                 log.append("%s is Broken and loses this turn." % CREATURES[cid]["display_name"])
             continue
         if side_of(i) == "player":
