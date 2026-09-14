@@ -23,10 +23,14 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+GAME_TOOLS = os.path.join(HERE, "..", "..", "game", "tools")
+sys.path.insert(0, GAME_TOOLS)
+
 import combat_solver as S            # noqa: E402
-import creature_forge as F           # noqa: E402
+import creature_forge as F           # noqa: E402  (game/tools/, ported at tick 60)
 
 OUT = os.environ.get("HUD_OUT", os.path.join(HERE, "mockups"))
+SPRITES = os.path.join(HERE, "..", "..", "game", "assets", "sprites", "creatures")
 
 W, H = 360, 200                      # 16:9-ish at pixel-art scale
 SCALE = 3
@@ -167,7 +171,7 @@ def place(cid, side, slot):
 
 def sprite(cid):
     if cid not in _SPRITE_CACHE:
-        path = os.path.join(HERE, "sprites", "%s.png" % cid)
+        path = os.path.join(SPRITES, "%s.png" % cid)
         _SPRITE_CACHE[cid] = F.read_png(path) if os.path.exists(path) else None
     return _SPRITE_CACHE[cid]
 

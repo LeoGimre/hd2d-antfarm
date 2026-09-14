@@ -522,14 +522,14 @@ def _():
 @check("the committed sprite PNGs still match what the generator produces")
 def _():
     import shutil, tempfile
-    src = os.path.join(ROOT, "design", "proto", "sprites")
+    src = os.path.join(ROOT, "game", "assets", "sprites", "creatures")
     if not os.path.isdir(src):
         return []                                      # nothing committed yet
     tmp = tempfile.mkdtemp(prefix="agreements-sprites-")
     try:
         env = dict(os.environ, FORGE_OUT=tmp)
         r = subprocess.run([sys.executable,
-                            os.path.join(ROOT, "design", "proto", "creature_forge.py")],
+                            os.path.join(ROOT, "game", "tools", "creature_forge.py")],
                            capture_output=True, text=True, env=env)
         if r.returncode != 0:
             return ["the generator failed: %s" % (r.stderr.strip().splitlines() or [""])[-1]]
@@ -544,7 +544,7 @@ def _():
         for f in sorted(committed & produced):
             if open(os.path.join(src, f), "rb").read() != open(os.path.join(tmp, f), "rb").read():
                 out.append("%s differs from the generator's output — regenerate with "
-                           "FORGE_OUT=design/proto/sprites" % f)
+                           "python3 game/tools/creature_forge.py" % f)
         return out
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -582,14 +582,45 @@ def _():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-@check("design/roster.md and the sprite generator list the same creatures")
+@check("design/roster.md and game/data/creature_art.json list the same creatures")
 def _():
-    sys.path.insert(0, os.path.join(ROOT, "design", "proto"))
-    import creature_forge as cf
-    ids = {c[0] for c in cf.ROSTER}
-    named = {m.lower() for m in re.findall(r"\*\*([A-Z][a-z]+)\*\*", read("design", "roster.md"))}
-    return (["%r is in the generator but not roster.md" % i for i in sorted(ids - named)]
-            + ["%r is in roster.md but not the generator" % i for i in sorted(named - ids)])
+    """The roster document is the authored roster — place, habit, tell — and the
+    art file is what gets drawn. One growing without the other is a creature
+    with a body and no reason, or a reason and no body."""
+    art = json.load(open(os.path.join(ROOT, "game", "data", "creature_art.json")))
+    roster = read("design", "roster.md")
+    plans = set(art["plans"])
+    out = []
+    named = set(re.findall(r"\*\*([A-Z][a-z]+)\*\*", roster))
+    art_names = {c["id"] for c in art["creatures"]}
+    for n in sorted(named):
+        if n.lower() not in art_names:
+            out.append("design/roster.md authors %s with no entry in creature_art.json" % n)
+    for cid in sorted(art_names):
+        if not any(n.lower() == cid for n in named):
+            out.append("%s is drawn but design/roster.md does not author it" % cid)
+    for c in art["creatures"]:
+        if c["plan"] not in plans:
+            out.append("%s names body plan %r, which creature_art.json does not list"
+                       % (c["id"], c["plan"]))
+    return out
+
+
+@check("creature_art.json and creatures.json agree on every shipped creature's type")
+def _():
+    """The hue comes from the type in the art file and the fight comes from the
+    type in creatures.json. Two files that can disagree about a creature's type
+    is a creature that fights as one thing and is coloured as another."""
+    art = {c["id"]: c["type"] for c in json.load(open(
+        os.path.join(ROOT, "game", "data", "creature_art.json")))["creatures"]}
+    out = []
+    for c in json.loads(read("game", "data", "creatures.json"))["creatures"]:
+        if c["id"] not in art:
+            out.append("%s ships with stats and has no art entry" % c["id"])
+        elif art[c["id"]] != c["type"]:
+            out.append("%s is %s in creatures.json and %s in creature_art.json"
+                       % (c["id"], c["type"], art[c["id"]]))
+    return out
 
 
 if __name__ == "__main__":
