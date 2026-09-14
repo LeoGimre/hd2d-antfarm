@@ -29,7 +29,7 @@ building it.
 - [x] A combat design pitch exists, with its reasoning and rejected alternatives
 - [x] Battle scene with turn order and a readable state
 - [x] Four creatures and enough moves to make a choice matter
-- [ ] A battle that can be lost by playing badly and won by playing well
+- [x] A battle that can be lost by playing badly and won by playing well
 - [ ] Combat logic under unit test
 
 ## M4 — Creature systems

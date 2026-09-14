@@ -71,6 +71,17 @@ func preview(count: int) -> Array[Combatant]:
 	return result
 
 
+## A deep copy, for BattleCore.clone(). Scheduled times are the whole state
+## here — two queues with the same roster but different times are different
+## positions, so preview() alone is not enough to branch a search on.
+func clone() -> TurnQueue:
+	var copy := TurnQueue.new()
+	for c in combatants:
+		copy.add_combatant(c.id, c.display_name, c.side, c.speed)
+		copy.combatants[-1].scheduled_time = c.scheduled_time
+	return copy
+
+
 func _soonest_real() -> Combatant:
 	var best: Combatant = null
 	for c in combatants:
