@@ -15,31 +15,21 @@ tick 9 has had an engine.** Prefer building, checking or correcting over writing
 document.
 
 ## Current milestone
-M3 — First blood. **Four of five boxes done**; the fourth closed in the merged branch's tick 10,
-in the engine, on the *unpaired* roster. Box 5 (combat logic under unit test) is untouched, and
-`design/combat_tests.md` plus the 74 generated cases in `design/proto/combat_cases.json` are
-waiting for it.
+**M3 — First blood is CLOSED** (tick 58). All five boxes. The next milestone is **M4 — Creature
+systems**: data-driven creatures/moves/types (already true), the sprite port, the roster past 20,
+and capture.
 
 ## Current focus
-**The engine works here now, and forty-four ticks of design are waiting to land.** Work the queue
-below in order. Start with item 1, because everything after it reads the encounter data.
+**Ship Ashmoth and Ridgewalk into `game/data/creatures.json`.** They are designed, searched and
+balanced in `design/proto/proposed_creatures.json` and `design/second_encounter.md`; the only
+reason `the_ridge` is not in the game is that the engine cannot load an encounter naming creatures
+with no stats. Shipping them turns on seven skipped tier-2 test cases, makes `the_ridge` playable,
+and is forced anyway by the agreement check written in tick 55 — which fails the moment the stats
+exist and the encounter is still not shipped. Check their moves exist in `moves.json` first; if
+they need new moves, that is part of the same edit.
 
-**The re-pairing is still the recommendation, and it is not what the engine ships.** The merged
-branch closed M3's fourth box on the *unpaired* roster by finding a seven-decision winning line
-exhaustively. That result is real and it is not the same claim as this line's: a fight can have a
-winning line and still have no winning *plan*, and on the unpaired roster no explainable policy
-wins and random play wins 0.4%. `design/first_blood_balance.md` prescribes **Player Rootshell
-(Front) + Tidalpup (Back) vs Enemy Emberling (Front) + Galewing (Back)**, where every correct
-target is diagonal, naive loses, correct targeting wins, and hoarding Charges loses by 10 HP.
-Landing it is item 2 of the queue. Do not treat box 4 as reopened — it is closed; this improves
-the fight it closed with.
-
-**The two searches agree exactly** (tick 54). `battle_sim.gd` (GDScript, in-engine, exhaustive)
-and `design/proto/combat_solver.py --no-capture` (Python, off-engine) both report no win at six
-decisions and a win at seven on the unpaired roster, and produce the same line move for move:
-Emberling melee, **Rootshell ranged at the enemy Back slot**, Emberling melee, Rootshell melee ×3,
-Rootshell melee +Charge. Two implementations, two sessions, one answer. Anything that makes them
-disagree is a bug in one of them, and finding out which is now a five-minute job.
+After that, work the queue below. M4's real weight is the sprite port (item 4) and capture
+(item 6).
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -59,20 +49,17 @@ None of these needs re-deciding; all need building. Work them in order.
    Validated on **both** encounters: exactly one of seven scripted lines wins and it is the
    correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
    that is deliberate.
-3. `design/combat_tests.md` — **tier 1 done, tick 57.** `game/tests/run_tests.gd` walks
-   `design/proto/combat_cases.json` and runs 97 assertions; `farm/test.py` runs it and no longer
-   skips. **M3's fifth box is deliberately still unticked**: tiers 2 (whole-fight outcomes for
-   both encounters, 14 cases) and 3 (the golden trace, 16 events) need a policy driver in
-   GDScript — ports of the solver's `naive`, `melee_charge`, `snipe_back`, `anti_typed`, `typed`,
-   `typed_hoard`, `typed_swap` on top of `BattleCore`. They report as skipped every run. Do that,
-   then tick the box. Regenerate the fixture with `python3 design/proto/gen_test_cases.py` —
-   `agreements.py` fails if it is stale, and it records the constants *as shipped*, so applying
-   the retune means regenerating in the same commit.
+3. ~~`design/combat_tests.md`~~ — **done, ticks 57 and 58.** All three tiers run;
+   `game/tests/run_tests.gd` + `game/tests/policy_battery.gd`, 212 assertions, invoked by
+   `farm/test.py`. M3's fifth box is ticked. Historical note kept because the shape matters:
+   tier 1 done, tick 57. Regenerate the fixture with
+   `python3 design/proto/gen_test_cases.py` — `agreements.py` fails if it is stale, and it records
+   the constants *as shipped*, so applying the retune means regenerating in the same commit.
+
 4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
    generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
-   now carries six body plans and twenty placeholder entries, validated at roster scale — but
-   author real creatures from `design/creatures.md`'s place/habit/tell template rather than
-   shipping those placeholder names.
+   carries six body plans and twenty authored creatures (`design/roster.md`), validated at roster
+   scale. This is M4's real weight and the battle scene still renders grey capsules.
 
 4b. **Creature labels clip and overlap in the battle scene** (found by looking, tick 56 — see
    `devlog/0057-five-decisions.md`). Player Back's label runs off the right edge of the frame
@@ -109,7 +96,7 @@ None of these needs re-deciding; all need building. Work them in order.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check, the twenty-two cross-file agreements, and the GDScript combat suite (97
+self-check, the twenty-two cross-file agreements, and the GDScript combat suite (212
 assertions). It finds the engine in `/opt/godot/<version>` on its own, so the stage runs without
 `GODOT_BIN` being exported. A skipped stage is a check that is not happening — the summary says
 so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
@@ -132,6 +119,12 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **A golden trace compares structured events, not format strings** (tick 58). The fixture carries
+  both: `events` for a human reading the diff, `structured_events` for the suite. Making GDScript
+  reproduce a Python format string couples the test to padding rather than to the fight.
+- **Perturb before believing a green suite** (tick 58). Tiers 2 and 3 passed first run, which is
+  suspicious. Changing one expected value in each tier produced exactly the failures it should.
+  Do this whenever a new suite passes immediately.
 - **A test case you cannot reach through the real API is not coverage** (tick 57). The fixture
   carried a `breaks_defender` case at 3 Guard damage since tick 14; no hit in this game does 3,
   the table being `{weak: 2, neutral: 1, resist: 0}`. The Python model never noticed because it
@@ -530,4 +523,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-57
+58
