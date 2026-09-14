@@ -20,14 +20,19 @@ systems**: data-driven creatures/moves/types (already true), the sprite port, th
 and capture.
 
 ## Current focus
-**M4's real weight is the sprite port** — queue item 4. The battle scene still renders grey
-capsules while `design/proto/creature_forge.py` has produced twenty authored creatures' sprites
-for twenty ticks. Port it into `game/tools/`, generate, `godot --headless --import`, and **look at
-the frames**. That is M4's second box and the biggest visible gap between what this project has
-designed and what it shows.
+**Make the battle scene render the sprites.** The assets are in the game as of tick 60
+(`game/assets/sprites/creatures/`, imported, lossless) and nothing loads them — `build_battle.gd`
+still builds four coloured capsules. Follow `build_diorama.gd`'s traveler: `AnimatedSprite3D`,
+`BILLBOARD_FIXED_Y`, `TEXTURE_FILTER_NEAREST`, two idle frames (`<id>.png` / `<id>_b.png`).
+**`battle.gd`'s hit flash pulses `emission_energy_multiplier` on the capsule's material** and will
+need a different mechanism on a sprite — `modulate` is the obvious one. Do item 4b (the clipping
+labels) in the same pass: both are about what the scene looks like, and both need **mid-fight**
+capture frames to check, not a first frame.
 
-Do item 4b (the clipping labels) in the same neighbourhood if it is cheap — both are about what
-the battle scene actually looks like, and both need mid-fight capture frames to check.
+Two things to judge in the scene rather than on a contact sheet, both recorded at tick 60:
+the Gale hue is much paler than the other three (`SAT["Gale"] = 0.40` against Ember's 0.85), and
+`game/assets/sprites/traveler_idle.png.import` carries `compress/mode=2` with mipmaps from Godot's
+`detect_3d` auto-conversion, which the creature sprites are explicitly set to avoid.
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -54,10 +59,10 @@ None of these needs re-deciding; all need building. Work them in order.
    `python3 design/proto/gen_test_cases.py` — `agreements.py` fails if it is stale, and it records
    the constants *as shipped*, so applying the retune means regenerating in the same commit.
 
-4. `design/creature_sprites.md` — port `design/proto/creature_forge.py` into `game/tools/`,
-   generate, **`godot --headless --import`**, look at the frames. M4's second box. The prototype
-   carries six body plans and twenty authored creatures (`design/roster.md`), validated at roster
-   scale. This is M4's real weight and the battle scene still renders grey capsules.
+4. ~~`design/creature_sprites.md` — port the generator.~~ **Half done, tick 60.** Generator,
+   art data and imported PNGs all ship. **The battle scene still renders capsules** — that is the
+   other half and it is the current focus above. M4's second box stays unticked until something
+   draws them.
 
 4b. **Creature labels clip and overlap in the battle scene** (found by looking, tick 56 — see
    `devlog/0057-five-decisions.md`). Player Back's label runs off the right edge of the frame
@@ -94,7 +99,7 @@ None of these needs re-deciding; all need building. Work them in order.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check, the twenty-three cross-file agreements, and the GDScript combat suite (226
+self-check, the twenty-four cross-file agreements, and the GDScript combat suite (226
 assertions). It finds the engine in `/opt/godot/<version>` on its own, so the stage runs without
 `GODOT_BIN` being exported. A skipped stage is a check that is not happening — the summary says
 so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
@@ -117,6 +122,18 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **Per-plan defaults are code; what a creature overrides is content** (tick 60). That split is
+  what made `game/data/creature_art.json` worth having — three of the twenty override nothing at
+  all, which is the sprite grammar's claim made visible. Adding a creature's art is one entry
+  naming a body plan.
+- **New PNGs in `game/assets/` need `detect_3d/compress_to=0`** (tick 60). Godot's default is to
+  silently re-import a texture as VRAM-compressed with mipmaps the first time it is used in 3D.
+  Right for a stone texture, wrong for a 40x44 sprite: block compression mangles a three-tone
+  ramp with a one-pixel outline, and mipmaps make a nearest-filtered billboard shimmer.
+- **When you move something, find what should be bit-for-bit unchanged and check it** (tick 60,
+  and ticks 55 and 59). The ported generator's forty PNGs compare equal to the prototype's; the
+  encounter refactor reproduced the search's node counts; shipping two stat blocks regenerated
+  the fixture byte-identical. Cheaper than an argument, and it catches what a green gate cannot.
 - **The roster is six and `proposed_creatures.json` is empty** (tick 59). Ashmoth and Ridgewalk
   ship, so `the_ridge` ships and all 14 tier-2 cases run (226 assertions, no skips). Empty is the
   state to prefer for that file: it is a staging area, not a second roster. `_stat_note` travels
@@ -524,9 +541,14 @@ edits REQUESTS.md itself.
 (none — REQUESTS.md has no notes yet)
 
 ## Known cleanup (non-blocking)
+`design/proto/creature_forge.py` is a stub that raises on import, and the forty PNGs in
+`design/proto/sprites/` are dead — the generator and the sprites moved to `game/` at tick 60 and
+nothing reads the old copies. The loop has no allowlisted way to delete a file, so they need a
+human with an `rm`.
+
 `game/assets/sprites/traveler.png` and its `.import` are orphaned — nothing loads them since the
 traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied by the allowlist, so
 this needs Leo. Not urgent.
 
 ## Tick counter
-59
+60
