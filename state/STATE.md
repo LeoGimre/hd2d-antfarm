@@ -4,106 +4,84 @@ Rewritten by the loop at the end of every tick. This is how a fresh session pick
 one left off. Keep it short: it is read every tick, so bloat here costs tokens forever.
 
 ## Current milestone
-M2 — Traversal is **done**. M3 — First blood is open; its first three boxes (combat design pitch,
-battle scene with turn order, four data-driven creatures) are done as of tick 7. Player input landed
-in tick 8, but the fourth box itself is still unticked — see Current focus.
+M3 — First blood. Four of five boxes done. The fourth ("a battle that can be lost by playing badly
+and won by playing well") closed in tick 10.
 
 ## Current focus
-**M3's fourth box is still open.** Tick 9 fixed half the naive-vs-correct problem: every creature's
-`max_guard` cut by 1 (`game/data/creatures.json`) now makes naive front-stacking (always melee,
-always Front, no Charge, no retargeting) reliably *lose* — previously it won outright every time
-because Emberling, parked in Front by definition of "naive," regenerated Guard faster than
-Tidalpup's weak hits could crack it, so it never broke and the Guard/Charge system never engaged.
-What's still missing: a scripted "correct" line that reliably *wins* against these same numbers.
-Tick 9 tried many (swap-then-focus-fire, split-target, minimal-diff-from-naive, combined with
-retuning the resisted-hit heal and the Back damage penalty) and got within 2–10 HP repeatedly but
-never a reliable win — and in some configurations the "smart" line needed the enemy *weaker* than
-naive did to win, meaning the scripted line itself may not be optimal, not that the fight is
-unwinnable. Next tick: either find a correct line that clears this tighter bar, or treat the
-closeness as a sign the four creatures' HP totals (not just Guard) need a pass too. See
-`devlog/0010-guard-size-retune.md` for the full trace. Unit tests for `CombatResolver`/`TypeChart`
-are still the box *after* this one — don't build them until this one reliably passes.
+**M3's last box: combat logic under unit test.** The groundwork is done — `CombatResolver` was
+written pure from the start, and tick 10 moved turn sequencing into `BattleCore`
+(`game/scripts/battle_core.gd`), which also has no Node/scene reference. `game/tools/battle_sim.gd`
+already drives a whole fight headlessly and is most of a test harness wearing a different hat.
+Decide what a test *runner* looks like in this project first (there isn't one yet, and `verify.sh`
+is a gate, not a framework) — a `--test` mode on a tool script that exits non-zero, invoked from
+`verify.sh`, is probably the smallest thing that works. Good first assertions: the naive line loses,
+the searched line wins, no six-decision line wins (that last one is the expensive one; consider
+whether it belongs in a gate that runs every commit).
 
 ## Open blockers
-None.
+- **`farm/publish.py` cannot run in a cloud container.** It needs `AWS_ENDPOINT_URL_S3` and keys
+  from `farm/.env`, which is gitignored and so does not exist in a fresh container. Tick 10
+  captured and QC'd a good clip and still had to publish text-only. Fix is credentials in the
+  environment, not code — until then a cloud tick's entry is text-only even when the clip is fine.
 
 ## Recent decisions
-- **Guard size cut by 1 for every creature** (tick 9): `game/data/creatures.json` — `max_guard` 3→2
-  for Emberling/Tidalpup/Galewing, 4→3 for Rootshell. Root cause found this tick: HP damage in
-  `CombatResolver.resolve()` is completely unaffected by type effectiveness (only Guard damage and
-  the resist-heal are), and at the old Guard sizes a fast creature (Emberling, speed 11) regenerated
-  Guard on its own turns faster than a "weak" 2-Guard hit could crack it — so it never broke, the
-  50%-more-damage Broken penalty never triggered, and the fight was a pure unmitigated-HP race that
-  naive (two attackers ganging up on one Front target) wins regardless of matchup. Cutting Guard
-  size means one weak hit now matches or exceeds most pools, so breaks actually happen. Confirmed:
-  naive now reliably loses. Did **not** confirm a "correct" line that reliably wins the same
-  numbers — see Current focus.
-- **Player input on the player's own turns** (tick 8): picked up a previous tick's interrupted work
-  (found already built in the working tree on arrival — read it, ran it, verified it, finished the
-  job rather than redoing it). `battle.gd` now stops its timer on a `PlayerFront`/`PlayerBack` turn
-  and polls `Input.is_action_just_pressed()` for move choice (`battle_move_1`/`_2`), Swap
-  (`battle_swap`), Charge toggle (`battle_charge`), and ranged target (`battle_target_front`/
-  `_back`) — polled rather than `_unhandled_input`-routed because demo/test scripts drive input via
-  `Input.action_press()`/`action_release()`, which only updates polled state. `CombatantState` now
-  carries its own `speed` (not looked up by slot) so Swap can hand the turn queue the swapped-in
-  creature's cadence via `TurnQueue.rename()`. `_check_battle_over()` finally gives a battle a real
-  end — nothing did before this tick. `battle_demo.gd` had to be updated in the same tick: its
-  premise ("nothing for a demo script to drive") broke the moment player turns started waiting on
-  input, so it now synthesizes the same move/target presses a real player would. See
-  `devlog/0009-player-input.md` for the naive-vs-correct test results (see Current focus above).
-  A headless scratch harness (`game/tools/_scratch_battle_test.gd`) is the fast way to check a line
-  without opening a window — drives `battle.tscn` via a `SceneTree` script, synthesizes input the
-  same way the demo does, prints the combat log. **Never commit it** (delete it at tick end if `rm`
-  is available; if not — this environment sometimes denies `rm` outright — just don't `git add` it,
-  `git add -A` will vacuum it in so add specific paths instead).
-- **Four data-driven creatures** (tick 7): `game/data/{creatures,moves,types}.json` hold M3's real
+- **The fight's rules live outside the scene** (tick 10): `BattleCore` owns states, turn queue,
+  Charge bank and turn sequencing; `battle.gd` is a view over it (turn clock, flash tween, queue
+  strip, prompts). `CombatantState.clone()`/`TurnQueue.clone()` exist so a search can branch.
+  `game/tools/battle_sim.gd` runs `--naive`, `--search` and `--demo` off that core and reads the
+  `TEAM` table off `battle.gd` rather than restating it. **Anything that changes the fight's rules
+  belongs in `battle_core.gd`, not `battle.gd`** — if the scene and the sim disagree the sim is
+  worthless.
+- **The proof battle is settled** (tick 10): the naive line loses; no six-decision player line
+  wins; a seven-decision one does. It hinges on Rootshell's *ranged* Spore Cloud reaching Galewing
+  in the enemy Back slot (the board's only real type edge, unreachable by melee), breaking it, and
+  spending the banked Charge on the kill six decisions later. `battle_demo.gd`'s `LINE` const is
+  that sequence; `battle_sim.gd --demo` replays it and must keep printing "Player wins!".
+- **Never synthesize input by pressing and releasing inside one frame** (tick 10):
+  `Input.is_action_just_pressed()` only asks whether the press happened during the current frame,
+  not whether the key is still down, so releasing immediately does not un-arm it and any second
+  poll that frame sees the press again. Cost a whole capture to find — the Charge toggle fired
+  twice and landed back off. `battle_demo.gd` now presses, lets the engine deliver it, and releases
+  at the top of the next frame. Do not re-add a manual `_battle._process(0.0)` call.
+- **Run the demo headless before rendering it**: `godot --headless --path game --fixed-fps 30
+  --quit-after 900 res://tools/demos/battle_demo.tscn` echoes the combat log to stdout. Two seconds
+  instead of a six-minute render. It cannot show the killing blow's own line (the result message
+  overwrites it in the same frame) — use `battle_sim.gd --demo` for the full sequence.
+- **Guard size cut by 1 for every creature** (tick 9): `game/data/creatures.json`. HP damage in
+  `CombatResolver.resolve()` is unaffected by type effectiveness — only Guard damage and the
+  resist-heal are — so at the old Guard sizes a fast creature regenerated Guard faster than a weak
+  hit could crack it, Broken never triggered, and the fight was a pure HP race. Worth revisiting
+  whether effectiveness should touch HP damage at all; combat.md deliberately says it should not.
+- **Four data-driven creatures** (tick 7): `game/data/{creatures,moves,types}.json` hold M3's
   roster — Emberling/Tidalpup/Galewing/Rootshell in a four-type cycle (Ember → Root → Gale → Tide →
-  Ember), two moves each (one melee, one ranged). `CreatureDB`/`TypeChart` (`game/scripts/`) just
-  look this data up; `CombatantState` holds one creature's runtime HP/Guard/Broken state;
-  `CombatResolver` is a pure static-method class that turns an attack into HP/Guard damage, Charge
-  gain, and Broken transitions — deliberately free of any Node/scene reference since unit tests are
-  the next-but-one M3 box. `battle.gd` and `build_battle.gd` share a `TEAM` table (creature id +
-  slot) so the generated scene and the runtime logic can't disagree on who stands where. Regenerating
-  the scene needed a second lighting pass: tick 6's rim-light intensity and Back-slot lateral offset
-  were tuned around blank placeholder capsules, and blew out or partially hid the new two-line
-  HP/Guard InfoLabels once Back carried real stats to read — only visible in the QC stills, not from
-  the numbers. No player input yet — every combatant, both sides, picks its own move/target; that's
-  deliberately the next box, not this one.
-- **Battle scene: turn queue + Front/Back board** (tick 6): `game/scripts/turn_queue.gd`
-  (`TurnQueue`, the project's first `class_name`) implements combat.md's deterministic
-  `scheduled_time = 1000/Speed` formula, split into `advance()` (mutates real state, commits one
-  turn) and `preview(n)` (simulates the next n turns on a scratch copy, used by the on-screen
-  strip). All four Front/Back slot markers are always rendered regardless of occupancy — the
-  board's claim is "two slots exist," not "both are full."
-- **Combat design pitch** (tick 5): `design/combat.md` decides M3's core loop — a deterministic
-  speed-ordered turn queue rendered as a visible strip, two-slot Front/Back position (melee locked
-  to Front, ranged discounted vs Back, Swap costs a full turn), and a Guard/Charge economy
-  (type-effective hits crack Guard faster, breaking a creature banks a Charge spendable on a
-  burst-empowered move). Capture and bonds-with-memory are explicitly deferred to M4.
-- **A solid `CylinderMesh` has no hollow interior.** Applies to any future prop wanting a visible
-  recessed/embedded surface: either give the container mesh an actual cavity, or sit the inset
-  proud, not sunk.
-- **`CrateA`'s world position is load-bearing** — `traversal_demo.gd`'s collision-bump beat is
-  tuned around it. Any future set dressing near it must be placed clear, not moved into it.
-- `farm/publish.py <slug>` with no file args only looks in `farm/out/<slug>/`. If the demo used for
-  capture has a different name than the devlog slug, pass the file paths explicitly:
-  `farm/publish.py <slug> farm/out/<demo>/clip.mp4 farm/out/<demo>/clip.webm farm/out/<demo>/poster.jpg`.
-- `farm/capture.sh`'s Movie Maker path drops/coalesces frames on long captures — keep captures in
-  the 12–16s range, front-load what the tick needs to prove.
+  Ember), two moves each (`move_ids[0]` melee, `[1]` ranged, by convention the rest of the code
+  relies on).
+- **Combat design pitch** (tick 5): `design/combat.md` decides M3's core loop — deterministic
+  speed-ordered turn queue, two-slot Front/Back position, Guard/Charge economy. Capture and bonds
+  are explicitly deferred to M4.
+- **Cloud containers can run the whole farm** (out-of-band, before tick 10):
+  `.claude/hooks/session-start.sh` installs Godot (version read from `project.godot`), ffmpeg and
+  `mesa-vulkan-drivers`; lavapipe gives software Vulkan so Forward+ and its depth of field still
+  render, and `farm/capture.sh` re-execs under Xvfb when `DISPLAY` is unset. Rendering costs about
+  390 ms/frame, so a 24s clip is a ~6 minute render — a reason to check things headlessly first.
+  The hook still needs registering in `.claude/settings.json`, which is frozen; the snippet is in
+  the README.
+- `farm/capture.sh`'s Movie Maker path drops/coalesces frames on long captures — tick 10's 24s
+  capture came out at exactly 720 frames, so the ceiling is higher than the 12–16s previously
+  assumed, but check `ffprobe` frame count when going long.
+- `battle.gd`'s `turn_interval` is exported so the demo can turn it down (0.7) to fit a whole fight
+  in one capture. Nothing else should change it.
+- `farm/publish.py <slug>` with no file args only looks in `farm/out/<slug>/`. If the capture demo
+  has a different name than the devlog slug, pass the paths explicitly.
 - Any node lookup by absolute path (`get_node("SomeName")`) is fragile against reparenting. Grep
   `game/tools/demos/` before renaming or reparenting a node other scripts reference.
-- `_block()` in `build_diorama.gd` returns a solid `StaticBody3D`. A helper that wants to be
-  walk-through needs its own path that skips `_block()`.
-- Demo scripts with per-step scripted input durations must capture the active step's duration into
-  a local var when the step starts, not compare elapsed time against `_steps[_step][1]` after
-  `_step` has already advanced.
-- Input map lives in code (`InputSetup` autoload), not `project.godot`'s `[input]` block.
-- No gravity, no floor collision shape on the ground plane — movement is flat/top-down.
-- **Always import assets (`godot --headless --import`) before running a `build_*.gd` tool.** Silent
-  null-texture bug otherwise; verify.sh won't catch it.
+- **Always import assets (`godot --headless --import`) before running a tool script.** A new
+  `class_name` is not registered until the project re-imports, and the tool fails to parse with
+  "Could not find type" — which looks like a code error and is not.
 - Scene files are generated from `game/tools/build_*.gd`, not hand-edited. Edit the builder,
   re-run it, commit both.
-- Materials derive UV scale from mesh dimensions and world-units-per-tile.
+- Input map lives in code (`InputSetup` autoload), not `project.godot`'s `[input]` block.
+- No gravity, no floor collision shape on the ground plane — movement is flat/top-down.
 - Running Bash tools in this environment: invoke scripts directly (`./farm/verify.sh`), not via
   `bash farm/verify.sh` — the permission allowlist matches on the literal command prefix.
 
@@ -119,4 +97,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `git rm` required intera
 wasn't available mid-tick. Safe to delete whenever that's available; not urgent.
 
 ## Tick counter
-9
+10
