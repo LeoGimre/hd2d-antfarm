@@ -59,6 +59,38 @@ optimistic, the wait escalates (15m, 30m, 1h, ...) rather than hammering the lim
 | `MAX_FAILS` | 5 | Consecutive real failures before halting for a human |
 | `TICK_TIMEOUT` | 2700 | Watchdog, seconds |
 
+## Running it in the cloud
+
+Claude Code on the web gets a bare Ubuntu container: no Godot, no ffmpeg, no display. The
+`SessionStart` hook in `.claude/hooks/session-start.sh` installs all three, reading the engine
+version out of `game/project.godot` so it can never drift from what the project expects. It only
+runs when `CLAUDE_CODE_REMOTE=true`, so a Mac is untouched.
+
+Register it once, in `.claude/settings.json`:
+
+```json
+"hooks": {
+  "SessionStart": [
+    { "hooks": [ { "type": "command",
+                   "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\"",
+                   "timeout": 600 } ] }
+  ]
+}
+```
+
+After that `farm/verify.sh` and `farm/capture.sh` work unchanged — the hook exports `GODOT_BIN`
+and `FFMPEG_BIN`, and capture re-execs itself inside Xvfb when there is no display.
+
+There is no GPU. Godot falls back to **lavapipe**, Mesa's software Vulkan device, which still runs
+Forward+ — so depth of field, bloom and shadows all render, and clips look like the Mac's. They are
+just slow to produce: about 390 ms per frame, so a 6-second clip takes around 95 seconds of wall
+clock. Movie Maker renders at a fixed timestep, so slowness costs time and nothing else; the output
+is identical either way.
+
+Two things the egress policy blocks, in case a future session wonders: `godotengine.org` is not
+reachable, which is why the hook pulls the engine from its GitHub release, and the GitHub API is
+scoped to this repository alone.
+
 ## Running things by hand
 
 ```bash
