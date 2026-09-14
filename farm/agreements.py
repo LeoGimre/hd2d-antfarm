@@ -235,6 +235,29 @@ def _():
     return out
 
 
+@check("every committed still is shown by a devlog entry, and every one shown exists")
+def _():
+    """farm/still.py keeps one frame from a capture so an entry can show its
+    work, because the clip needs credentials a cloud container does not have.
+    Both directions matter: an orphaned still is a junk drawer forming, and a
+    referenced-but-missing one is a broken image on a page Vercel has already
+    deployed."""
+    stills = os.path.join(ROOT, "farm", "stills")
+    devlog = os.path.join(ROOT, "devlog")
+    committed = ({f for f in os.listdir(stills) if f.endswith(".jpg")}
+                 if os.path.isdir(stills) else set())
+    referenced = set()
+    for f in sorted(os.listdir(devlog)):
+        if f.endswith(".md"):
+            referenced |= set(re.findall(r"/stills/([A-Za-z0-9_\-.]+\.jpg)", read("devlog", f)))
+    out = []
+    for f in sorted(referenced - committed):
+        out.append("a devlog entry shows /stills/%s and farm/stills/ does not have it" % f)
+    for f in sorted(committed - referenced):
+        out.append("farm/stills/%s is committed and no devlog entry shows it" % f)
+    return out
+
+
 @check("design/README.md mentions every design document")
 def _():
     d = os.path.join(ROOT, "design")

@@ -42,6 +42,7 @@ function loadEntries() {
         date: data.date || "",
         status: data.status || "ok",
         visual: data.visual === true || data.visual === "true",
+        still: data.still === true || data.still === "true",
         milestone: data.milestone || "",
         commit: data.commit || "",
         summary: data.summary || "",
@@ -222,6 +223,9 @@ function statusPill(e) {
   if (e.status === "stuck") return '<span class="pill stuck">stuck</span>';
   if (e.status === "design") return '<span class="pill design">design</span>';
   if (e.visual) return '<span class="pill visual">clip</span>';
+  // A still is one frame kept from a capture, not a clip. Saying "clip" for it
+  // would be the index lying about what is on the other end of the link.
+  if (e.still) return '<span class="pill still">still</span>';
   return '<span class="pill ok">shipped</span>';
 }
 
@@ -550,6 +554,18 @@ function main() {
     mkdirSync(join(OUT, "mockups"), { recursive: true });
     for (const f of readdirSync(mockSrc).filter((f) => f.endsWith(".png"))) {
       copyFileSync(join(mockSrc, f), join(OUT, "mockups", f));
+    }
+  }
+
+  // Frames kept from a capture by farm/still.py. The clip itself needs
+  // farm/publish.py and credentials a cloud container does not have, so this is
+  // how a visual tick shows its work. farm/agreements.py fails on a still no
+  // entry references, so this directory cannot quietly become a junk drawer.
+  const stillSrc = join(ROOT, "farm", "stills");
+  if (existsSync(stillSrc)) {
+    mkdirSync(join(OUT, "stills"), { recursive: true });
+    for (const f of readdirSync(stillSrc).filter((f) => f.endsWith(".jpg"))) {
+      copyFileSync(join(stillSrc, f), join(OUT, "stills", f));
     }
   }
 

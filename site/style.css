@@ -149,6 +149,7 @@ h2.section {
 .pill.stuck  { color: var(--rust);  border-color: #4a2a24; background: #241512; }
 .pill.design { color: var(--blue);  border-color: #2b3a52; background: #141a24; }
 .pill.ok     { color: var(--green); border-color: #2f4a2a; background: #16200f; }
+.pill.still  { color: var(--amber); border-color: #3d3524; background: #1e1a12; }
 
 /* ---------------------------------------------------------------- article */
 article.post { padding: 8px 0 60px; }
