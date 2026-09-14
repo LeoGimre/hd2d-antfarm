@@ -144,13 +144,14 @@ dof_blur_near_distance = 17.0
 dof_blur_near_transition = 6.0
 dof_blur_amount = 0.2
 
-[node name="Battle" type="Node3D" unique_id=763660332]
+[node name="Battle" type="Node3D" unique_id=674847429]
 script = ExtResource("1_th188")
+encounter_id = "first_blood_unpaired"
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=778170054]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=678126808]
 environment = SubResource("Environment_6vh42")
 
-[node name="Key" type="DirectionalLight3D" parent="." unique_id=290929858]
+[node name="Key" type="DirectionalLight3D" parent="." unique_id=585879888]
 transform = Transform3D(-0.76604444, 0.4924039, -0.41317594, 0, 0.64278764, 0.76604444, 0.64278764, 0.58682406, -0.4924039, 0, 0, 0)
 light_color = Color(0.86, 0.8, 1, 1)
 light_energy = 1.1
@@ -158,125 +159,125 @@ shadow_enabled = true
 shadow_normal_bias = 1.4
 shadow_blur = 2.6
 
-[node name="Fill" type="DirectionalLight3D" parent="." unique_id=1975099523]
+[node name="Fill" type="DirectionalLight3D" parent="." unique_id=724915034]
 transform = Transform3D(0.49999997, -0.3522443, 0.7911536, 0, 0.9135454, 0.40673664, -0.86602545, -0.2033683, 0.45677269, 0, 0, 0)
 light_color = Color(0.55, 0.62, 0.95, 1)
 light_energy = 0.25
 
-[node name="PlayerRim" type="OmniLight3D" parent="." unique_id=1680284618]
+[node name="PlayerRim" type="OmniLight3D" parent="." unique_id=127809018]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 2.6, 3.3)
 light_color = Color(0.55, 0.75, 1, 1)
 light_energy = 1.6
 omni_range = 5.5
 
-[node name="EnemyRim" type="OmniLight3D" parent="." unique_id=756000216]
+[node name="EnemyRim" type="OmniLight3D" parent="." unique_id=1261023178]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 2.6, -2.8)
 light_color = Color(1, 0.55, 0.45, 1)
 light_energy = 1.6
 omni_range = 5.5
 
-[node name="ArenaFloor" type="MeshInstance3D" parent="." unique_id=1539433734]
+[node name="ArenaFloor" type="MeshInstance3D" parent="." unique_id=668019751]
 material_override = SubResource("StandardMaterial3D_4k1nj")
 mesh = SubResource("PlaneMesh_f4pi3")
 
-[node name="SlotMarkers" type="Node3D" parent="." unique_id=606918531]
+[node name="SlotMarkers" type="Node3D" parent="." unique_id=551430481]
 
-[node name="PlayerFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=185710822]
+[node name="PlayerFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=306894913]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0.025, 1.8)
 material_override = SubResource("StandardMaterial3D_yahae")
 mesh = SubResource("CylinderMesh_v7i3o")
 
-[node name="PlayerBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=202274595]
+[node name="PlayerBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=748925074]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0.025, 2.6)
 material_override = SubResource("StandardMaterial3D_66ngm")
 mesh = SubResource("CylinderMesh_03edq")
 
-[node name="EnemyFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=637397125]
+[node name="EnemyFrontMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=1837067253]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0.025, -1.3)
 material_override = SubResource("StandardMaterial3D_22uqi")
 mesh = SubResource("CylinderMesh_6ni85")
 
-[node name="EnemyBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=809630063]
+[node name="EnemyBackMarker" type="MeshInstance3D" parent="SlotMarkers" unique_id=1596185264]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.025, -1.7)
 material_override = SubResource("StandardMaterial3D_vceff")
 mesh = SubResource("CylinderMesh_ekamt")
 
-[node name="Creatures" type="Node3D" parent="." unique_id=1729995716]
+[node name="Creatures" type="Node3D" parent="." unique_id=2066710420]
 
-[node name="PlayerFront" type="Node3D" parent="Creatures" unique_id=233538321]
+[node name="PlayerFront" type="Node3D" parent="Creatures" unique_id=1862937773]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0, 1.8)
 
-[node name="Body" type="MeshInstance3D" parent="Creatures/PlayerFront" unique_id=1002910365]
+[node name="Body" type="MeshInstance3D" parent="Creatures/PlayerFront" unique_id=1072363615]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 material_override = SubResource("StandardMaterial3D_djc8l")
 mesh = SubResource("CapsuleMesh_h4dll")
 
-[node name="InfoLabel" type="Label3D" parent="Creatures/PlayerFront" unique_id=548604211]
+[node name="InfoLabel" type="Label3D" parent="Creatures/PlayerFront" unique_id=1080400562]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
 billboard = 1
 text = "Emberling (Ember)
-HP 28/28   Guard 3/3"
+HP 28/28   Guard 2/2"
 font_size = 40
 outline_size = 9
 
-[node name="PlayerBack" type="Node3D" parent="Creatures" unique_id=1061113464]
+[node name="PlayerBack" type="Node3D" parent="Creatures" unique_id=565757611]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0, 2.6)
 
-[node name="Body" type="MeshInstance3D" parent="Creatures/PlayerBack" unique_id=273331242]
+[node name="Body" type="MeshInstance3D" parent="Creatures/PlayerBack" unique_id=1066664781]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 material_override = SubResource("StandardMaterial3D_p0caf")
 mesh = SubResource("CapsuleMesh_61i1y")
 
-[node name="InfoLabel" type="Label3D" parent="Creatures/PlayerBack" unique_id=1028618779]
+[node name="InfoLabel" type="Label3D" parent="Creatures/PlayerBack" unique_id=803220744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.65, 0)
 billboard = 1
 text = "Rootshell (Root)
-HP 36/36   Guard 4/4"
+HP 36/36   Guard 3/3"
 font_size = 40
 outline_size = 9
 
-[node name="EnemyFront" type="Node3D" parent="Creatures" unique_id=1553257007]
+[node name="EnemyFront" type="Node3D" parent="Creatures" unique_id=1115683149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, -1.3)
 
-[node name="Body" type="MeshInstance3D" parent="Creatures/EnemyFront" unique_id=1998364212]
+[node name="Body" type="MeshInstance3D" parent="Creatures/EnemyFront" unique_id=50657963]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 material_override = SubResource("StandardMaterial3D_saiin")
 mesh = SubResource("CapsuleMesh_dd63g")
 
-[node name="InfoLabel" type="Label3D" parent="Creatures/EnemyFront" unique_id=1867763740]
+[node name="InfoLabel" type="Label3D" parent="Creatures/EnemyFront" unique_id=28914188]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
 billboard = 1
 text = "Tidalpup (Tide)
-HP 32/32   Guard 3/3"
+HP 32/32   Guard 2/2"
 font_size = 40
 outline_size = 9
 
-[node name="EnemyBack" type="Node3D" parent="Creatures" unique_id=885228314]
+[node name="EnemyBack" type="Node3D" parent="Creatures" unique_id=1596890387]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0, -1.7)
 
-[node name="Body" type="MeshInstance3D" parent="Creatures/EnemyBack" unique_id=1853172265]
+[node name="Body" type="MeshInstance3D" parent="Creatures/EnemyBack" unique_id=1597173187]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 material_override = SubResource("StandardMaterial3D_fpf3k")
 mesh = SubResource("CapsuleMesh_bi5l8")
 
-[node name="InfoLabel" type="Label3D" parent="Creatures/EnemyBack" unique_id=1188722048]
+[node name="InfoLabel" type="Label3D" parent="Creatures/EnemyBack" unique_id=996189806]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 billboard = 1
 text = "Galewing (Gale)
-HP 24/24   Guard 3/3"
+HP 24/24   Guard 2/2"
 font_size = 52
 outline_size = 11
 
-[node name="BattleCamera" type="Camera3D" parent="." unique_id=396037892]
+[node name="BattleCamera" type="Camera3D" parent="." unique_id=49009977]
 transform = Transform3D(1, 0, 0, 0, 0.7880108, 0.6156615, 0, -0.6156615, 0.7880108, 0, 15, 19)
 attributes = SubResource("CameraAttributesPractical_jt4d8")
 current = true
 fov = 28.0
 far = 100.0
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=1536730845]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1251425095]
 
-[node name="TurnQueueStrip" type="HBoxContainer" parent="UI" unique_id=733005006]
+[node name="TurnQueueStrip" type="HBoxContainer" parent="UI" unique_id=1476003207]
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 22.0
@@ -284,7 +285,7 @@ offset_bottom = 110.0
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="CombatLog" type="Label" parent="UI" unique_id=2072007617]
+[node name="CombatLog" type="Label" parent="UI" unique_id=2009590604]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -297,7 +298,7 @@ theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 horizontal_alignment = 1
 
-[node name="PlayerPrompt" type="Label" parent="UI" unique_id=1804617054]
+[node name="PlayerPrompt" type="Label" parent="UI" unique_id=1144278592]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -310,14 +311,14 @@ theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
 horizontal_alignment = 1
 
-[node name="PlayerCharge" type="Label" parent="UI" unique_id=1112583128]
+[node name="PlayerCharge" type="Label" parent="UI" unique_id=1544699686]
 offset_left = 20.0
 offset_top = 130.0
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.3, 0.55, 0.95, 1)
 text = "Player Charge: 0"
 
-[node name="EnemyCharge" type="Label" parent="UI" unique_id=435146917]
+[node name="EnemyCharge" type="Label" parent="UI" unique_id=2011912612]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0

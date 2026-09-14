@@ -20,6 +20,10 @@ func _init(creatures_path: String = "res://data/creatures.json",
 		_moves[entry["id"]] = entry
 
 
+func has_creature(id: String) -> bool:
+	return _creatures.has(id)
+
+
 func get_creature(id: String) -> Dictionary:
 	return _creatures[id]
 

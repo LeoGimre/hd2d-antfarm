@@ -3,18 +3,30 @@ extends SceneTree
 ## approach as build_diorama.gd. Run with:
 ##   godot --headless --path game --script res://tools/build_battle.gd
 ##
-## M3's third box: four real creatures from game/data/, two per side in
-## Front and Back. battle.gd owns the TEAM table (which creature stands in
-## which slot) and looks these nodes up by matching name, so the two files
-## have to stay in agreement on both node names and TEAM's contents — this
-## file keeps its own copy for initial placement and labels since it runs
-## standalone, before battle.gd's _ready() ever executes.
+## M3's third box: real creatures from game/data/, in Front and Back slots.
+##
+## This file used to keep its own copy of battle.gd's TEAM table, and the two
+## had to be hand-synced. They no longer exist: who stands where comes from
+## game/data/encounters.json (design/encounters.md), and what stays here is the
+## *board* — four slot positions and their per-slot label tuning, every value
+## of which was arrived at by staring at QC frames and none of which has
+## anything to do with which creature is standing there.
+##
+## Build a scene for a different encounter by passing its id:
+##   godot --headless --path game --script res://tools/build_battle.gd -- <id>
 
 const ARENA_SIZE := Vector2(11.0, 11.0)
 const ARENA_TILE_UNITS := 2.0
 const MARKER_RADIUS := 0.7
 const MARKER_HEIGHT := 0.05
 const CREATURE_HEIGHT := 1.5
+
+## The encounter the scene is built for when the command line does not name one.
+## battle.gd carries the same value for the same reason; keeping both is
+## deliberate, since either file can be run without the other.
+const DEFAULT_ENCOUNTER := "first_blood_unpaired"
+
+var _encounter_id := DEFAULT_ENCOUNTER
 
 ## Back sits well to the *side* of Front, not mostly behind it. The original
 ## near-diagonal offset (Back = Front + (1.6, 1.8)) put Front and Back close
@@ -35,19 +47,21 @@ const ENEMY_COLOR := Color(0.85, 0.30, 0.28)
 const FRONT_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.55)
 const BACK_MARKER_TINT := Color(1.0, 1.0, 1.0, 0.28)
 
-## Must match battle.gd's TEAM exactly — see the header comment above.
-const TEAM := {
-	"PlayerFront": {"creature_id": "emberling", "pos_key": "player_front"},
-	"PlayerBack": {"creature_id": "rootshell", "pos_key": "player_back"},
-	"EnemyFront": {"creature_id": "tidalpup", "pos_key": "enemy_front"},
-	"EnemyBack": {"creature_id": "galewing", "pos_key": "enemy_back"},
-}
+
 
 
 func _initialize() -> void:
+	var args := OS.get_cmdline_user_args()
+	var encounter_id: String = args[0] if not args.is_empty() else DEFAULT_ENCOUNTER
+
 	var root := Node3D.new()
 	root.name = "Battle"
 	root.set_script(load("res://scripts/battle.gd"))
+	# Always set explicitly: an exported property equal to the script's default
+	# is not serialised, so a scene built for a defaulted id would store nothing
+	# and follow any later change to that default. See battle.gd.
+	root.set("encounter_id", encounter_id)
+	_encounter_id = encounter_id
 
 	_add_environment(root)
 	_add_lights(root)
@@ -246,12 +260,14 @@ func _add_creatures(root: Node3D) -> void:
 		"enemy_back": ENEMY_BACK_POS,
 	}
 	var db := CreatureDB.new()
-	for node_name in TEAM:
-		var info: Dictionary = TEAM[node_name]
+	var team := EncounterDB.new().team(_encounter_id, db)
+	for node_name in team:
+		var info: Dictionary = team[node_name]
 		var data := db.get_creature(info["creature_id"])
-		var pos: Vector3 = positions[info["pos_key"]]
-		var color := PLAYER_COLOR if info["pos_key"].begins_with("player") else ENEMY_COLOR
-		var is_back: bool = info["pos_key"].ends_with("back")
+		var pos_key: String = "%s_%s" % [info["side"], info["slot"]]
+		var pos: Vector3 = positions[pos_key]
+		var color := PLAYER_COLOR if info["side"] == "player" else ENEMY_COLOR
+		var is_back: bool = info["slot"] == "back"
 		# Lifted clear of Front's own label so the two don't share screen
 		# space at this camera angle. Enemy Back needed much less of this
 		# once it got its own wide lateral offset from Enemy Front (below) —
@@ -259,9 +275,9 @@ func _add_creatures(root: Node3D) -> void:
 		# Back sits close enough to the frame's top edge already that
 		# lifting it as far as Player Back would crop it.
 		var label_lift := 0.35
-		if info["pos_key"] == "player_back":
+		if pos_key == "player_back":
 			label_lift = 1.15
-		elif info["pos_key"] == "enemy_back":
+		elif pos_key == "enemy_back":
 			label_lift = 0.5
 		# Enemy Back moves *away* from camera as it moves off Front (Player
 		# Back moves *toward* camera instead), so only it ends up small
@@ -270,7 +286,7 @@ func _add_creatures(root: Node3D) -> void:
 		# paper, only caught by opening the QC frames, and immune to every
 		# lighting/DOF knob tried first because it was never a lighting
 		# problem. Scaling just that one label up compensates directly.
-		var label_font_scale := 1.3 if info["pos_key"] == "enemy_back" else 1.0
+		var label_font_scale := 1.3 if pos_key == "enemy_back" else 1.0
 		creatures.add_child(_creature(node_name, pos, color, data, label_lift, label_font_scale))
 
 

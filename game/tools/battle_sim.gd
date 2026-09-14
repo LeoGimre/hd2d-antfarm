@@ -18,7 +18,7 @@ extends SceneTree
 ## The fight is fully deterministic (design/combat.md's turn queue has no
 ## randomness), so "the space" is a finite tree and the answer is decidable,
 ## not estimable. This runs the same BattleCore the battle scene runs, off the
-## same TEAM constant and the same game/data JSON, so a win found here is a win
+## same encounter data and the same game/data JSON, so a win found here is a win
 ## a player can actually type in.
 
 const BATTLE_SCRIPT := "res://scripts/battle.gd"
@@ -248,11 +248,12 @@ func _describe_action(action: Dictionary) -> String:
 ## ---- Plumbing ----
 
 func _new_core() -> BattleCore:
-	# TEAM is read off battle.gd rather than restated here: a simulator that
-	# can disagree with the scene about who is standing where is worse than
-	# no simulator at all.
-	var team: Dictionary = load(BATTLE_SCRIPT).get_script_constant_map()["TEAM"]
-	return BattleCore.new(team, _db(), _types())
+	# The encounter id is read off battle.gd rather than restated here: a
+	# simulator that can disagree with the scene about who is standing where is
+	# worse than no simulator at all. The table itself now comes from
+	# game/data/encounters.json, so both of them read the same bytes.
+	var id: String = load(BATTLE_SCRIPT).get_script_constant_map()["DEFAULT_ENCOUNTER"]
+	return BattleCore.new(EncounterDB.new().team(id, _db()), _db(), _types())
 
 
 func _score(core: BattleCore) -> String:

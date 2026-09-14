@@ -111,15 +111,56 @@ def _():
 
 # ---------------------------------------------------------------- game code
 
-@check("battle.gd's TEAM and build_battle.gd's TEAM name the same creatures")
+@check("the shipped encounters and the prototype encounters agree")
 def _():
-    grab = lambda src: dict(re.findall(r'"(\w+)":\s*\{"creature_id":\s*"(\w+)"', src))
-    a = grab(read("game", "scripts", "battle.gd"))
-    b = grab(read("game", "tools", "build_battle.gd"))
-    if not a or not b:
-        return ["could not parse a TEAM table (has it moved to data? update this check)"]
-    return ["%s: battle.gd says %r, build_battle.gd says %r" % (k, a.get(k), b.get(k))
-            for k in sorted(set(a) | set(b)) if a.get(k) != b.get(k)]
+    """design/proto/encounters.json is where an encounter is designed and where
+    the solver reads it; game/data/encounters.json is what the engine loads.
+    Two files that agree until they do not is exactly the coupling moving the
+    roster into data existed to delete, so: every id in both must be identical,
+    and any prototype encounter whose creatures all exist in creatures.json has
+    no excuse for not being shipped."""
+    proto_path = os.path.join(ROOT, "design", "proto", "encounters.json")
+    game_path = os.path.join(ROOT, "game", "data", "encounters.json")
+    if not (os.path.exists(proto_path) and os.path.exists(game_path)):
+        return []
+    proto = {e["id"]: e for e in json.load(open(proto_path))["encounters"]}
+    game = {e["id"]: e for e in json.load(open(game_path))["encounters"]}
+    creatures = {c["id"] for c in json.loads(read("game", "data", "creatures.json"))["creatures"]}
+    out = []
+    for eid in sorted(set(proto) & set(game)):
+        if proto[eid] != game[eid]:
+            out.append("%s differs between design/proto/encounters.json and "
+                       "game/data/encounters.json" % eid)
+    for eid in sorted(set(game) - set(proto)):
+        out.append("%s is shipped but not in design/proto/encounters.json, so the solver "
+                   "cannot balance it" % eid)
+    for eid in sorted(set(proto) - set(game)):
+        ids = {m["creature"] for side in ("player", "enemy") for m in proto[eid][side]}
+        if ids <= creatures:
+            out.append("%s uses only creatures that exist in creatures.json and is still not "
+                       "shipped in game/data/encounters.json" % eid)
+    return out
+
+
+@check("the battle scene names an encounter that exists")
+def _():
+    """The gate smoke-runs the diorama, never battle.tscn, so a scene pointed at
+    a deleted encounter passes verify.sh and fails when someone runs the demo.
+    design/encounters.md called that out; this is the cheap half of the answer."""
+    path = os.path.join(ROOT, "game", "data", "encounters.json")
+    if not os.path.exists(path):
+        return []
+    known = {e["id"] for e in json.load(open(path))["encounters"]}
+    out = []
+    for rel in (("game", "scenes", "battle.tscn"), ("game", "scripts", "battle.gd"),
+                ("game", "tools", "build_battle.gd")):
+        src = read(*rel)
+        for m in re.finditer(r'(?:encounter_id|DEFAULT_ENCOUNTER)\s*:?=\s*"([^"]*)"', src):
+            eid = m.group(1)
+            if eid and eid not in known:
+                out.append("%s names encounter %s, which is not in encounters.json"
+                           % (os.path.join(*rel), eid))
+    return out
 
 
 @check("every input action battle.gd polls is declared in input_setup.gd")

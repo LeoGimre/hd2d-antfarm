@@ -38,17 +38,19 @@ const CHIP_COLORS := {
 	"enemy": Color(0.85, 0.30, 0.28),
 }
 
-## Which creature stands in which slot. build_battle.gd builds the same
-## table to place and label the capsules; the two files have to stay in
-## agreement on ids and creature choices, same coupling tick 6 already noted
-## for node names. tools/battle_sim.gd reads this constant off this script
-## rather than restating it, so a searched fight is this fight.
-const TEAM := {
-	"PlayerFront": {"creature_id": "emberling", "side": "player", "slot": "front"},
-	"PlayerBack": {"creature_id": "rootshell", "side": "player", "slot": "back"},
-	"EnemyFront": {"creature_id": "tidalpup", "side": "enemy", "slot": "front"},
-	"EnemyBack": {"creature_id": "galewing", "side": "enemy", "slot": "back"},
-}
+## Which encounter this scene is. build_battle.gd sets it explicitly on the
+## root before packing — Godot only serialises an exported property whose value
+## differs from the declared default, so the default here is deliberately empty
+## and never a real id. A scene built for a defaulted id would store nothing and
+## silently follow any later change to that default.
+##
+## Who stands where comes out of game/data/encounters.json via EncounterDB, and
+## is no longer a table in this file that build_battle.gd has to keep a matching
+## copy of. tools/battle_sim.gd reads this property off this script, so a
+## searched fight is still this fight.
+@export var encounter_id: String = ""
+
+const DEFAULT_ENCOUNTER := "first_blood_unpaired"
 
 @onready var _strip: HBoxContainer = $UI/TurnQueueStrip
 @onready var _creatures: Node3D = $Creatures
@@ -70,7 +72,8 @@ var _charge_queued := false
 
 
 func _ready() -> void:
-	_core = BattleCore.new(TEAM, _db)
+	var id := encounter_id if encounter_id != "" else DEFAULT_ENCOUNTER
+	_core = BattleCore.new(EncounterDB.new().team(id, _db), _db)
 	_refresh_strip()
 	_refresh_status_labels()
 	_refresh_charge_labels()
