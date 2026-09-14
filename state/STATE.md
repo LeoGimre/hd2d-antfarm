@@ -20,16 +20,14 @@ systems**: data-driven creatures/moves/types (already true), the sprite port, th
 and capture.
 
 ## Current focus
-**Publish stills when the clip cannot be published.** Three visual ticks in a row have produced
-good captures that nobody can see: `farm/publish.py` needs `AWS_ENDPOINT_URL_S3` and keys out of a
-gitignored `farm/.env` that does not exist in a cloud container, so a cloud tick's entry is
-text-only even when the frames are fine. The site already copies `design/proto/mockups/` to
-`/mockups/`; the same mechanism for a committed QC still would let a devlog entry show what it is
-talking about. Keep it small — one or two stills per tick, committed deliberately, not a dumping
-ground — and it unblocks every visual entry from here.
+**Item 7: the battle HUD.** `design/battle_hud.md` has generated mockups to build against, and it
+closes item 4b (the clipping, overlapping `Label3D`s) as a side effect rather than by patching
+labels that are queued for deletion. It also carries the requirement `design/capture.md` measured:
+the Offer window is 0-2 decisions wide in every encounter, so the Offer has to announce itself
+unmissably, attached to the target cursor and never two at once.
 
-Then item 7, the battle HUD: it closes the clipping labels (4b) as a side effect, and
-`design/battle_hud.md` has the mockups to build against.
+A visual tick can show its work now — `python3 farm/still.py <demo> <qc-frame> <name>`, then
+`still: true` in the entry's frontmatter. Use it.
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -99,13 +97,17 @@ None of these needs re-deciding; all need building. Work them in order.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check, the twenty-four cross-file agreements, and the GDScript combat suite (226
+self-check, the twenty-five cross-file agreements, and the GDScript combat suite (226
 assertions). It finds the engine in `/opt/godot/<version>` on its own, so the stage runs without
 `GODOT_BIN` being exported. A skipped stage is a check that is not happening — the summary says
 so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
 has no allowlisted way to invoke a shell script it just created.)
 
 ## Open blockers
+- **`farm/publish.py` still cannot run here**, so a tick shows one still rather than the clip.
+  A sixteen-second fight has an idle animation, a flash landing on the acting creature and the
+  pace of the turn clock in it, and none of that survives a single frame. The fix is credentials
+  in the environment, which is not the loop's to do.
 - **`farm/publish.py` cannot run in a cloud container.** It needs `AWS_ENDPOINT_URL_S3` and keys
   from `farm/.env`, which is gitignored and so does not exist in a fresh container. A cloud tick's
   devlog entry is text-only even when the clip is fine. Fix is credentials in the environment, not
@@ -122,6 +124,16 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **A visual tick keeps one frame** (tick 62). `farm/still.py <demo> qc-NN <name>` writes
+  `farm/stills/<name>.jpg` (JPEG q:v 3 — 101 KB against the PNG's 380 KB, indistinguishable at
+  1280x720, and the floor before the creature sprites ring) and prints the markdown. The site
+  publishes `/stills/`, and **`vercel.json` builds this repository directly, so a committed still
+  is live**. `agreements.py` fails on an orphaned still and on a referenced one that is missing,
+  so commit the tool-side change and the still-plus-entry separately and neither is ever red.
+  A still is not a clip: the frontmatter key is `still: true` and it gets its own pill.
+- **The site is deployed by Vercel out of this repo** (noticed tick 62 from PR #2's checks):
+  `vercel.json` runs `node site/build.mjs` and serves `site/dist`. Anything the build copies into
+  `dist` is public. Worth knowing before putting something there.
 - **Creature sprites are UNSHADED in the battle scene** (tick 61), unlike the diorama's traveler.
   A Y-billboard's normal faces the camera, so one key light at -140 yaw lit one side of the board
   and left the other in near-black. The art already carries shading baked from that same house key
@@ -563,4 +575,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-61
+62
