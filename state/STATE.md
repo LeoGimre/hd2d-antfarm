@@ -49,11 +49,12 @@ None of these needs re-deciding; all need building. Work them in order.
    on the command line, and both `TEAM` tables are deleted. `the_ridge` stays in
    `design/proto/encounters.json` only until Ashmoth and Ridgewalk have stats in
    `game/data/creatures.json`; an agreement check will say so the moment they do.
-2. `design/first_blood_balance.md` — apply the re-pairing. **This is now one line**: set
-   `encounter_id` to `first_blood` in `build_battle.gd`/`battle.gd` and rebuild. Then re-script
-   `battle_demo.gd`'s `LINE` (the re-paired board is a different tree, so the seven-decision line
-   does not transfer) and confirm against `battle_sim.gd --search`. Box 4 is already ticked; this
-   improves the fight it was ticked with, it does not reopen it. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
+2. ~~`design/first_blood_balance.md` — apply the re-pairing.~~ **Done, tick 56.** The scene fields
+   `first_blood`; the shortest win is five decisions (was seven), naive still loses, and
+   `battle_demo.gd` plays the new line. **Not yet applied from that document: the retune** —
+   `CHARGE_MULTIPLIER` 1.5 → 2.0, `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (delete the clause),
+   `FRONT_DAMAGE_BONUS` 2.0 → 1.0. Update the solver's constants in the same commit or
+   `agreements.py` fails, and regenerate `design/proto/combat_cases.json` in that commit too. **Also apply the retune recorded there**: `CHARGE_MULTIPLIER` 1.5 → 2.0,
    `BROKEN_TAKES_MORE_DAMAGE` 1.5 → 1.0 (deleting that clause), `FRONT_DAMAGE_BONUS` 2.0 → 1.0.
    Validated on **both** encounters: exactly one of seven scripted lines wins and it is the
    correct one; bands +75/+40 and +75/+50; random play 9.2% and 4.8%. Update the solver's constants in the same commit or `agreements.py` will fail —
@@ -69,6 +70,15 @@ None of these needs re-deciding; all need building. Work them in order.
    now carries six body plans and twenty placeholder entries, validated at roster scale — but
    author real creatures from `design/creatures.md`'s place/habit/tell template rather than
    shipping those placeholder names.
+
+4b. **Creature labels clip and overlap in the battle scene** (found by looking, tick 56 — see
+   `devlog/0057-five-decisions.md`). Player Back's label runs off the right edge of the frame
+   (`BROKEN` renders as `BRO`), Enemy Back's runs off the left (`HP 24/24` renders as `0/24`), and
+   the two enemy labels overlap each other. Cause is the wide lateral Back offsets
+   `build_battle.gd` took on at tick 6 to stop Back's label being swallowed by Front's silhouette;
+   that worked and pushed both to the frame edges instead. The state suffixes (`BROKEN`, `DOWN`)
+   are what tip them over, so a still of an idle scene never shows it. **Capture and look at
+   mid-fight frames, not the first frame, when checking this.**
 
 5. `design/hd2d_look.md` — remediation list at the bottom: battle scene has no fog, its
    tilt-shift brackets nothing (board is 22–25 units out; near blur ends at 17, far starts at 50),
@@ -118,6 +128,14 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **The two searches have now agreed three times** (tick 56): the unpaired roster's depth of seven
+  and its exact sequence, and the re-paired roster's depth of five and its exact sequence.
+  `battle_sim.gd --search` in-engine and `combat_solver.py search --no-capture` off-engine. Treat
+  a disagreement as a bug in one of them and find out which; it is a five-minute job.
+- **A comment that states a number about content goes stale silently** (tick 56).
+  `battle_demo.gd` asserted "nothing shorter than seven decisions wins this fight", which became
+  false the instant the encounter id changed and nothing noticed. It now says where the number
+  comes from and to re-run the search. Prefer that shape to the bare number.
 - **Prove a refactor inert with `battle_sim.gd`'s node counts** (tick 55). The iterative-deepening
   search prints how many nodes it expanded at each depth, and that is a fingerprint of the rules
   and the board together. `4, 20, 93, 457, 1675, 4701, WIN at 7 in 78` before and after means no
@@ -498,4 +516,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-55
+56
