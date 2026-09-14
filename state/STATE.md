@@ -20,16 +20,14 @@ systems**: data-driven creatures/moves/types (already true), the sprite port, th
 and capture.
 
 ## Current focus
-**Ship Ashmoth and Ridgewalk into `game/data/creatures.json`.** They are designed, searched and
-balanced in `design/proto/proposed_creatures.json` and `design/second_encounter.md`; the only
-reason `the_ridge` is not in the game is that the engine cannot load an encounter naming creatures
-with no stats. Shipping them turns on seven skipped tier-2 test cases, makes `the_ridge` playable,
-and is forced anyway by the agreement check written in tick 55 — which fails the moment the stats
-exist and the encounter is still not shipped. Check their moves exist in `moves.json` first; if
-they need new moves, that is part of the same edit.
+**M4's real weight is the sprite port** — queue item 4. The battle scene still renders grey
+capsules while `design/proto/creature_forge.py` has produced twenty authored creatures' sprites
+for twenty ticks. Port it into `game/tools/`, generate, `godot --headless --import`, and **look at
+the frames**. That is M4's second box and the biggest visible gap between what this project has
+designed and what it shows.
 
-After that, work the queue below. M4's real weight is the sprite port (item 4) and capture
-(item 6).
+Do item 4b (the clipping labels) in the same neighbourhood if it is cheap — both are about what
+the battle scene actually looks like, and both need mid-fight capture frames to check.
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -96,7 +94,7 @@ None of these needs re-deciding; all need building. Work them in order.
 
 ## The tick ritual
 Run **`python3 farm/test.py`** as well as `./farm/verify.sh`. It runs the combat model's
-self-check, the twenty-two cross-file agreements, and the GDScript combat suite (212
+self-check, the twenty-three cross-file agreements, and the GDScript combat suite (226
 assertions). It finds the engine in `/opt/godot/<version>` on its own, so the stage runs without
 `GODOT_BIN` being exported. A skipped stage is a check that is not happening — the summary says
 so, and two sections of the fixture (tiers 2 and 3) still report as skipped inside the suite. (It is `.py`, not the `.sh` `combat_tests.md` first named: the loop cannot `chmod` and
@@ -119,6 +117,14 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **The roster is six and `proposed_creatures.json` is empty** (tick 59). Ashmoth and Ridgewalk
+  ship, so `the_ridge` ships and all 14 tier-2 cases run (226 assertions, no skips). Empty is the
+  state to prefer for that file: it is a staging area, not a second roster. `_stat_note` travels
+  into `game/data` with the stats, because a searched number looks like a chosen one six months
+  later.
+- **A shipped creature must have a place/habit/tell row in `design/roster.md`** (tick 59, checked).
+  The staging file was always checked that way and the shipped file was not, which is backwards
+  once things ship.
 - **A golden trace compares structured events, not format strings** (tick 58). The fixture carries
   both: `events` for a human reading the diff, `structured_events` for the suite. Making GDScript
   reproduce a Python format string couples the test to padding rather than to the fight.
@@ -523,4 +529,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-58
+59

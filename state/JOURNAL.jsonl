@@ -58,3 +58,4 @@
 {"tick": 56, "date": "2026-09-14", "task": "Land the re-pairing, and cut the fight from seven decisions to five", "status": "ok", "visual": false, "commit": "28bfe9a959e8c67c29bbb1efa6f85c4b0fba924b", "slug": "0057-five-decisions"}
 {"tick": 57, "date": "2026-09-14", "task": "Run the combat rules under test, and delete a case the game cannot reach", "status": "ok", "visual": false, "commit": "323e96a5d829734574bb5b199e7f33dde7a61ad3", "slug": "0058-ninety-seven-assertions"}
 {"tick": 58, "date": "2026-09-14", "task": "Play whole fights under test, and close M3", "status": "ok", "visual": false, "commit": "f84561b6fd9f741c749873f141c89c858442dd6c", "slug": "0059-m3-closed"}
+{"tick": 59, "date": "2026-09-14", "task": "Ship Ashmoth and Ridgewalk, and let the engine play an encounter it never saw", "status": "ok", "visual": false, "commit": "16c1ddf4f73aa9421ca6d8cfc68842b59b8611f3", "slug": "0060-shipping-the-ridge"}
