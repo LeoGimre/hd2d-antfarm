@@ -20,19 +20,16 @@ systems**: data-driven creatures/moves/types (already true), the sprite port, th
 and capture.
 
 ## Current focus
-**Make the battle scene render the sprites.** The assets are in the game as of tick 60
-(`game/assets/sprites/creatures/`, imported, lossless) and nothing loads them — `build_battle.gd`
-still builds four coloured capsules. Follow `build_diorama.gd`'s traveler: `AnimatedSprite3D`,
-`BILLBOARD_FIXED_Y`, `TEXTURE_FILTER_NEAREST`, two idle frames (`<id>.png` / `<id>_b.png`).
-**`battle.gd`'s hit flash pulses `emission_energy_multiplier` on the capsule's material** and will
-need a different mechanism on a sprite — `modulate` is the obvious one. Do item 4b (the clipping
-labels) in the same pass: both are about what the scene looks like, and both need **mid-fight**
-capture frames to check, not a first frame.
+**Publish stills when the clip cannot be published.** Three visual ticks in a row have produced
+good captures that nobody can see: `farm/publish.py` needs `AWS_ENDPOINT_URL_S3` and keys out of a
+gitignored `farm/.env` that does not exist in a cloud container, so a cloud tick's entry is
+text-only even when the frames are fine. The site already copies `design/proto/mockups/` to
+`/mockups/`; the same mechanism for a committed QC still would let a devlog entry show what it is
+talking about. Keep it small — one or two stills per tick, committed deliberately, not a dumping
+ground — and it unblocks every visual entry from here.
 
-Two things to judge in the scene rather than on a contact sheet, both recorded at tick 60:
-the Gale hue is much paler than the other three (`SAT["Gale"] = 0.40` against Ember's 0.85), and
-`game/assets/sprites/traveler_idle.png.import` carries `compress/mode=2` with mipmaps from Godot's
-`detect_3d` auto-conversion, which the creature sprites are explicitly set to avoid.
+Then item 7, the battle HUD: it closes the clipping labels (4b) as a side effect, and
+`design/battle_hud.md` has the mockups to build against.
 
 ## Queued for the next engine tick
 None of these needs re-deciding; all need building. Work them in order.
@@ -64,7 +61,10 @@ None of these needs re-deciding; all need building. Work them in order.
    other half and it is the current focus above. M4's second box stays unticked until something
    draws them.
 
-4b. **Creature labels clip and overlap in the battle scene** (found by looking, tick 56 — see
+4b. **Creature labels clip and overlap in the battle scene** — **do not patch these in place.**
+   `design/battle_hud.md` replaces the world-space `Label3D`s with screen-space nameplates, so
+   this closes as a side effect of item 7 and any nudging done first is thrown away. Original
+   finding: (found by looking, tick 56 — see
    `devlog/0057-five-decisions.md`). Player Back's label runs off the right edge of the frame
    (`BROKEN` renders as `BRO`), Enemy Back's runs off the left (`HP 24/24` renders as `0/24`), and
    the two enemy labels overlap each other. Cause is the wide lateral Back offsets
@@ -122,6 +122,18 @@ has no allowlisted way to invoke a shell script it just created.)
   hook and not the loop's to edit. The three lines to paste are in the README.
 
 ## Recent decisions
+- **Creature sprites are UNSHADED in the battle scene** (tick 61), unlike the diorama's traveler.
+  A Y-billboard's normal faces the camera, so one key light at -140 yaw lit one side of the board
+  and left the other in near-black. The art already carries shading baked from that same house key
+  angle (tick 28); relighting it is what broke it. A tactical board also has to read equally on
+  both sides, which scene lighting cannot promise. `SPRITE_PIXEL_SIZE` is 0.07 here, not the
+  diorama's 0.05: below that a creature is shorter than its slot marker is wide.
+- **Slot markers carry the side colour now** (tick 61) because a sprite's hue is coded to its
+  *type* and the capsules' blue/red used to be the only side signal on the board. Keep them
+  mostly white — the first attempt at 35% toward white out-shouted the creatures.
+- **Putting real art on the board exposes what placeholder art hides** (tick 61). A defeated
+  creature had been standing at full brightness since tick 7 and nobody saw it, because four
+  identical capsules never looked alive. Expect more of these as placeholders get replaced.
 - **Per-plan defaults are code; what a creature overrides is content** (tick 60). That split is
   what made `game/data/creature_art.json` worth having — three of the twenty override nothing at
   all, which is the sprite grammar's claim made visible. Adding a creature's art is one entry
@@ -551,4 +563,4 @@ traveler switched to `traveler_idle/walk_a/walk_b.png`. `rm`/`git rm` are denied
 this needs Leo. Not urgent.
 
 ## Tick counter
-60
+61

@@ -60,3 +60,4 @@
 {"tick": 58, "date": "2026-09-14", "task": "Play whole fights under test, and close M3", "status": "ok", "visual": false, "commit": "f84561b6fd9f741c749873f141c89c858442dd6c", "slug": "0059-m3-closed"}
 {"tick": 59, "date": "2026-09-14", "task": "Ship Ashmoth and Ridgewalk, and let the engine play an encounter it never saw", "status": "ok", "visual": false, "commit": "16c1ddf4f73aa9421ca6d8cfc68842b59b8611f3", "slug": "0060-shipping-the-ridge"}
 {"tick": 60, "date": "2026-09-14", "task": "Port the sprite generator into the game, and split the roster into data", "status": "ok", "visual": false, "commit": "7853574f302d88360cd74c2d17c54e8cb98de4d6", "slug": "0061-sprites-ship"}
+{"tick": 61, "date": "2026-09-14", "task": "Put the creature sprites on the board, and let three captures correct them", "status": "ok", "visual": false, "commit": "1111aad31962d664e0c41073d9a030b1ca34272a", "slug": "0062-sprites-on-the-board"}
