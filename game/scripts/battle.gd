@@ -50,7 +50,7 @@ const CHIP_COLORS := {
 ## searched fight is still this fight.
 @export var encounter_id: String = ""
 
-const DEFAULT_ENCOUNTER := "first_blood_unpaired"
+const DEFAULT_ENCOUNTER := "first_blood"
 
 @onready var _strip: HBoxContainer = $UI/TurnQueueStrip
 @onready var _creatures: Node3D = $Creatures

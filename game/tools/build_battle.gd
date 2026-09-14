@@ -24,7 +24,7 @@ const CREATURE_HEIGHT := 1.5
 ## The encounter the scene is built for when the command line does not name one.
 ## battle.gd carries the same value for the same reason; keeping both is
 ## deliberate, since either file can be run without the other.
-const DEFAULT_ENCOUNTER := "first_blood_unpaired"
+const DEFAULT_ENCOUNTER := "first_blood"
 
 var _encounter_id := DEFAULT_ENCOUNTER
 
