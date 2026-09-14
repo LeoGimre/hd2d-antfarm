@@ -27,6 +27,15 @@ FFMPEG="${FFMPEG_BIN:-/opt/homebrew/bin/ffmpeg}"
 SCENE="res://tools/demos/${DEMO}.tscn"
 OUT="$ROOT/farm/out/$DEMO"
 
+# Movie Maker mode needs a rendering context. On a Mac that is the logged-in GUI
+# session the runner already lives in; a Linux container has no display at all,
+# so re-exec into a virtual one. The guard variable stops a second re-exec if
+# Xvfb comes up without exporting DISPLAY for some reason.
+if [ -z "${DISPLAY:-}" ] && [ -z "${CAPTURE_UNDER_XVFB:-}" ] && command -v xvfb-run >/dev/null 2>&1; then
+  export CAPTURE_UNDER_XVFB=1
+  exec xvfb-run -a -s "-screen 0 ${WIDTH}x${HEIGHT}x24" "$0" "$@"
+fi
+
 [ -f "$ROOT/game/tools/demos/${DEMO}.tscn" ] || { echo "capture: no such demo scene: $DEMO" >&2; exit 2; }
 command -v "$GODOT"  >/dev/null 2>&1 || [ -x "$GODOT" ]  || { echo "capture: godot not found at $GODOT" >&2; exit 2; }
 
